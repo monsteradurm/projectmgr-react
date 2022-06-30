@@ -1,5 +1,8 @@
 // eslint-disable-next-line
 @import "~bootstrap/scss/bootstrap";
+@import "primereact/resources/themes/lara-light-indigo/theme.css";  //theme
+@import "primereact/resources/primereact.min.css";                  //core css
+@import "primeicons/primeicons.css";                                //icons
 
 .App {
   text-align: center;
@@ -57,6 +60,12 @@
 .dropend > .btn {
   padding: 0.25rem 0 !important;
   text-align: left !important;
+}
+.dropdown-menu.show {
+  z-index: 1 !important;
+}
+.dropdown-item {
+  z-index:1000 !important;
 }
 .dropend:hover, .dropdown-item:hover {
   background-color: #444 !important;

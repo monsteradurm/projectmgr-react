@@ -1,9 +1,9 @@
 import { FirebaseConfig } from "../Environment/Firebase"
 import * as firebase from 'firebase/app';
 import { getFirestore, collection as fsCollection, doc as fsDoc } from 'firebase/firestore';
-import { collectionChanges, collectionData, doc, collection } from 'rxfire/firestore';
+import { collectionChanges, doc, collection } from 'rxfire/firestore';
 import * as _ from 'underscore';
-import { firstValueFrom, map, switchMap, take } from "rxjs";
+import { firstValueFrom, forkJoin, map, switchMap, take } from "rxjs";
 
 const app = firebase.initializeApp(FirebaseConfig);
 export class FirebaseService {
@@ -58,5 +58,17 @@ export class FirebaseService {
         return doc(fsDoc(FirebaseService.db, col + '/' + id)).pipe(
             take(1)
         )
+    }
+
+    static BoardOptions$(projectId) {
+        return FirebaseService.AllDocsFromCollection$(`ProjectManager/${projectId}/Boards`);
+    }
+
+    static GroupOptions$(projectId, boardId) {
+        return FirebaseService.AllDocsFromCollection$(`ProjectManager/${projectId}/Boards/${boardId}/Groups`)
+    }
+
+    static Items$(projectId, boardId, groupId) {
+        return FirebaseService.AllDocsFromCollection$(`ProjectManager/${projectId}/Boards/${boardId}/Groups/${groupId}/Items`)
     }
 }
