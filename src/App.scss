@@ -57,19 +57,43 @@
 .dropdown-item, .dropdown-menu  {
   background-color: #333 !important;
 }
+.dropdown-menu {
+  min-width: 7.5rem;
+}
 .dropend > .btn {
-  padding: 0.25rem 0 !important;
+  padding: 0 0 !important;
   text-align: left !important;
+  font-size: 14px !important;
 }
-.dropdown-menu.show {
-  z-index: 1 !important;
+.navbar > .container > .dropdown > button {
+  padding:10px 30px !important;
+  margin:0px 15px !important;
 }
-.dropdown-item {
-  z-index:1000 !important;
+.navbar > .container > .dropdown > button:hover {
+  background-color: #444 !important;
+}
+a.dropdown-item {
+  font-size: 14px !important;
 }
 .dropend:hover, .dropdown-item:hover {
   background-color: #444 !important;
 }
+.navbar-brand {
+  padding-top: 0.1rem !important;
+  padding-bottom: 0.1rem !important;
+  font-size:18px !important;
+  vertical-align: middle !important;
+  width:100%
+}
+.navbar > .container {
+  justify-content: center !important;
+}
+.navbar {
+  padding: 0 0 !important;
+  width:100vw !important;
+}
+
+
 /*
 .navbar {
   padding-top:unset;

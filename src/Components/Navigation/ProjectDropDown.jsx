@@ -5,23 +5,11 @@ import { FirebaseService } from "../../Services/Firebase";
 import * as _ from 'underscore';
 import { NestedDropdown } from "../General/NestedDropDown";
 import { result } from "underscore";
+import { GroupDropdown } from "./GroupDropdown";
 
-const loadingHTML = <Dropdown.Item>Loading...</Dropdown.Item>
+const loadingHTML = <Dropdown.Item>Loading Project...</Dropdown.Item>
 const emptyHTML = <Dropdown.Item>Empty Project...</Dropdown.Item>
-/*
-export function BoardDropdown(board, index) {
 
-    if (board.name.indexOf('/') < 0) {
-        return(<Dropdown.Item>{board.name}</Dropdown.Item>)
-    }
-    else {
-        const nameArr = b.name.split('/');
-        if (index == nameArr.length - 1) {
-            return (<Dropdown.Item>{nameArr[index]}</Dropdown.Item>)
-        }
-     }
-}
-*/
 function NestHierarchyFromName(board, nested) {
     if (board.name.indexOf('/') < 1) {
         if (!nested[board.name])
@@ -34,7 +22,7 @@ function NestHierarchyFromName(board, nested) {
         const nameArr = board.name.split('/');
         let last = nested;
         for (var n=0; n<nameArr.length; n++) {
-            if (n == nameArr.length - 1) {
+            if (n === nameArr.length - 1) {
                 if (!last[nameArr[n]]) 
                     last[nameArr[n]] = {boards: [board]}
                 else if (!last[nameArr[n]].boards)
@@ -54,33 +42,32 @@ function NestHierarchyFromName(board, nested) {
     return nested;
 }
 
-function NestedHierarchyToMenu(items) {
-    console.log("ITEMS", items);
-    return items.map( entry => {
+function NestedHierarchyToMenu(items, projectId) {
+    let result = [];
+    items.forEach( entry => {
 
-        console.log("ENTRY", entry);
-        const title = entry[0];
-        const children = entry[1].children;
-        const boards = entry[1].boards;
-        
-        let result = [];
-        if (children && children.length > 0) {
+        let [title, val] = entry;
+        let {boards, children} = val;
+        if (children) {
             result.push(
                 <NestedDropdown title={title} key={title}>
                     {
-                        NestedHierarchyToMenu(Object.entries(children))
+                        NestedHierarchyToMenu(Object.entries(children), projectId)
                     }
                 </NestedDropdown>
             )
         }
         if (boards && boards.length > 0) {
+            
             boards.forEach(b => {
-                result.push(<Dropdown.Item key={b.name}>{b.name}</Dropdown.Item>)
+                const name = b.name.split('/').pop();
+                result.push(
+                    <GroupDropdown key={b.id} projectId={projectId} boardId={b.id} title={name}></GroupDropdown>
+                )
             })
         }
-
-        return result.length > 0 ? result : null;
     });
+    return result.length > 0 ? result : null;
 }
 
 export function ProjectDropdown({projectId, children}) {
@@ -91,7 +78,7 @@ export function ProjectDropdown({projectId, children}) {
     const showDropdown = (e)=>{
         if (!projectId) setBoards(null);
 
-        FirebaseService.AllDocsFromCollection$('ProjectManager/' + projectId + '/Boards')
+        FirebaseService.BoardOptions$(projectId)
         .pipe(take(1))
         .subscribe((boards) => {
             let result = {};
@@ -99,9 +86,7 @@ export function ProjectDropdown({projectId, children}) {
             boards.forEach(b => {
                 result = NestHierarchyFromName(b, result);
             })
-            console.log("RESULT", result);
-            const html = NestedHierarchyToMenu(Object.entries(result));
-            console.log(html);
+            const html = NestedHierarchyToMenu(Object.entries(result), projectId);
             setDisplayHTML(html);
         })
         setShow(!show);

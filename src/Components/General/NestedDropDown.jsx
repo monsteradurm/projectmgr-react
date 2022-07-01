@@ -11,14 +11,12 @@ export const NestedDropdown = ({title, children}) => {
     }
     return (
         <Dropdown.Item as="div" onMouseEnter={showDropdown} onMouseLeave={hideDropdown}>
-            <div>
                 <Dropdown variant="primary" drop="end" autoClose="outside" show={show}>
                     <Dropdown.Toggle>{title}</Dropdown.Toggle>
                     <Dropdown.Menu>
                         { children }
                     </Dropdown.Menu>
                 </Dropdown>
-            </div>
         </Dropdown.Item>
     );
 }
