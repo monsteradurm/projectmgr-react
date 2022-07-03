@@ -2,13 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Dropdown } from "react-bootstrap";
 import { take } from "rxjs";
 import { FirebaseService } from "../../Services/Firebase";
-import * as _ from 'underscore';
 import { NestedDropdown } from "../General/NestedDropDown";
-import { result } from "underscore";
-import { GroupDropdown } from "./GroupDropdown";
 
-const loadingHTML = <Dropdown.Item>Loading Project...</Dropdown.Item>
-const emptyHTML = <Dropdown.Item>Empty Project...</Dropdown.Item>
+const loadingProjectHTML = <Dropdown.Item>Loading Project...</Dropdown.Item>
+const emptyProjectHTML = <Dropdown.Item>Empty Project...</Dropdown.Item>
+const loadingGroupHTML =<Dropdown.Item>Loading Group...</Dropdown.Item>
+const emptyGroupHTML = <Dropdown.Item>Empty Group...</Dropdown.Item>
 
 function NestHierarchyFromName(board, nested) {
     if (board.name.indexOf('/') < 1) {
@@ -39,6 +38,7 @@ function NestHierarchyFromName(board, nested) {
             last = last[nameArr[n]].children;
         }
     }
+    console.log(nested);
     return nested;
 }
 
@@ -62,7 +62,23 @@ function NestedHierarchyToMenu(items, projectId) {
             boards.forEach(b => {
                 const name = b.name.split('/').pop();
                 result.push(
-                    <GroupDropdown key={b.id} projectId={projectId} boardId={b.id} title={name}></GroupDropdown>
+                    b.groups.length > 1 ?
+                        <NestedDropdown key={b.id} title={name}>
+                            {
+                                b.groups ?
+                                    b.groups.length > 0 ?
+                                        b.groups.map(g => 
+                                            <Dropdown.Item key={g.id} 
+                                            href={`Projects?ProjectId=${projectId}&BoardId=${b.id}&GroupId=${g.id}`}>
+                                                {g.title}
+                                            </Dropdown.Item>)
+                                        : emptyGroupHTML
+                                    : loadingGroupHTML
+                            }
+                        </NestedDropdown>
+                    : <Dropdown.Item key={b.id} 
+                        href={`Projects?ProjectId=${projectId}&BoardId=${b.id}&GroupId=${b.groups[0].id}`}
+                        >{name}</Dropdown.Item>
                 )
             })
         }
@@ -73,7 +89,7 @@ function NestedHierarchyToMenu(items, projectId) {
 export function ProjectDropdown({projectId, children}) {
     const [show, setShow] = useState(false);
     const [boards, setBoards] = useState(null);
-    const [displayHTML, setDisplayHTML] = useState(loadingHTML);
+    const [displayHTML, setDisplayHTML] = useState(loadingProjectHTML);
 
     const showDropdown = (e)=>{
         if (!projectId) setBoards(null);
@@ -98,11 +114,11 @@ export function ProjectDropdown({projectId, children}) {
 
     useEffect(() => {
         if (!boards) {
-            setDisplayHTML(loadingHTML);
+            setDisplayHTML(loadingProjectHTML);
             return
         }
         else if (boards.length < 1) {
-            setDisplayHTML(emptyHTML);
+            setDisplayHTML(emptyProjectHTML);
             return;
         }  
     }, [boards])

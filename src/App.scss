@@ -6,6 +6,14 @@
 
 .App {
   text-align: center;
+  letter-spacing: 0.1rem;
+  overflow: hidden !important;
+  height: 100vh;
+  width: 100vw;
+}
+
+.btn-primary, .form-control {
+  letter-spacing: 0.1rem;
 }
 
 .App-logo {
@@ -21,7 +29,6 @@
 
 .App-header {
   background-color: white;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -33,7 +40,10 @@
 .App-link {
   color: #61dafb;
 }
-
+.p-skeleton {
+  opacity: 0.6 !important;
+  background: lightgray;
+}
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -43,39 +53,11 @@
   }
 }
 
-.bg-dark, .dropdown-menu-dark {
-  background-color: #333 !important;
-}
-.btn-primary {
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-.dropdown-menu-dark .dropdown-item.active, .dropdown-menu-dark .dropdown-item:active {
-  background-color: #444 !important;
-}
-.dropdown-item, .dropdown-menu  {
-  background-color: #333 !important;
-}
-.dropdown-menu {
-  min-width: 7.5rem;
-}
-.dropend > .btn {
-  padding: 0 0 !important;
-  text-align: left !important;
-  font-size: 14px !important;
-}
 .navbar > .container > .dropdown > button {
   padding:10px 30px !important;
   margin:0px 15px !important;
 }
 .navbar > .container > .dropdown > button:hover {
-  background-color: #444 !important;
-}
-a.dropdown-item {
-  font-size: 14px !important;
-}
-.dropend:hover, .dropdown-item:hover {
   background-color: #444 !important;
 }
 .navbar-brand {
@@ -92,8 +74,16 @@ a.dropdown-item {
   padding: 0 0 !important;
   width:100vw !important;
 }
-
-
+.pm-filterbar {
+  width:100vw !important;
+  height:38px !important;
+  background: white;
+  box-shadow: 0px 5px 15px -5px #dfdfdf;
+  border-bottom: solid 1px #aaa; 
+}
+.dropdown-menu {
+  box-shadow: 0px 5px 15px -5px #aaa;
+}
 /*
 .navbar {
   padding-top:unset;

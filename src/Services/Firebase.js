@@ -3,7 +3,7 @@ import * as firebase from 'firebase/app';
 import { getFirestore, collection as fsCollection, doc as fsDoc } from 'firebase/firestore';
 import { collectionChanges, doc, collection } from 'rxfire/firestore';
 import * as _ from 'underscore';
-import { firstValueFrom, forkJoin, map, switchMap, take } from "rxjs";
+import { firstValueFrom, map, switchMap, take } from "rxjs";
 
 const app = firebase.initializeApp(FirebaseConfig);
 export class FirebaseService {
@@ -46,6 +46,9 @@ export class FirebaseService {
     static SubscribeToCollection$(collection) {
         return collectionChanges(fsCollection(FirebaseService.db, collection));
     }
+    static SubscribeToDocument$(path) {
+        return doc(fsDoc(FirebaseService.db, path));
+    }
 
     static get AllBadges$() {
         return FirebaseService.AllDocsFromCollection$('Badges');
@@ -69,6 +72,20 @@ export class FirebaseService {
     }
 
     static Items$(projectId, boardId, groupId) {
-        return FirebaseService.AllDocsFromCollection$(`ProjectManager/${projectId}/Boards/${boardId}/Groups/${groupId}/Items`)
+        return FirebaseService
+            .SubscribeToCollection$(
+                `ProjectManager/${projectId}/Boards/${boardId}/Groups/${groupId}/Items`
+            ).pipe(
+                map(docs => docs.map(d => d.doc.data())),
+            );
+    }
+
+    static Board$(projectId, boardId) {
+        return FirebaseService
+            .SubscribeToDocument$(
+                `ProjectManager/${projectId}/Boards/${boardId}`
+            ).pipe(
+                map(snapshot => snapshot.data()),
+            );
     }
 }

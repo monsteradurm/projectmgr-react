@@ -1,0 +1,129 @@
+{
+    "/syncsketch/*": {
+        "target": "https://syncsketch.com/api/v1",
+        "secure": false,
+        "changeOrigin": true,
+        "loglevel": "debug",
+        "pathRewrite": {
+            "^/syncsketch/*": ""
+        }
+    },
+    "/syncsketch-v2/*": {
+        "target": "https://syncsketch.com/api/v2",
+        "secure": false,
+        "changeOrigin": true,
+        "loglevel": "debug",
+        "pathRewrite": {
+            "^/syncsketch-v2/*": ""
+        }
+    },
+    "/syncsketch-upload/*": {
+        "target": "https://syncsketch.com",
+        "secure": false,
+        "changeOrigin": true,
+        "loglevel": "debug",
+        "pathRewrite": {
+            "^/syncsketch-upload/*": ""
+        }
+    },
+    "/typeform/*": {
+      "target": "https://api.typeform.com/",
+      "secure": false,
+      "changeOrigin": true,
+      "loglevel": "debug",
+      "pathRewrite": {
+          "^/typeform/*": ""
+      }
+    },
+    "/confluence/*": {
+        "target": "https://liquidanimation.atlassian.net/wiki/rest/api/",
+        "secure": false,
+        "changeOrigin": true,
+        "loglevel": "debug",
+        "pathRewrite": {
+            "^/confluence/*": ""
+        }
+    },
+    "/admin-atlassian/*": {
+        "target": "https://api.atlassian.com/admin/v1/",
+        "secure": false,
+        "changeOrigin": true,
+        "loglevel": "debug",
+        "pathRewrite": {
+            "^/admin-atlassian/*": ""
+        }
+    },
+    "/box/*": {
+        "target": "https://api.box.com/2.0/",
+        "secure": false,
+        "changeOrigin": true,
+        "loglevel": "debug",
+        "pathRewrite": {
+            "^/box/*": ""
+        }
+    },
+    "/box-account/*": {
+        "target": "https://account.box.com/api/oauth2/",
+        "secure": false,
+        "changeOrigin": true,
+        "loglevel": "debug",
+        "pathRewrite": {
+            "^/box-account/*": ""
+        }
+    },
+    "/box-rest/*": {
+        "target": "http://localhost:63235/box-rest/",
+        "secure": true,
+        "changeOrigin": true,
+        "loglevel": "debug",
+        "pathRewrite": {
+            "^/box-rest/*": ""
+        }
+    },
+    "/pm-socket/*": {
+        "target": "http://lapm_websocket-acranch908002.codeanyapp.com:3000/socket.io/",
+        "secure": false,
+        "changeOrigin": true,
+        "loglevel": "debug",
+        "pathRewrite": {
+            "^/pm-socket/*": ""
+        }
+    },
+
+    "/cloud-functions/*" :{
+        "target": "https://us-central1-pm-websocket.cloudfunctions.net/",
+        "secure": false,
+        "changeOrigin": true,
+        "loglevel": "debug",
+        "pathRewrite": {
+            "^/cloud-functions/*": ""
+        }
+    },
+    "/item-data-cdn-syncsketch-com/*": {
+        "target": "https://item-data-cdn.syncsketch.com/",
+        "secure": false,
+        "changeOrigin": true,
+        "loglevel": "debug",
+        "pathRewrite": {
+            "/item-data-cdn-syncsketch-com/*": ""
+        }
+    },
+    "/media-cdn-syncsketch-com/*": {
+        "target": "https://media-cdn.syncsketch.com/",
+        "secure": false,
+        "changeOrigin": true,
+        "loglevel": "debug",
+        "pathRewrite": {
+            "/media-cdn-syncsketch-com/*": ""
+        }
+    },
+    "/lareposync/*": {
+        "target": "https://lareposyncstorage.blob.core.windows.net/",
+        "secure": false,
+        "changeOrigin": true,
+        "loglevel": "debug",
+        "pathRewrite": {
+            "^/lareposync/*": ""
+        }
+    }
+}

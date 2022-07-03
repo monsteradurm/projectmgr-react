@@ -1,23 +1,27 @@
-import { Dropdown, Navbar, Container } from 'react-bootstrap';
+import { Dropdown, Navbar, Container, Stack } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faList, faUsers, faFilm, faCogs, faHome, faTruckMedical } from '@fortawesome/free-solid-svg-icons';
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FirebaseService } from '../../Services/Firebase';
+import { NavigationService } from '../../Services/Navigation';
 import { NestedDropdown } from '../General/NestedDropDown';
+import { ProjectDropdown } from '../Navigation/ProjectDropDown';
+import './Navigation.scss';
 
 import * as _ from 'underscore';
-import { ProjectDropdown } from '../Navigation/ProjectDropDown';
-import { OverlayPanel } from 'primereact/overlaypanel';
-import './Navigation.scss';
-export const NavigationComponent = ({user, titles}) => {
+
+export const NavigationComponent = ({user, primaryColor}) => {
     function onStudioPipeline(evt) {
         window.open('https://liquidanimation.atlassian.net/wiki/spaces/LAT0003/overview','_blank');
     }
 
     const [workspaces, setWorkspaces] = useState([]);
-    const [navHeight, setNavHeight] = useState(0);
-
+    const [titles, setTitles] = useState(null);
     const navRef = useRef();
+    useEffect(() => {
+        let sub = NavigationService.Titles$.subscribe(setTitles);
+        return () => sub.unsubscribe();
+    }, [])
 
     useEffect(() => {
         const sub = FirebaseService.AllWorkspaces$.subscribe((result) => {
@@ -27,13 +31,12 @@ export const NavigationComponent = ({user, titles}) => {
                 return 'Other';
             });
             setWorkspaces(w);
-            console.log("ALL WORKSPACES", w)
         });
 
         return () => { sub.unsubscribe() }
     }, [])
     return (
-        <div className="pm-header">
+        <>
             <Navbar expand="lg" bg="dark" ref={navRef}>
             <Container style={{marginLeft: 20, marginRight: 20, maxWidth: 'unset'}}>
                 <Navbar.Brand href="#home" style={{color:"white", textAlign:"left"}}>Project Manager</Navbar.Brand>
@@ -111,8 +114,18 @@ export const NavigationComponent = ({user, titles}) => {
                 }
             </Container>
             </Navbar>
-            <div className="pm-titlebar">
-            </div>
-        </div>
+            {
+                titles && titles.length > 0 ?
+                <div className="pm-titlebar" style={{background: primaryColor, color:'white'}}>
+                    <Stack direction="horizontal" gap={3}>
+                        <div className="pm-title">{titles.map(t => {
+                            if (t.indexOf('/') >= 0)
+                                return t.split('/').join(" | ");
+                            return t;
+                        }).join(" | ").replace('_', ' ')}</div>
+                    </Stack>
+                </div> : null
+            }
+        </>
     )
 }

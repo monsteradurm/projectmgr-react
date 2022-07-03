@@ -3,6 +3,7 @@ body {
   font-family: 'Delius' !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow: hidden !important;
 }
 
 code {
@@ -12,6 +13,6 @@ code {
 :root, button {
   font-family: 'Delius' !important;
 }
-.dropdown-toggle:after { content: none !important }
+
 
 
