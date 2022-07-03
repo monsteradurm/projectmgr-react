@@ -19,8 +19,12 @@ export const NavigationComponent = ({user, primaryColor}) => {
     const [titles, setTitles] = useState(null);
     const navRef = useRef();
     useEffect(() => {
-        let sub = NavigationService.Titles$.subscribe(setTitles);
+        let sub = NavigationService.Titles$.subscribe(titlesRes => {
+            setTitles(titlesRes);
+        });
+
         return () => sub.unsubscribe();
+
     }, [])
 
     useEffect(() => {
@@ -116,7 +120,7 @@ export const NavigationComponent = ({user, primaryColor}) => {
             </Navbar>
             {
                 titles && titles.length > 0 ?
-                <div className="pm-titlebar" style={{background: primaryColor, color:'white'}}>
+                <div key="title_bar" className="pm-titlebar" style={{background: primaryColor, color:'white'}}>
                     <Stack direction="horizontal" gap={3}>
                         <div className="pm-title">{titles.map(t => {
                             if (t.indexOf('/') >= 0)

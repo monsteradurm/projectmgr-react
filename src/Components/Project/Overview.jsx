@@ -78,23 +78,27 @@ export const ProjectOverview = ({headerRef}) => {
             setItems(data);
         });
         let boardSub = observedBoard.subscribe((board)=> {
+            const paramGroup =  params.get('GroupId');
             if (board) {
                 let group = null;
                 setGroupOptions(board.groups);
-                if (board.groups.length === 1)
+                if (board.groups.length === 1 || !paramGroup)
                     group = board.groups[0].title;
                     
-                else {
-                    group = _.first(board.groups, (g) => g.id === params.get('GroupId')).title;
+                else if (board.groups.length > 1) {
+                    group = _.first(_.filter(board.groups, (g) => {
+                        return g.id == paramGroup;
+                    }))?.title;
                 }
 
                 setGroup(group)
-                NavigationService.SetTitles([
+                NavigationService.SetTitles(
+                    _.filter([
                     "Projects", "Overview",
                     params.get("ProjectId"),
                     board.name,
                     group
-                ])
+                ], (t) => t))
             }
         })
         return () => {
@@ -105,7 +109,7 @@ export const ProjectOverview = ({headerRef}) => {
 
     return (
     <>
-        <div className="pm-filterbar" ref={filterBarRef}>
+        <div key="overview_filter" className="pm-filterbar" ref={filterBarRef}>
             <Stack direction="horizontal" gap={3}>
                 <Dropdown key="department_filter">
                     <Dropdown.Toggle><FontAwesomeIcon icon={faUserGroup} 
@@ -195,11 +199,11 @@ export const ProjectOverview = ({headerRef}) => {
             <div id="Overview_Items">
             {
                 _.filter(Object.keys(filteredItems), (i) => i !== 'Other').map( i => 
-                   <div class="pm-item-container">
+                   <div key={i} className="pm-item-container">
                        <div className="pm-element">{i}</div>
                         {
                         filteredItems[i].map(item => 
-                            <div class="pm-task-conainer">
+                            <div key={item.id} className="pm-task-conainer">
                                 <ProjectItem key={item.id} item={item} />
                             </div>
                            )

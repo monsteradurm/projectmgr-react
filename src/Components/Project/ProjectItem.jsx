@@ -95,7 +95,7 @@ export const ProjectItem = ({item}) => {
 
     return (
         <>
-        <div className="pm-task-left">
+        <div key="task-left" className="pm-task-left">
                 <Avatars users={artist} background={status.info.color}/>
         </div>
         <Panel headerTemplate={header} style={{marginBottom:'10px'}} collapsed={true} toggleable>
@@ -124,7 +124,7 @@ export const ProjectItem = ({item}) => {
             */
             }
         </Panel>
-        <div className="pm-task-right">
+        <div key="task-right" className="pm-task-right">
                 <Stack direction="horizontal" gap={1}>
                     <Skeleton shape="circle" size="50px" />
                     <Skeleton shape="circle" size="50px" />
