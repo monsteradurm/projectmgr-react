@@ -204,7 +204,7 @@ export const ProjectOverview = ({headerRef}) => {
                         {
                         filteredItems[i].map(item => 
                             <div key={item.id} className="pm-task-conainer">
-                                <ProjectItem key={item.id} item={item} />
+                                <ProjectItem item={item} />
                             </div>
                            )
                         }

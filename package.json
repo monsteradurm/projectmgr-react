@@ -22,6 +22,7 @@
     "fs": "^0.0.1-security",
     "helmet": "^5.1.0",
     "http-proxy": "^1.18.1",
+    "moment": "^2.29.3",
     "node-sass": "^7.0.1",
     "path": "^0.12.7",
     "primereact": "^8.1.1",

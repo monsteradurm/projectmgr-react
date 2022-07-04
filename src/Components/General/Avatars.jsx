@@ -22,7 +22,7 @@ export const Avatars = ({users, background}) => {
                 <AvatarGroup> 
                     {
                         displayUsers.map(u =>
-                            <Avatar key={u} size="large" shape="circle" label={u.label} 
+                            <Avatar key={u.label} size="large" shape="circle" label={u.label} 
                             style={{background: background}} />
                         )
                     }

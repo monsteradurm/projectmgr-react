@@ -1,4 +1,4 @@
-.pm-filterbar {
+.pm-filterbar, #Overview_Items {
     .dropdown-item, .dropdown-menu  {
         background-color: white !important;
         color: black;
@@ -98,6 +98,41 @@
     }
 }
 #Overview_Items {
+    .p-submenu-list {
+        z-index:5;
+    }
+    .p-menubar {
+        background: transparent !important;
+        padding:0px;
+        font-family: 'Delius' !important;
+        border-bottom: solid 1px black;
+        margin-right:20px;
+        z-index:100;
+    }
+    .p-menuitem:hover {
+        background: #ddd;
+        font-family: 'Delius' !important;
+    }
+    .p-menubar .p-menubar-root-list > .p-menuitem.p-menuitem-active > 
+    .p-menuitem-link .p-menuitem-text, .p-menubar .p-menubar-root-list > 
+    .p-menuitem.p-menuitem-active > .p-menuitem-link:not(.p-disabled):hover 
+    .p-menuitem-text, .p-menubar .p-menuitem.p-menuitem-active > .p-menuitem-link .p-menuitem-text {
+        color:black;
+    }
+    .p-menuitem-link {
+        background:transparent;
+        font-family: 'Delius' !important;
+        box-shadow: none !important;
+    }
+    .p-menuitem-active {
+        background: #eee;
+        color: black;
+        //font-weight:bold;
+        box-shadow:none !important;
+        border:none;
+        outline: none !important;
+        //border-bottom: solid 1px;
+    }
     .p-tabview .p-tabview-nav, .p-tabview, .p-tabview-nav-link, .p-tabview-panels {
         background:transparent;
         color:black;
@@ -106,6 +141,8 @@
         padding-top: 0.5rem;
         font-weight:400;
         color:black;
+        padding-bottom: 0.75rem;
+        box-shadow:none !important;
     }
     .p-panel-content {
         .p-skeleton {
@@ -200,6 +237,41 @@
     .pm-task-container {
         width:100%;
         position:relative;
+    }
+    .pm-task-tags {
+        margin-right:15px;
+        color:black;
+        text-align:right;
+        justify-content: end;
+        align-items: center;
+        display:flex;
+        width:100%;
+        font-weight:bold
+    }
+    .pm-task-latest-review {
+        margin-left:15px;
+        color:black;
+        text-align:left;
+        min-width:200px;
+        margin-top:4px;
+        font-weight:bold;
+    }
+    .pm-item-tab-active {
+        font-weight: bold;
+    }
+    .pm-review-item {
+        border-bottom: solid 1px black;
+        padding-bottom:15px;
+    }
+    .pm-task-latest-timeline {
+        margin-left:15px;
+        color:black;
+        text-align:left;
+        min-width:200px;
+        margin-top:-8px;
+    }
+    .pm-item-submenu {
+        font-weight:normal !important;
     }
     .pm-task {
         margin-right:15px;

@@ -40,6 +40,21 @@
 .App-link {
   color: #61dafb;
 }
+
+.pm .p-scrollpanel-wrapper {
+  border-right: 3px solid #f4f4f4;
+}
+
+.pm .p-scrollpanel-bar {
+  background-color: #555;
+  opacity: 1;
+  transition: background-color .3s;
+}
+
+.pm .p-scrollpanel-bar:hover {
+  background-color: #555;
+}
+
 .p-skeleton {
   opacity: 0.6 !important;
   background: lightgray;

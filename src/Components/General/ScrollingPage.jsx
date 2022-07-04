@@ -14,7 +14,7 @@ export const ScrollingPage = ({offsets, children}) => {
     }, [offsets]);
 
     return (
-        <ScrollPanel style={{width: '100vw', height: 
+        <ScrollPanel className="pm" style={{width: '100vw', height: 
             `calc(100vh - ${offsetHeight}px)`, padding:'2rem'}}>
             { children }
         </ScrollPanel>
