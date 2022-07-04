@@ -5,7 +5,8 @@ import { FirebaseService } from '../../Services/Firebase';
 import { NavigationService } from '../../Services/Navigation';
 import * as _ from 'underscore';
 import { Dropdown, FormControl, Stack } from 'react-bootstrap';
-import { faUserGroup, faLayerGroup, faFilter, faArrowDownAZ, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
+import { faUserGroup, faLayerGroup, faFilter, faArrowDownAZ, faMagnifyingGlass,
+faChartBar, faChartGantt, faTable } from '@fortawesome/free-solid-svg-icons';
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import './Overview.scss';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -14,13 +15,18 @@ import { Fieldset } from "primereact/fieldset";
 import { BehaviorSubject, map, shareReplay } from "rxjs";
 import { ProjectItem } from "./ProjectItem";
 
+const viewIconMap = {
+    Chart: faChartBar,
+    Gantt: faChartGantt,
+    Table: faTable
+}
 export const ProjectOverview = ({headerRef}) => {
     
     
     const [params] = useSearchParams();
     const [items, setItems] = useState([]);
     const [filteredItems, setFilteredItems] = useState([]);
-
+    const [itemsView, setItemsView] = useState('Table');
     const [observedItems, setObservedItems] = useState(of([]));
     const [observedBoard, setObservedBoard] = useState(of(null));
 
@@ -30,8 +36,6 @@ export const ProjectOverview = ({headerRef}) => {
     const [group, setGroup] = useState(null);
     const [activeFilterIndex, setActiveFilterIndex] = useState(null);
     const filterBarRef = useRef();
-    
-
 
     useEffect(() => {
         let filtered = items ? items : [];
@@ -126,6 +130,17 @@ export const ProjectOverview = ({headerRef}) => {
                 </Dropdown>
             
             <div style={{width:'100%'}}></div>
+            <Dropdown key="items_viewing">
+            <Dropdown.Toggle><FontAwesomeIcon icon={viewIconMap[itemsView]} 
+                        style={{marginRight:'10px', color: 'gray'}}/>
+                        View as {itemsView}
+                </Dropdown.Toggle>
+                <Dropdown.Menu variant="light" id="sortMenu">
+                    <Dropdown.Item onClick={(evt) => {setItemsView('Table')}}>Table</Dropdown.Item>
+                    <Dropdown.Item onClick={(evt) => {setItemsView('Gantt')}}>Gantt</Dropdown.Item>
+                    <Dropdown.Item onClick={(evt) => {setItemsView('Chart')}}>Chart</Dropdown.Item>
+                </Dropdown.Menu>
+            </Dropdown>
             <Dropdown key="items_sorting">
             <Dropdown.Toggle><FontAwesomeIcon icon={faArrowDownAZ} 
                         style={{marginRight:'10px', color: 'gray'}}/>
