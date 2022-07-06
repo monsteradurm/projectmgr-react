@@ -1,9 +1,13 @@
 body {
   margin: 0;
-  font-family: 'Delius' !important;
+  font-family: 'Open Sans' !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden !important;
+}
+.p-component {
+  font-family: 'Open Sans' !important;
+  font-weight:300;
 }
 
 code {
@@ -11,7 +15,7 @@ code {
     monospace;
 }
 :root, button {
-  font-family: 'Delius' !important;
+  font-family: 'Open Sans' !important;
 }
 
 

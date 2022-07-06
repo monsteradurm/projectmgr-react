@@ -1,0 +1,105 @@
+// eslint-disable-next-line
+@import "~bootstrap/scss/bootstrap";
+@import "primereact/resources/themes/lara-light-indigo/theme.css";  //theme
+@import "primereact/resources/primereact.min.css";                  //core css
+@import "primeicons/primeicons.css";                                //icons
+
+.App {
+  text-align: center;
+  //letter-spacing: 0.1rem;
+  overflow: hidden !important;
+  height: 100vh;
+  width: 100vw;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: black;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+.pm .p-scrollpanel-wrapper {
+  border-right: 3px solid #f4f4f4 !important;
+}
+
+.pm .p-scrollpanel-bar {
+  background-color: #555 !important;
+  opacity: 1 !important;
+  transition: background-color .3s !important;
+}
+
+.pm .p-scrollpanel-bar:hover {
+  background-color: #555 !important;
+}
+.p-menuitem-active > .p-menuitem-link {
+  font-weight: bold !important;
+}
+.p-skeleton {
+  opacity: 0.6 !important;
+  background: lightgray;
+}
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.navbar > .container > .dropdown > button {
+  padding:10px 30px !important;
+  margin:0px 15px !important;
+}
+.navbar > .container > .dropdown > button:hover {
+  background-color: #444 !important;
+}
+.navbar-brand {
+  padding-top: 0.1rem !important;
+  padding-bottom: 0.1rem !important;
+  font-size:20px !important;
+  vertical-align: middle !important;
+  width:100%;
+  letter-spacing: 0.09rem;
+}
+.navbar > .container {
+  justify-content: center !important;
+}
+.navbar {
+  padding: 0 0 !important;
+  width:100vw !important;
+}
+.pm-filterbar {
+  width:100vw !important;
+  height:38px !important;
+  background: white;
+  box-shadow: 0px 5px 15px -5px #dfdfdf;
+  border-bottom: solid 1px #aaa; 
+}
+.dropdown-menu {
+  box-shadow: 0px 5px 15px -5px #aaa;
+}
+/*
+.navbar {
+  padding-top:unset;
+  padding-bottom:unset;
+}*/
