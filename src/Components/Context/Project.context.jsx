@@ -11,6 +11,7 @@ export const ProjectState = {
         ProjectId: null,
         BoardId: null,
         GroupId: null,
+        Grouping: 'Element',
         Sorting: 'Name',
         ReverseSorting: 'false',
     },
@@ -307,6 +308,11 @@ export const DispatchProjectState = (state, action) => {
             return { ...state, 
                 params: { ...state.params, 
                     GroupId: action.value }
+                }
+        case 'Grouping' :
+            return { ...state,
+                params: { ...state.params,
+                    Grouping: action.value }
                 }
         case 'Department' : 
             return { ...state, 

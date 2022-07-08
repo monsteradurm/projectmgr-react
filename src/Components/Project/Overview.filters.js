@@ -5,7 +5,7 @@ import moment from 'moment';
 export const toggleArrFilter = (t, key, searchParams, setSearchParams) => {
 
     let filter = t.replace(/\s+/g, '');
-    let tagStr = searchParams.get(key);
+    let tagStr = searchParams.get('Filter' + key);
     tagStr = tagStr === null ? '' : tagStr;
 
     let arr = tagStr.trim().replace(/\s+/g, '').split(',')
@@ -16,7 +16,7 @@ export const toggleArrFilter = (t, key, searchParams, setSearchParams) => {
     else
         arr = arr.filter(tag => tag != filter);
         
-    searchParams.set(key, arr.join(','))
+    searchParams.set('Filter' + key, arr.join(','))
     setSearchParams(searchParams);
 }
 
@@ -89,6 +89,11 @@ export const sortFilteredItems = (filtered, params) => {
 
         sorted = params.ReverseSorting === 'true' ? 
             unassigned.concat(result) : result.concat(unassigned); 
+    }
+    else if (params.Sorting === 'Status') { 
+        sorted = _.sortBy(filtered, (i) => 
+            i.Status && i.Status.text ? i.Status.text : 'Not Started'
+        )
     }
 
     else if (params.Sorting === 'Director'){

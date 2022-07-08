@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef, useReducer, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { map, take } from "rxjs";
-import { FirebaseService } from '../../Services/Firebase.service';
 import { ScrollingPage } from "../General/ScrollingPage.component";
 import { ProjectItem } from "./ProjectItem.component";
 import { DispatchProjectState, ProjectState } from "../Context/Project.context";
@@ -14,6 +12,7 @@ import * as _ from 'underscore';
 import './Overview.component.scss'
 import { Stack } from "react-bootstrap";
 import { ItemBadgeIcon } from "../../Helpers/ProjectItem.helper";
+import DatePicker from "react-datepicker";
 
 export const ProjectContext = React.createContext(ProjectState);
 
@@ -35,10 +34,11 @@ export const Overview = ({headerRef}) => {
         const Sorting = searchParams.get('Sorting');
         const ReverseSorting = searchParams.get('ReverseSorting');
         const Search = searchParams.get('Search');
-        const Tags = searchParams.get('Tags');
-        const Badges = searchParams.get('Badges');
-        const Status = searchParams.get('Status');
-        const Artist = searchParams.get('Artist');
+        const Tags = searchParams.get('FilterTags');
+        const Badges = searchParams.get('FilterBadges');
+        const Status = searchParams.get('FilterStatus');
+        const Artist = searchParams.get('FilterArtist');
+        const Grouping = searchParams.get('Grouping');
 
         if (ProjectId !== state.params.ProjectId)
             ProjectObservables.SetProjectId(ProjectId);
@@ -76,7 +76,10 @@ export const Overview = ({headerRef}) => {
         if (Artist !== filters.Artist)
             dispatch({type: 'Artist', value: Artist});
 
-    }, [searchParams])
+        if (Grouping !== params.Grouping && Grouping)
+            dispatch({type: 'Grouping', value: Grouping});
+
+    }, [searchParams, state.params])
 
     //subscribe to state observables
     useEffect(() => {
@@ -102,11 +105,21 @@ export const Overview = ({headerRef}) => {
         const sorted = sortFilteredItems(filtered, params);
         
         const nested = _.groupBy(sorted, (i) => {
-            if (i.name.indexOf('/'))
-                return i.name.split('/')[0];
-            return 'Other'
+            console.log(i.Status.text);
+            if (state.params.Grouping == 'Status') {
+                return !!i.Status && !!i.Status.text ? i.Status.text : 'Not Started';
+            } 
+            else if (state.params.Grouping == 'Department') {
+                return i.Department.text
+            }
+            else if (state.params.Grouping == 'Element'){
+                if (i.name.indexOf('/'))
+                    return i.name.split('/')[0];
+                return 'Other'
+            }
+            return '';
         });
-
+        console.log(nested);
         return nested;
     }, [state.objects.Items, state.params, state.filters]);
 
@@ -246,6 +259,7 @@ export const Overview = ({headerRef}) => {
                         filteredItems[i].map(item => 
                             <div key={item.id} className="pm-task-conainer">
                                 <ProjectItem boardId={state.params.BoardId} projectItem={item} 
+                                    grouping={state.params.Grouping}
                                     statusMenu={statusMenu} badgeMenu={badgeMenu}
                                     badgeOptions={state.objects.BadgeOptions}
                                     tagOptions={state.objects.TagOptions}

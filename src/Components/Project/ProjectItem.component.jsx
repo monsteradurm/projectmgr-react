@@ -26,7 +26,7 @@ const formatTimeline = (tl) => {
 }
 
 
-export const ProjectItem = ({boardId, projectItem, statusMenu, badgeMenu, 
+export const ProjectItem = ({boardId, projectItem, statusMenu, badgeMenu, grouping,
     departmentOptions, tagOptions, setSearchParams, searchParams, badgeOptions}) => {
     const [element, setElement] = useState();
     const [task, setTask] = useState('');
@@ -157,7 +157,7 @@ export const ProjectItem = ({boardId, projectItem, statusMenu, badgeMenu,
         if (statusRef.current.className.indexOf('hover') > -1) {
             evt.stopPropagation();
             evt.preventDefault();
-            toggleStatusFilter(item.Status.text, searchParams, setSearchParams)
+            toggleArrFilter(item.Status.text, 'Status', searchParams, setSearchParams)
         }
     }
     const AddStatusHover = () => {
@@ -209,8 +209,19 @@ export const ProjectItem = ({boardId, projectItem, statusMenu, badgeMenu,
                 <div className="pm-task-thumb-container">
                     <Skeleton width="100px" height="100%"/>
                 </div>
-                <Stack direction="horizontal" gap={0}>
-                    <div className="pm-task">{task ? task : element }</div>
+                <Stack direction="horizontal" gap={0} style={{position:'relative'}}>
+                    <div className="pm-task">
+                        {
+                            grouping != 'Element' ?
+                            <span style={{fontWeight:600, marginRight: '10px', position: 'absolute', left: '10px'}}>
+                                {element}
+                            </span> : null
+                        }
+
+                        {
+                            task ? task : element 
+                        }
+                    </div>
                     <div className="pm-status" ref={statusRef} 
                         onClick={OnStatusClick}
                         style={{background: status.info.color}}>
