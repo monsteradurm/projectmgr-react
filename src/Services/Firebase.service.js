@@ -3,7 +3,7 @@ import * as firebase from 'firebase/app';
 import { getFirestore, collection as fsCollection, doc as fsDoc } from 'firebase/firestore';
 import { collectionChanges, doc, collection } from 'rxfire/firestore';
 import * as _ from 'underscore';
-import { firstValueFrom, map, switchMap, take } from "rxjs";
+import { BehaviorSubject, firstValueFrom, map, switchMap, take, tap } from "rxjs";
 
 const app = firebase.initializeApp(FirebaseConfig);
 export class FirebaseService {
@@ -51,7 +51,12 @@ export class FirebaseService {
     }
 
     static get AllBadges$() {
-        return FirebaseService.AllDocsFromCollection$('Badges');
+        return FirebaseService.AllDocsFromCollection$('Badges').pipe(
+            map(result => _.reduce(result, (acc, t) => {
+                acc[t.Title.replace(/\s/g, '')] = t;
+                return acc;
+            }, {})),
+        )
     }
 
    static get AllWorkspaces$() {
@@ -71,12 +76,13 @@ export class FirebaseService {
         return FirebaseService.AllDocsFromCollection$(`ProjectManager/${projectId}/Boards/${boardId}/Groups`)
     }
 
-    static Items$(projectId, boardId, groupId) {
+    static _ItemsStore = new BehaviorSubject([]);
+    static ItemsChanged$(projectId, boardId, groupId) {
+        FirebaseService._ItemsStore.next([]);
+
         return FirebaseService
             .SubscribeToCollection$(
                 `ProjectManager/${projectId}/Boards/${boardId}/Groups/${groupId}/Items`
-            ).pipe(
-                map(docs => docs.map(d => d.doc.data())),
             );
     }
 

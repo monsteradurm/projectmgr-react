@@ -7,7 +7,10 @@ import { NavigationComponent } from './Components/Navigation/Navigation.componen
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Overview } from './Components/Project/Overview.component';
 import { ApplicationObservables, DispatchApplicationState, ApplicationState } from './Components/Context/Application.context';
-
+import { Toast } from 'primereact/toast';
+import { MondayService } from './Services/Monday.service';
+import { ToastService } from './Services/Toast.service';
+import { Tooltip } from 'primereact/tooltip';
 
 export const ApplicationContext = React.createContext(ApplicationState);
 
@@ -16,7 +19,8 @@ function App() {
   const { instance, accounts, inProgress } = useMsal();
   const [accessToken, setAccessToken] = useState(null);
   const appHeaderRef = useRef();
-  
+  const toastRef = useRef();
+
   const authRequest = useMemo(() => ({
     ...OAuthScopes,
     account: accounts[0]
@@ -25,7 +29,6 @@ function App() {
   const account = authRequest.account;
 
   useEffect(() => {
-    console.log("HERE");
     instance.acquireTokenSilent(authRequest).then((response) => {
         setAccessToken(response.accessToken);
     }).catch((e) => {
@@ -36,7 +39,10 @@ function App() {
 
   }, [instance, authRequest])
 
-  
+  useEffect(() => {
+    ToastService.SetToaster(toastRef.current);
+  }, [toastRef.current])
+
   useEffect(() => {
     if (!account || !accessToken)
       return;
@@ -68,12 +74,14 @@ function App() {
   return (
       <div className="App">
         <ApplicationContext.Provider value={state}>
+          
           {
             state.User ? 
             <>
               <header className="App-header" ref={appHeaderRef}>
                 <NavigationComponent />
               </header>
+              <Toast ref={toastRef} position="bottom-right"/>
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<div>Placeholder...</div>} />

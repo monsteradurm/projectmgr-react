@@ -22,11 +22,11 @@ header {
     }
     .pm-title {
         word-spacing: 5px !important;
-        font-weight: bold;
+        font-weight: 400;
         letter-spacing: 0.05rem;
         font-size: 17px;
         //letter-spacing: 0.13rem;
-        //font-weight: bold;
+        //font-weight: 400;
     }
     .dropdown-divider {
         //margin-top: 0 !important;
@@ -68,6 +68,7 @@ header {
     }
     .dropend:hover, .dropdown-item:hover {
         background-color: #444 !important;
+        font-weight:600;
     }
 
     .dropdown-toggle:after { 
@@ -76,9 +77,9 @@ header {
     }
 
     .p-menuitem-active > .p-menuitem-link {
-        font-weight: bold !important;
+        font-weight: 600 !important;
       }
     .dropend > button:hover, .dropdown-item:hover{
-        font-weight:bold !important;
+        font-weight:600 !important;
     }
 }

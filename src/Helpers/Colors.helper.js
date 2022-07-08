@@ -1,0 +1,1 @@
+export const RandomRGB = () => '#' + Math.floor(Math.random()*16777215*0.5).toString(16)

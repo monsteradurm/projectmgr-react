@@ -3,6 +3,7 @@
 @import "primereact/resources/themes/lara-light-indigo/theme.css";  //theme
 @import "primereact/resources/primereact.min.css";                  //core css
 @import "primeicons/primeicons.css";                                //icons
+@import "react-datepicker/dist/react-datepicker.css";
 
 .App {
   text-align: center;
@@ -64,6 +65,54 @@
   to {
     transform: rotate(360deg);
   }
+}
+.p-toast .p-toast-message {
+  border: solid 1px black !important;
+  box-shadow: 5px 5px 15px 0px rgba(0, 0, 0, 0.5);
+  color: #ffffff;
+  text-align: left;
+  font-family: 'Open Sans';
+  font-weight: bold;
+}
+
+.pm-tooltip {
+  font-size:13px !important;
+  font-family: 'Open Sans' !important;
+  padding: 2px !important;
+}
+.pm-tooltip > .p-tooltip-text {
+  font-size: 15px !important;
+  padding:0.5rem;
+}
+.p-toast .p-toast-message.p-toast-message-success {
+  background: #028577;
+}
+.p-toast .p-toast-message.p-toast-message-error {
+  background: #7b002f;
+}
+.p-toast .p-toast-message.p-toast-message-warning {
+  background: #fe9400;
+}
+.p-toast .p-toast-message.p-toast-message-info {
+  background: #950aeb;
+}
+
+.p-toast .p-toast-message .p-toast-message-content .p-toast-summary {
+  font-weight: bolder;
+  font-size: 20px;
+  color: white;
+}
+
+.p-toast .p-toast-message .p-toast-message-content .p-toast-detail {
+    margin: 0.5rem 0 0 0;
+    font-weight: normal;
+    color: white;
+}
+.p-toast .p-toast-message.p-toast-message-error .p-toast-message-icon, .p-toast .p-toast-message.p-toast-message-error .p-toast-icon-close,
+.p-toast .p-toast-message.p-toast-message-info .p-toast-message-icon, .p-toast .p-toast-message.p-toast-message-info .p-toast-icon-close,
+.p-toast .p-toast-message.p-toast-message-warning .p-toast-message-icon, .p-toast .p-toast-message.p-toast-message-warning .p-toast-icon-close,
+.p-toast .p-toast-message.p-toast-message-success .p-toast-message-icon, .p-toast .p-toast-message.p-toast-message-success .p-toast-icon-close {
+  color: #ffffff;
 }
 
 .navbar > .container > .dropdown > button {

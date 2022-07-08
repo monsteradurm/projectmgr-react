@@ -1,19 +1,53 @@
-import { BehaviorSubject, EMPTY, finalize, map, Observable, of, retry, shareReplay, switchMap, take, takeWhile, tap, timer } from "rxjs";
-import { MondayConfig, MondayQueries } from "../Environment/Monday.environment";
+import { BehaviorSubject, finalize, map, Observable, of, 
+    retry, shareReplay, switchMap, take, takeWhile, tap, timer } from "rxjs";
+import { MondayConfig, MondayGraphQL } from "../Environment/Monday.environment";
 import * as _ from 'underscore';
 import mondaySdk from 'monday-sdk-js';
+import { ToastService } from "./Toast.service";
+import { RandomRGB } from "../Helpers/Colors.helper";
 
 const monday = mondaySdk();
 monday.setToken(MondayConfig.token);
 export class MondayService {
+
+    static Toaster = null;
+
     static _IsReachable = new BehaviorSubject(true);
     static IsReachable$ = MondayService._IsReachable.asObservable().pipe(shareReplay(1));
 
     static _ComplexityExhausted = new BehaviorSubject(null);
     static ComplexityExhausted$ = MondayService._ComplexityExhausted.asObservable();
 
+    static SetItemStatus = (boardId, itemId, columnId, statusIndex) => {
+        const mutation = MondayGraphQL.Mutate_SimpleColumn(boardId, itemId, columnId, statusIndex);
+        MondayService.Execute$(mutation).pipe(take(1)).subscribe((t) => {
+            ToastService.SendSuccess('Status Updated')
+        })
+    }
+
+    static SetItemTags = (boardId, itemId, columnId, tags) => {
+
+    }
+    
+    static AddTagOption = (label) => {
+
+    }
+
+    static AllTags = () => MondayService.Execute$(
+        MondayGraphQL.Query_AllTags()
+    ).pipe(
+        map(result => _.map(result.tags, 
+                (t) => (   {...t, color: RandomRGB()}  )
+            )
+        ),
+        map(result => _.reduce(result, (acc, t) => {
+            acc[t.name] = t;
+            return acc;
+        }, {})),
+        take(1)
+    )
     static ColumnSettings = (boardId) => MondayService.Execute$(
-        MondayQueries.ColumnSettings(boardId)
+        MondayGraphQL.Query_ColumnSettings(boardId)
     ).pipe(
         switchMap(result => of(result.boards[0].columns) ),
         map(cols => _.reduce(cols, (res, v) => {
@@ -48,7 +82,7 @@ export class MondayService {
               timer(0, 1000).pipe(
                 takeWhile(t => cError > 0)
               ).subscribe(() => {
-                MondayService.ComplexityExhausted.next(cError.toString())
+                MondayService._ComplexityExhausted.next(cError.toString())
                 cError -= 1;
                 if (cError === 0)
                   observer.error({ retry: true })
