@@ -2,6 +2,7 @@
   "name": "projectmgr-react",
   "version": "0.1.0",
   "private": true,
+  "proxy" : "http://localhost:3000",
   "dependencies": {
     "@azure/msal-browser": "^2.26.0",
     "@azure/msal-react": "^1.4.2",
@@ -36,7 +37,6 @@
     "path": "^0.12.7",
     "primeicons": "^5.0.0",
     "primereact": "^8.1.1",
-    "process": "^0.11.10",
     "react": "^18.2.0",
     "react-bootstrap": "^2.4.0",
     "react-datepicker": "^4.8.0",
@@ -51,7 +51,7 @@
   "scripts": {
     "watch": "npm-watch",
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "NODE_ENV=development react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -64,9 +64,8 @@
     }
   },
   "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
+    "ignorePatterns": [
+      "src/*"
     ]
   },
   "browserslist": {
@@ -80,5 +79,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "dotenv-cli": "^6.0.0"
   }
 }

@@ -16,6 +16,8 @@ import { Button } from 'primereact/button';
 import { toggleArrFilter, toggleStatusFilter } from './Overview.filters';
 import { DispatchProjectItemState, ProjectItemState } from '../Context/ProjectItem.context';
 import { UploadReview } from './Dialogs/UploadReview.component';
+import { SyncsketchService } from '../../Services/Syncsketch.service';
+import { NavigationService } from '../../Services/Navigation.service';
 
 export const ProjectItemContext = React.createContext(ProjectItemState);
 
@@ -35,6 +37,9 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
     const [addBadgeMenu, setAddBadgeMenu] = useState([]);
     const [removeBadgeMenu, setRemoveBadgeMenu] = useState(null);
     const [contextMenu, setContextMenu] = useState([]);
+
+    const [reviewLink, setReviewLink] = useState(null);
+    const [thumbnail, setThumbnail] = useState(null);
 
     const [tabMenu, setTabMenu] = useState([]);
     const [reviewsTab, setReviewsTab] = useState(null);
@@ -82,7 +87,32 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
         dispatch({ type: 'Status', value: projectItem.Status})
     }, [projectItem.Status]);
 
+    useEffect(() => {
+        if (CurrentReview?.Link?.text && CurrentReview.Link.text.length > 0)
+            setReviewLink(CurrentReview.Link.text);
+        else if (reviewLink !== null)
+            setReviewLink(null);
 
+        /*
+        if (CurrentReview?.Thumbnail?.text && CurrentReview.Thumbnail.text.length > 0)
+            setThumbnail(CurrentReview.Thumbnail.text);
+        else if (thumbnail !== null)
+            setThumbnail(null);
+        */
+    }, [CurrentReview])
+
+    useEffect(() => {
+        if (reviewLink) {
+            const id = _.first(
+                _.last(reviewLink.split('/#/')).split('/')
+            )
+
+            SyncsketchService.ItemById$(id).subscribe(result => {
+                if (result.thumbnail_url)
+                    setThumbnail(result.thumbnail_url)
+            });
+        }
+    }, [reviewLink])
     useEffect(() => {
         let badges = projectItem.Badges?.value ?
         projectItem.Badges.value.reduce((acc, b) => {
@@ -295,7 +325,12 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
             <Stack direction="horizontal" className={itemClass} 
                 onClick={options.onTogglerClick} onContextMenu={(e) => itemContext.current.show(e)}>
                 <div className="pm-task-thumb-container">
-                    <Skeleton width="100px" height="100%"/>
+                    {
+                        thumbnail ? <img src={thumbnail} className="pm-overview-thumbnail" 
+                            onClick={(e) => NavigationService.OpenNewTab(reviewLink, e)}
+                            width="100px" height="100%" /> :
+                            <Skeleton width="100px" height="100%"/>
+                    }
                 </div>
                 <Stack direction="horizontal" gap={0} style={{position:'relative'}}>
                     <div className="pm-task">

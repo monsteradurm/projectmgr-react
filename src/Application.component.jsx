@@ -11,6 +11,7 @@ import { Toast } from 'primereact/toast';
 import { MondayService } from './Services/Monday.service';
 import { ToastService } from './Services/Toast.service';
 import { Tooltip } from 'primereact/tooltip';
+import { SyncsketchService } from './Services/Syncsketch.service';
 
 export const ApplicationContext = React.createContext(ApplicationState);
 

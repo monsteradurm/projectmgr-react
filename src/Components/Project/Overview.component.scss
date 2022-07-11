@@ -1,4 +1,41 @@
 #Overview_Items {
+    .pm-review-hover {
+        .pm-comment {
+            color: #aaa
+        }
+        .pm-review-thumbnail {
+            opacity: 0.7;
+            border-width: 2px;
+        }
+        .pm-review-title {
+            color: #888;
+        }
+    }
+    .pm-comment {
+        text-align: left;
+        overflow: hidden;
+        max-width: 150ch;
+    }
+    .pm-overview-thumbnail {
+        max-width:100px;
+        max-height:100%;
+        width: 100px;
+        object-fit: cover;
+        height: auto;
+    }
+    .pm-review-thumbnail {
+        max-width:130px;
+        max-height:70px;
+        width: auto;
+        height: auto;
+        border-radius:5px;
+        border: solid 1px black;
+    }
+
+    .pm-overview-thumbnail:hover, .pm-review-thumbnail:hover {
+        opacity:0.7;
+        cursor: pointer;
+    }
     .pm-tag {
         font-weight:600;
         cursor: pointer;
@@ -334,10 +371,12 @@
     }
     .pm-review-timeline {
         //padding-top:10px;
-        font-weight:600;
         text-align:right;
         position:absolute;
         right:0px;
+        color:black;
+        font-weight: 400;
+        opacity: 0.4;
     }
     .pm-review-item {
         border-bottom: solid 1px black;
