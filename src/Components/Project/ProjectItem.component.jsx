@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { Stack } from 'react-bootstrap';
 import { Skeleton } from 'primereact/skeleton';
 import { Avatars, ProjectArtist } from './ProjectArtist.component';
@@ -14,8 +14,10 @@ import { ItemBadgeIcon } from '../../Helpers/ProjectItem.helper';
 import { Tooltip } from 'primereact/tooltip';
 import { Button } from 'primereact/button';
 import { toggleArrFilter, toggleStatusFilter } from './Overview.filters';
+import { DispatchProjectItemState, ProjectItemState } from '../Context/ProjectItem.context';
+import { UploadReview } from './Dialogs/UploadReview.component';
 
-const defaultStatus = {text: 'Not Started', info: { color: 'black'}}
+export const ProjectItemContext = React.createContext(ProjectItemState);
 
 const formatTimeline = (tl) => {
     if (!tl.text || tl.text.length < 1 || tl.text.indexOf(' - ') < 0)
@@ -25,139 +27,199 @@ const formatTimeline = (tl) => {
     return range.map(d => moment(d).format('MMM DD')).join(' - ');
 }
 
+export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions, grouping,
+    departmentOptions, tagOptions, setSearchParams, searchParams}) => {
+    const [state, dispatch] = useReducer(DispatchProjectItemState, ProjectItemState);
 
-export const ProjectItem = ({boardId, projectItem, statusMenu, badgeMenu, grouping,
-    departmentOptions, tagOptions, setSearchParams, searchParams, badgeOptions}) => {
-    const [element, setElement] = useState();
-    const [task, setTask] = useState('');
-    const [status, setStatus] = useState(defaultStatus);
-    const [artist, setArtist] = useState([]);
-    const [director, setDirector] = useState([]);
+    const [statusMenu, setStatusMenu] = useState([]);
+    const [addBadgeMenu, setAddBadgeMenu] = useState([]);
+    const [removeBadgeMenu, setRemoveBadgeMenu] = useState(null);
+    const [contextMenu, setContextMenu] = useState([]);
 
-    const [activeTab, setActiveTab] = useState('Internal Reviews');
+    const [tabMenu, setTabMenu] = useState([]);
+    const [reviewsTab, setReviewsTab] = useState(null);
+    const [referenceTab, setReferenceTab] = useState(null);
+    const [summaryTab, setSummaryTab] = useState(null);
+
+    const [reviewTabItems, setReviewTabItems] = useState([]);
+    const [referenceTabItems, setReferenceTabItems] = useState([]);
+
     const [tabHTML, setTabHTML] = useState(null);
-    const [timeline, setTimeline] = useState(null);
-    const [taskTags, setTaskTags] = useState([]);
-    const [subitems, setSubitems] = useState(null);
-    const [reviewTags, setReviewTags] = useState([]);
-    const [badges, setBadges] = useState([]);
-    const [lastUpdated, setLastUpdated] = useState(null);
+    const [reviewsHTML, setReviewsHTML] = useState(null);
+    const [referenceHTML, setReferenceHTML] = useState(null);
+    const [summaryHTML, setSummaryHTML] = useState(null);
+    const [collapsed, setCollapsed] = useState(true);
+
+    const [showUploadReviewDlg, setShowUploadReviewDlg] = useState(false);
+
     const statusRef = useRef();
     const itemContext = useRef(null);
 
+    const { Status, Artist, Director, Timeline, 
+            CurrentReview, Reviews, Reference, Tags, Badges, 
+            LastUpdate, Element, Task } = state.item;
+
+    const { ActiveTab } = state.params;
+
     useEffect(() => {
         setTabHTML(
-            activeTab.indexOf('Review') >= 0 ? reviewsHTML :
-                activeTab.indexOf('Summary') >= 0 ? summaryHTML
-                    : null
+            ActiveTab.indexOf('Review') >= 0 ? reviewsHTML :
+                ActiveTab.indexOf('Summary') >= 0 ? summaryHTML
+                    : referenceHTML
         )
-    }, [activeTab])
+    }, [ActiveTab, reviewsHTML, summaryHTML, referenceHTML])
 
-    const item = useMemo(() => {
-        let item = projectItem;
-        let nameArr = [item.name, null]
-        if (item.name.indexOf('/'))
-            nameArr = item.name.split('/')
-        
-        setElement(nameArr[0]);
-        setTask(nameArr[1]);
-        let s = item.Status;
-        if (!s.text || s.text.length < 1) {
-            s.text = defaultStatus.text;
-            s.info = defaultStatus.info;
-        }
 
-        setSubitems(item.subitems.reverse())
-        setStatus(s);
+    useEffect(() => {
+        dispatch({ type: 'Name', value: projectItem.name })
+    }, [projectItem.name]);
 
-        setDirector(item.Director.value);
-        setBadges(item.Badges && item.Badges.value ? item.Badges.value.reduce((acc, b) => {
-            if (tagOptions[b])
-                acc.push(b)
-            return acc;
-        }, []) : [])
+    useEffect(() => {
+        dispatch({ type: 'Director', value: projectItem.Director.value })
+    }, [projectItem.Director]);
 
-        setTaskTags(item.Tags && item.Tags.value ? item.Tags.value.reduce((acc, t) => {
-            if (tagOptions[t]) {
-                acc.push(t)
+    useEffect(() => {
+        dispatch({ type: 'Status', value: projectItem.Status})
+    }, [projectItem.Status]);
+
+
+    useEffect(() => {
+        let badges = projectItem.Badges?.value ?
+        projectItem.Badges.value.reduce((acc, b) => {
+                if (tagOptions[b])
+                    acc.push(b)
+                return acc;
+            }, []) : [];
+        dispatch({ type: 'Badges', value: badges });
+    }, [projectItem.Badges, badgeOptions]);
+
+    useEffect(() => {
+        let tags = projectItem.Tags?.value ?
+            projectItem.Tags.value.reduce((acc, t) => {
+                if (tagOptions[t]) {
+                    acc.push(t)
+                }
+                return acc;
+            }, []) : [];
+        dispatch({ type: 'ItemTags', value: tags });
+    }, [projectItem.Tags, tagOptions])
+
+    useEffect(() => {   
+        let grouped = {};
+        const subitems = projectItem.subitems ? 
+            [...projectItem.subitems.filter(
+                (i) => 
+                    i['Feedback Department']?.text?.length > 0 &&
+                    i.name?.length > 0
+            )].reverse() : [];
+
+            if (!subitems || subitems.length < 1) {
+                dispatch({ type: 'Timeline', value: formatTimeline(projectItem.Timeline) });
+                dispatch({ type: 'Artist', value: projectItem.Artist.value });
+                dispatch({ type: 'LastUpdate', value: projectItem.updated_at });
+                dispatch({ type: 'CurrentReview', value: null})
+                dispatch({ type: 'ActiveTab', value: 'Summary' });
+            } else {
+                dispatch({ type: 'CurrentReview', value: _.first(subitems) });
+
+                grouped = _.groupBy(subitems, (i) => i['Feedback Department'].text + ' Reviews');
+                Object.keys(grouped).forEach((k) => {
+                    const length = grouped[k].length; 
+                    grouped[k].map((sub, index) => sub.index = length - index);
+                });
             }
-            return acc;
-        }, []) : [])
-        
-        
-        return item;
-    }, [projectItem, tagOptions])
-
-    const currentReview = useMemo(() => {
-        if (!subitems || subitems.length < 1) {
-            setTimeline(formatTimeline(item.Timeline));
-            setArtist(item.Artist.value);
-            setLastUpdated(item.updated_at);
-            return null;
-        }
             
-        const current = _.last(subitems);
+            grouped['All Reviews'] = subitems;
+            dispatch({ type: 'Reviews', value: grouped })
 
-        setTimeline(
-            formatTimeline(current.Timeline?.text?.length > 0 ? 
-                current.Timeline : item.Timeline)
-        );
+    }, [projectItem.subitems])
 
-        setArtist(current.Artist?.value && current.Artist.value.length > 0? 
-            current.Artist.value : item.Artist.value);
-        
-        setLastUpdated(current.updated_at > item.updated_at ?
-            current.updated_at : item.updated_at);
-            
-        return current;
-    }, [subitems])
-    
-    const contextMenu = useMemo(() => {
-        const statusOptions = _.map(statusMenu, (s) => (
+    useEffect(() => {
+        if (CurrentReview == null)
+            return;
+
+        dispatch({ type: 'ActiveTab', value: 
+            CurrentReview['Feedback Department'].text + ' Reviews' });
+        dispatch({ type: 'Timeline', value: 
+            formatTimeline(CurrentReview.Timeline?.text?.length > 0 ? 
+                CurrentReview.Timeline : projectItem.Timeline)
+        });
+        dispatch({ type: 'Artist', value: 
+            CurrentReview.Artist?.value && CurrentReview.Artist.value.length > 0 ? 
+            CurrentReview.Artist.value : projectItem.Artist.value
+        });
+        dispatch({ type: 'LastUpdate', value: 
+            CurrentReview.updated_at > projectItem.updated_at ?
+            CurrentReview.updated_at : projectItem.updated_at
+        });
+    }, [CurrentReview]);
+
+    useEffect(() => {
+        setStatusMenu(_.map(statusOptions, (s) => (
             {...s, command: (e) => {
 
-                        setStatus({...item.Status, text: s.label,
-                            info: {...item.Status.info, color: s.style.background }})
+                        dispatch({ type: 'Status', value: {...projectItem.Status, text: s.label,
+                            info: {...projectItem.Status.info, color: s.style.background }}
+                        });
                         
-                        MondayService.SetItemStatus(boardId, item.id, s.column_id, s.id);
+                        MondayService.SetItemStatus(boardId, projectItem.id, s.column_id, s.id);
                     }
                 }
             )
+        ))
+    }, [statusOptions])
+
+    useEffect(() => {
+        const labels = Object.keys(badgeOptions);
+        const menu = {label: 'Add Badge', items: []}
+        if (labels.length > 0) 
+            menu.items = (_.map(_.flatten(Object.values(labels)), (b) => ({
+                label: badgeOptions[b].Title,
+                icon: ItemBadgeIcon(badgeOptions[b]),
+                style: {background: badgeOptions[b].Background},
+                className: 'pm-status-option'
+            }))
         )
-        const removeBadge = (item?.Badges?.value && item.Badges.value.length > 0) ?
-        { label: 'Remove Badge', items: _.reduce(item.Badges.value,
+    
+        setAddBadgeMenu(menu);
+    }, [badgeOptions])
+
+    useEffect(() => {
+        if (!Badges || Badges.length < 1)
+            setRemoveBadgeMenu(null);
+        
+        setRemoveBadgeMenu(
+            { label: 'Remove Badge', items: _.reduce(projectItem.Badges.value,
                 (acc, cur) => {
-                    const b = _.find(badgeMenu, b => b.label === cur.replace(/[A-Z]/g, ' $&').trim())
+                    const b = badgeOptions[cur.replace(/[A-Z]/g, ' $&').trim()]
                     if (b)
                         acc.push(b)
                     return acc;
-                }, []
-        )} : null;
+                }, [])
+            }
+        )
+        }, [Badges, badgeOptions])
 
-        const addBadge = { label: 'Add Badge', items: badgeMenu};
-        const badgeMenuOptions = removeBadge && removeBadge.items.length > 0 ? 
-            [addBadge,  removeBadge] : [addBadge];
-
+    useEffect(() => {
         const result = [
-            {label: 'Status', items: statusOptions},
-            {label: 'Badges', items: badgeMenuOptions},
+            {label: 'Status', items: statusMenu},
+            {label: 'Badges', items: [addBadgeMenu, removeBadgeMenu]},
 
             {separator: true},
-            {label: 'Upload Review'},
-            {label: 'Upload Reference'},
+            {label: 'Upload Review', command: (evt) => setShowUploadReviewDlg(true)},
+            {label: 'Upload Reference', command: (evt) => {}},
             {separator: true},
-            {label: 'Edit Task'}
+            {label: 'Edit Task', command: (evt) => {}}
         ];
 
-        
-        return result;
-    }, [item, boardId, badgeMenu, statusMenu])
+        setContextMenu(result);
+    }, [addBadgeMenu, removeBadgeMenu, statusMenu])
 
     const OnStatusClick = (evt) => {
         if (statusRef.current.className.indexOf('hover') > -1) {
             evt.stopPropagation();
             evt.preventDefault();
-            toggleArrFilter(item.Status.text, 'Status', searchParams, setSearchParams)
+            toggleArrFilter(Status.text, 'Status', searchParams, setSearchParams)
         }
     }
     const AddStatusHover = () => {
@@ -171,38 +233,64 @@ export const ProjectItem = ({boardId, projectItem, statusMenu, badgeMenu, groupi
         toggleArrFilter(t, 'Tags', searchParams, setSearchParams);
     }
 
+    useEffect(() => {
+        setReviewTabItems(
+            Object.keys(Reviews).map((r) => ({
+                label: r, className: "pm-item-submenu", 
+                    command: (evt) => dispatch({ type: 'ActiveTab', value: r })
+                    })
+                )
+        )
+    }, [Reviews]);
 
-    const menuItems = [{
-        label: activeTab.indexOf('Review') >= 0 ? activeTab : 'Reviews',
-        className: activeTab.indexOf('Review') >= 0 ? 'pm-item-tab-active' :'',
-        items: [{label: 'Internal', className: "pm-item-submenu",
-            command: (event) => { setActiveTab('Internal Reviews')}}, 
-            {label: 'Client',  className: "pm-item-submenu",
-            command: (event) => { setActiveTab('Client Reviews') }}, 
-            {label: 'Franchise',  className: "pm-item-submenu",
-            command: (event) => { setActiveTab('Franchise Reviews') }}, 
-            {label: 'All Reviews',  className: "pm-item-submenu",
-            command: (event) => { setActiveTab('All Reviews') }}
-        ]
-    },
-    {
-        label: activeTab.indexOf('Reference') >= 0 ? activeTab : 'Reference', 
-        className: activeTab.indexOf('Reference') >= 0 ? 'pm-item-tab-active' :'',
-        items: departmentOptions.map((d) => {
-            const title = d.indexOf('All Departments') === 0? 'All Reference' : d;
-            return ({ label: title, command: (event) => 
-                setActiveTab(title.indexOf('Reference') >= 0 ? title : title + ' Reference') })
+    useEffect(() => {
+        setReferenceTabItems(
+            departmentOptions.map((d) => {
+                const allSelected =  d.indexOf('All Departments') === 0;
+                const title = allSelected ? 'All Reference' : d;
+                return ({ label: title, command: (event) => 
+                    dispatch({ type: 'ActiveTab', value:
+                        allSelected ? title : title + ' Reference' 
+                    }) // dispatch
+                }) // item loop
+            }) // departments
+        )
+    }, [departmentOptions])
+
+    useEffect(() => {
+        const reviewSelected = ActiveTab.indexOf('Review') >= 0;
+        const referenceSelected = ActiveTab.indexOf('Reference') >= 0;
+        const summarySelected = ActiveTab === 'Summary';
+
+        setReviewsTab({
+            label: reviewSelected ? ActiveTab : 'Reviews',
+            className: reviewSelected ? 'pm-item-tab-active' :'',
+            items: reviewTabItems
+        });
+
+        setReferenceTab({
+            label: referenceSelected ? ActiveTab : 'Reference', 
+            className: referenceSelected ? 'pm-item-tab-active' :'',
+            items: referenceTabItems
         })
-    }, 
-    {
-        label: 'Summary', className: activeTab.indexOf('Summary') >= 0 ? 'pm-item-tab-active' :'',
-        command: (event) => { setActiveTab('Summary')}
-    }]
+
+        setSummaryTab({
+            label: 'Summary', 
+            className: summarySelected ? 'pm-item-tab-active' :'',
+            command: (event) => dispatch({type: 'ActiveTab', value: 'Summary' })
+        });
+    }, [ActiveTab, reviewTabItems, referenceTabItems])
 
     const header = (options) => {
         const itemClass = options.collapsed ? "pm-projectItem" : "pm-projectItem expanded";
+
         return (
-        <>
+        <> 
+            {
+                showUploadReviewDlg ? 
+                <UploadReview item={projectItem} reviews={Reviews}
+                visibility={true} setVisibility={setShowUploadReviewDlg} /> : null
+            }
             <ContextMenu model={contextMenu} ref={itemContext} className="pm-task-context"></ContextMenu>
             <Stack direction="horizontal" className={itemClass} 
                 onClick={options.onTogglerClick} onContextMenu={(e) => itemContext.current.show(e)}>
@@ -214,28 +302,31 @@ export const ProjectItem = ({boardId, projectItem, statusMenu, badgeMenu, groupi
                         {
                             grouping != 'Element' ?
                             <span style={{fontWeight:600, marginRight: '10px', position: 'absolute', left: '10px'}}>
-                                {element}
+                                {Element}
                             </span> : null
                         }
 
                         {
-                            task ? task : element 
+                            Task ? Task : Element 
                         }
                     </div>
                     <div className="pm-status" ref={statusRef} 
                         onClick={OnStatusClick}
-                        style={{background: status.info.color}}>
+                        style={{background: Status.info.color}}>
                         <span onMouseEnter={AddStatusHover}
-                            onMouseLeave={RemoveStatusHover}>{status.text}</span>
+                            onMouseLeave={RemoveStatusHover}>{Status.text}</span>
                     </div>
-                    <Stack direction="vertical" gap={0}>
-                        <div className="pm-task-latest-review">{currentReview ? currentReview.name : ''}</div>   
-                        <div className="pm-task-latest-timeline"> ({timeline})</div>
+                    <Stack direction="vertical" gap={0} style={{padding:'2px'}}>
+                        <div className="pm-task-latest-review" style={CurrentReview ?
+                            {} : {color:'#999', fontStyle: 'italic'}}>
+                            {CurrentReview ? CurrentReview.name : 'No Reviews'}
+                        </div>   
+                        <div className="pm-task-latest-timeline"> ({Timeline})</div>
                     </Stack>         
                 </Stack>
                 <div className="pm-task-tags">
                     {
-                        taskTags.map((t) => 
+                        Tags.Item.map((t) => 
                         <div className="pm-tag" key={tagOptions[t].id} 
                             style={{color: 'black'}}
                             onClick={(evt) => onTagClick(evt, t)}>
@@ -248,31 +339,56 @@ export const ProjectItem = ({boardId, projectItem, statusMenu, badgeMenu, groupi
         )
     }
 
-    const reviewsHTML = [0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => 
-        <ReviewItem key={i} status={status} review={{}} ></ReviewItem>)
+    useEffect(() => {
+        if (collapsed || ActiveTab.indexOf('Reviews') < 0) {
+            setReviewsHTML(null);
+            return;
+        }
 
-    const summaryHTML = (
-        <div style={{width:'100%'}}>
-                <Skeleton className="mb-3 mt-3"></Skeleton>
-                <Skeleton className="mb-3"></Skeleton>
-                <Skeleton className="mb-3"></Skeleton>
-                <Skeleton className="mb-3"></Skeleton>
-                <Skeleton className="mb-3"></Skeleton>
-                <Skeleton className="mb-3"></Skeleton>
-                <Skeleton width="10rem" className="mb-6"></Skeleton>
-        </div>
-    )
+        const reviews = Reviews[ActiveTab];
+        if (!reviews || reviews.length < 1) {
+            setReviewsHTML(null);
+            return;
+        }
+
+        setReviewsHTML(Reviews[ActiveTab].map((i) => 
+                    <ReviewItem key={i.id} status={Status} review={i} activeTab={ActiveTab}></ReviewItem>)
+        );
+    }, [ActiveTab, Reviews, collapsed])
+
+
+
+    useEffect(() => 
+        setReferenceHTML(
+            "Reference Content..."
+        )
+    , [])
+
+    useEffect(() =>
+        setSummaryHTML(
+            collapsed && ActiveTab.indexOf('Summary') >= 0 ?
+                <div style={{width:'100%'}}>
+                        <Skeleton className="mb-3 mt-3"></Skeleton>
+                        <Skeleton className="mb-3"></Skeleton>
+                        <Skeleton className="mb-3"></Skeleton>
+                        <Skeleton className="mb-3"></Skeleton>
+                        <Skeleton className="mb-3"></Skeleton>
+                        <Skeleton className="mb-3"></Skeleton>
+                        <Skeleton width="10rem" className="mb-6"></Skeleton>
+                </div>
+    : null), [])
+
     return (
-        <>
+        <ProjectItemContext.Provider value={state}>
             <div key="task-left" className="pm-task-left">
-                    <ProjectArtist users={artist} 
+                    <ProjectArtist users={Artist} 
                     searchParams={searchParams} setSearchParams={setSearchParams}
-                    background={status.info.color}/>
+                    background={Status.info.color}/>
             </div>
             
-            
-            <Panel headerTemplate={header} style={{marginBottom:'10px'}} collapsed={true} toggleable>
-                <Menubar model={menuItems}/>
+            <Panel headerTemplate={header} style={{marginBottom:'10px'}} collapsed={collapsed} 
+                onToggle={(e) => setCollapsed(e.value)} toggleable>
+                <Menubar model={[reviewsTab, referenceTab, summaryTab]}/>
                 {
                     <ScrollPanel style={{width: '100%', height: '400px'}} className="pm">
                         { tabHTML }
@@ -282,8 +398,8 @@ export const ProjectItem = ({boardId, projectItem, statusMenu, badgeMenu, groupi
             <div key="task-right" className="pm-task-right">
                     <Stack direction="horizontal" gap={2}>
                         {
-                            badges && badgeOptions ? 
-                            badges.map((b) => 
+                            Badges && badgeOptions ? 
+                            Badges.map((b) => 
                                 <Button className="pm-badge p-button-rounded" key={b}
                                     onClick={(evt) => 
                                         toggleArrFilter(b, 'Badges', searchParams, setSearchParams)}
@@ -295,7 +411,6 @@ export const ProjectItem = ({boardId, projectItem, statusMenu, badgeMenu, groupi
                         }
                     </Stack>
             </div>
-        </>
+        </ProjectItemContext.Provider>
     )
-    
 }

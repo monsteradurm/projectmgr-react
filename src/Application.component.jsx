@@ -85,7 +85,8 @@ function App() {
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<div>Placeholder...</div>} />
-                  <Route path="Projects" element={<Overview headerRef={appHeaderRef} />} />
+                  <Route path="Projects" element={<Overview 
+                    headerHeight={appHeaderRef.current ? appHeaderRef.current.clientHeight : 0} />} />
                 </Routes>
               </BrowserRouter>
             </> : null

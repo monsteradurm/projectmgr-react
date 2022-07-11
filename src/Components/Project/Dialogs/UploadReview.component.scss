@@ -1,0 +1,162 @@
+.p-dialog-content {
+    width: 60vw !important;
+    height: 100% !important;
+    padding: 0 !important;
+    border-radius: 5px;
+    border: solid 1px black;
+    background: transparent;
+}
+.pm-dialog {
+    .p-dropdown-label.p-inputtext {
+        border: none !important;
+    }
+    .p-button.p-button-rounded {
+        border:none;
+        box-shadow:none;
+        background:transparent;
+        position:absolute;
+        right: 0px;
+        top:0px;
+        color: #bbb !important;
+    }
+    .p-button.p-button-rounded:hover {
+        background: transparent !important;
+        color: white !important;
+
+    }
+    .p-button {
+      background: #333;
+      border-color: black;
+      font-weight: 400;
+      font-family: 'Open Sans';
+    }
+    .p-button:hover {
+      background: #555 !important;
+      border-color:black !important;
+      outline: none !important;
+      font-weight: 600 !important;
+    }
+    .p-fileupload-row:first {
+      width: fit-content;
+      padding-top: 0px !important;
+    }
+    .p-fileupload-row > div{
+      padding: 0px;
+    }
+    .p-fileupload .p-fileupload-content {
+      padding:20px 10px;
+      padding-top: 5px;
+      margin: 0px 40px;
+    }
+  .p-fileupload-files {
+    margin-top: 10px;
+  }
+    .p-fileupload-row {
+      padding: 20px 3px !important;
+      border-bottom: solid 1px gray;
+      .p-button.p-button-icon-only {
+        width: 40px !important;
+        height: 40px !important;
+      }
+    }
+    .p-fileupload-filename {
+      width: 100%;
+      text-align:left;
+    }
+    .p-button:focus {
+      box-shadow: none !important;
+    }
+    .p-fileupload .p-progressbar {
+      height: 0.4rem !important;
+      border: solid 1px gray !important;
+    }
+    .p-dialog-header {
+        background: #333;
+        width: 75vw;
+        padding: 15px 20px;
+        color: white;
+        box-shadow: inset 0px 0px 55px -30px black;
+  
+        .p-dialog-header-icons {
+          background: transparent !important;
+          border: none !important;
+          box-shadow: none !important;
+          button {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+          }
+        }
+    }
+    .p-dialog-header-close-icon:hover {
+      color: white !important;
+    }
+    .p-dialog .p-dialog-header .p-dialog-header-icon:enabled {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    .p-dialog .p-dialog-header .p-dialog-header-icon:enabled:hover {
+      color: #ffffff !important;
+      border-color: transparent;
+      background: #444;
+      box-shadow:none !important;
+    }
+  }
+
+#pm-upload-review {
+    .pm-dialogHeader {
+        width: 100%;
+        background: gray;
+        color: white;
+        font-size: 18px;
+        font-weight: 600;
+        padding: 10px 20px;
+    }
+    .p-inputtext, .p-dropdown {
+        border: none;
+        border-bottom: solid 2px #ccc   ;
+        border-radius: 0;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    .p-fileupload-advanced {
+        margin-top: -60px;
+    }
+    .p-inputtext:focus-visible, .p-dropdown:focus-visible, .p-inputtext:enabled:hover
+    .p-dropdown:not(.p-disabled).p-focus, .p-inputtext:not(.p-disabled).p-focus {
+        border-bottom: solid 2px black !important;
+        border-color: black !important;
+    }
+    .p-dropdown:not(.p-disabled):hover, p-inputtext:not(.p-disabled):hover,
+    .p-inputtext:enabled:hover, .p-inputwrapper-focus {
+        border-color: black !important;
+    }
+    .p-dropdown-items > .p-dropdown-item.p-highlight,
+    
+
+    .p-divider.p-divider-horizontal:before {
+        border-top: solid 2px lightgray;
+    }
+
+    .p-fileupload .p-fileupload-buttonbar {
+        border: none;
+        padding: 0;
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: end;
+    }
+    label {
+        top: -0.3rem;
+        font-size: 14px;
+        font-weight: 600;
+        color: black !important;
+    }
+}
+
+.p-dropdown-items > .p-dropdown.item.p-highlight,
+li.p-highlight {
+    color: black !important;
+    font-weight: 600 !important;
+    background: #eee !important;
+}

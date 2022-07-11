@@ -82,6 +82,8 @@ export class ProjectObservables {
                 option.index = i;
                 option.column_id = status.id;
                 option.label = status.labels[i];
+                option.className = 'pm-status-option';
+                option.style = {background: option.color};
                 result.push(option);
             });
             return _.sortBy(result, r => r.label);
@@ -160,6 +162,10 @@ export class ProjectObservables {
         }),
         shareReplay(1)
     );
+
+    static BadgeMenu$ = ProjectObservables.BadgeOptions$.pipe(
+
+    )
 
     static SetProjectId = (id) => ProjectObservables._ProjectId.next(id);
     static SetBoardId = (id) => ProjectObservables._BoardId.next(id);
@@ -329,6 +335,7 @@ export const DispatchProjectState = (state, action) => {
                 objects: { ...state.objects,
                     StatusOptions: action.value }
                 }
+
         case 'Board' :
             return { ...state, 
                 objects: { ...state.objects, 

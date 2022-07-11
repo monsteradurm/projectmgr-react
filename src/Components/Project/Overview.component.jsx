@@ -11,16 +11,28 @@ import { ProjectFilterBar } from "./ProjectFilterBar.component";
 import * as _ from 'underscore';
 import './Overview.component.scss'
 import { Stack } from "react-bootstrap";
+import { Dialog } from 'primereact/dialog';
+
 import { ItemBadgeIcon } from "../../Helpers/ProjectItem.helper";
 import DatePicker from "react-datepicker";
+import { UploadReview } from "./Dialogs/UploadReview.component";
 
 export const ProjectContext = React.createContext(ProjectState);
 
-export const Overview = ({headerRef}) => {
+export const Overview = ({headerHeight}) => {
     const [state, dispatch] = useReducer(DispatchProjectState, ProjectState)
     const [searchParams, setSearchParams] = useSearchParams();
-    const filterBarRef = useRef();
+    const [filteredItems, setFilteredItems] = useState([]);
+
+    const [badgeFilters, setBadgeFilters] = useState(null);
+    const [tagFilters, setTagFilters] = useState(null);
+    const [statusFilter, setStatusFilter] = useState(null);
+    const [artistFilters, setArtistFilters] = useState(null);
+
     const [itemCount, setItemCount] = useState(0);
+    const filterBarRef = useRef();
+    const offsetY = headerHeight + filterBarRef?.current ?
+                filterBarRef.current.clientHeight : 0;
 
     useEffect(() => {
         const params = state.params;
@@ -33,12 +45,14 @@ export const Overview = ({headerRef}) => {
         const View = searchParams.get('View');
         const Sorting = searchParams.get('Sorting');
         const ReverseSorting = searchParams.get('ReverseSorting');
-        const Search = searchParams.get('Search');
         const Tags = searchParams.get('FilterTags');
         const Badges = searchParams.get('FilterBadges');
         const Status = searchParams.get('FilterStatus');
         const Artist = searchParams.get('FilterArtist');
         const Grouping = searchParams.get('Grouping');
+
+        let Search = searchParams.get('Search');
+        if (!Search) Search = ''; // value cannot be null!
 
         if (ProjectId !== state.params.ProjectId)
             ProjectObservables.SetProjectId(ProjectId);
@@ -90,7 +104,7 @@ export const Overview = ({headerRef}) => {
         return () => ProjectObservables.Unsubscribe(state.Subscriptions);
     }, [])
 
-    const filteredItems = useMemo(() => {
+    useEffect(() => {
         const filters = state.filters;
         const params = state.params;
 
@@ -105,7 +119,6 @@ export const Overview = ({headerRef}) => {
         const sorted = sortFilteredItems(filtered, params);
         
         const nested = _.groupBy(sorted, (i) => {
-            console.log(i.Status.text);
             if (state.params.Grouping == 'Status') {
                 return !!i.Status && !!i.Status.text ? i.Status.text : 'Not Started';
             } 
@@ -119,111 +132,88 @@ export const Overview = ({headerRef}) => {
             }
             return '';
         });
-        console.log(nested);
-        return nested;
-    }, [state.objects.Items, state.params, state.filters]);
 
-    useEffect(() => {
-        //Set current status/artist/directors for filtering
-    }, [filteredItems])
+        setFilteredItems(nested);
+    }, [state.objects.Items, state.params, state.filters]);
 
     useEffect(() => {
         if (!state.params.Department)
             dispatch({type: 'Department', value: state.objects.DepartmentOptions[0]})
     }, [state.objects.DepartmentOptions, state.params.Department])
 
-    const badgeMenu = useMemo(() => {
-        const BadgeOptions = state.objects.BadgeOptions;
-        const labels = Object.keys(BadgeOptions);
-        
-        if (labels.length < 1) return [];
-        return _.map(_.flatten(Object.values(labels)), (b) => ({
-            label: BadgeOptions[b].Title,
-            icon: ItemBadgeIcon(BadgeOptions[b]),
-            style: {background: BadgeOptions[b].Background},
-            className: 'pm-status-option'
-        }))
-    }, [state.objects.BadgeOptions])
-
-
-    const TagFilters = useMemo(() => {
+    useEffect(() => {
         const TagOptions = state.objects.TagOptions;
         const Tags = state.filters.Tags;
 
-        if (!Tags || Tags.length < 1)
-            return null;
+        if (!Tags || Tags.length < 1) {
+            setTagFilters(null);
+            return;
+        }
 
-        return Tags.split(',').filter(t => TagOptions[t]).map((t) =>
+        const result = Tags.split(',').filter(t => TagOptions[t]).map((t) =>
         <div key={TagOptions[t].id} className="pm-tag-filter" 
             onClick={(evt) => toggleArrFilter(t, 'Tags', searchParams, setSearchParams)}>
             {'#' + t}
         </div>)
 
+        setTagFilters(result)
     }, [state.objects.TagOptions, state.filters.Tags])
 
-    const StatusFilter = useMemo(() => {
+    useEffect(() => {
         const status = state.filters.Status;
 
-        if(!status || status.length < 1)
-            return null;
+        if(!status || status.length < 1) {
+            setStatusFilter(null);
+            return;
+        }
 
-        return <div key="status-filter" className="pm-tag-filter" 
-        onClick={(evt) => toggleStatusFilter(status, searchParams, setSearchParams)}>
-            {'#' + status}
-    </div>
-    })
+        setStatusFilter(<div key="status-filter" className="pm-tag-filter" 
+            onClick={(evt) => toggleArrFilter(status, 'Status', searchParams, setSearchParams)}>
+                {'#' + status}
+        </div>)
+    }, [state.filters.Status]);
 
-    const ArtistFilters = useMemo(() => {
+    useEffect(() => {
         const Artists = state.filters.Artist;
 
-        if (!Artists || Artists.length < 1)
-            return null;
-
+        if (!Artists || Artists.length < 1) {
+            setArtistFilters(null);
+            return;
+        }
         
-        return Artists.split(',')
+        setArtistFilters(Artists.split(',')
             .map((t) =>
                 <div key={t} className="pm-tag-filter" 
                     onClick={(evt) => toggleArrFilter(t, 'Artist', searchParams, setSearchParams)}>
                     {'#' + t}
-                </div>
+                </div>)
         )
 
     }, [state.filters.Artist])
-    const BadgeFilters = useMemo(() => {
+
+    useEffect(() => {
         const BadgeOptions = state.objects.BadgeOptions;
         const Badges = state.filters.Badges;
 
-        if (!Badges || Badges.length < 1)
-            return null;
-
-        return Badges.split(',')
+        if (!Badges || Badges.length < 1) {
+            setBadgeFilters(null);
+            return;
+        }
+        setBadgeFilters(Badges.split(',')
             .filter(t => BadgeOptions[t])
             .map((t) =>
                 <div key={t} className="pm-tag-filter" 
                     onClick={(evt) => toggleArrFilter(t, 'Badges', searchParams, setSearchParams)}>
                     {'#' + t}
-                </div>
+                </div>)
         )
     }, [state.filters.Badges, state.objects.BadgeOptions])
     
-    const statusMenu = useMemo(() => 
-    {
-        const options = [];
-        if (!state?.objects?.StatusOptions)
-            return options;
-
-        state.objects.StatusOptions.forEach((o) => 
-            options.push(
-                {label: o.label, 
-                    id: o.index, 
-                    column_id: o.column_id,
-                    className: 'pm-status-option',
-                    style: {background: o.color}
-                }
-            )
-        )
-        return options;
-    }, [state.objects])
+    const ClearSearch = (evt) => {
+        evt.preventDefault();
+        searchParams.set('Search', '');
+        setSearchParams(searchParams);
+    }
 
     return (
     <ProjectContext.Provider value={state}>
@@ -232,23 +222,31 @@ export const Overview = ({headerRef}) => {
                 GroupOptions={state.objects.GroupOptions} Group={state.objects.Group}
                 DepartmentOptions={state.objects.DepartmentOptions} />
         </div>
-        <ScrollingPage key="page_scroll" offsets={[headerRef, filterBarRef]}>
+        <ScrollingPage key="page_scroll" offsetY={offsetY}>
             <div id="Overview_Items">
                 <Stack direction="horizontal" gap={3}>
                     <div className="pm-tag-filter" style={{color: '#aaa', fontWeight: 400}}>
                         { itemCount.toString() + ' tasks...' }
                     </div>
                     {
-                        ArtistFilters
+                        state.filters.Search && state.filters.Search.trim().length > 0 ?
+                        <div className="pm-tag-filter" 
+                        onClick={ClearSearch}
+                        style={{color: '#aaa', fontWeight: 400}}>
+                            (Searched: {state.filters.Search})
+                        </div> : null
                     }
                     {
-                        StatusFilter
+                        artistFilters
                     }
                     {
-                        TagFilters
+                        statusFilter
                     }
                     {
-                        BadgeFilters
+                        tagFilters
+                    }
+                    {
+                        badgeFilters
                     }
                 </Stack>
             {
@@ -258,9 +256,9 @@ export const Overview = ({headerRef}) => {
                         {
                         filteredItems[i].map(item => 
                             <div key={item.id} className="pm-task-conainer">
-                                <ProjectItem boardId={state.params.BoardId} projectItem={item} 
+                                <ProjectItem boardId={state.params.BoardId} projectItem={item}
                                     grouping={state.params.Grouping}
-                                    statusMenu={statusMenu} badgeMenu={badgeMenu}
+                                    statusOptions={state.objects.StatusOptions} 
                                     badgeOptions={state.objects.BadgeOptions}
                                     tagOptions={state.objects.TagOptions}
                                     setSearchParams={setSearchParams}
