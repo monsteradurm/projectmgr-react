@@ -41,18 +41,12 @@ fs.readFile('proxy.conf.json', (err, data) => {
 
             console.log(req.url);
             console.log(config[addr].target);
-            //console.log("HERE", addr);
-
-            if (addr == "/syncsketch/*") {
-                res.header('content-type', "application/javascript")
-            }
 
             proxy.on('error', err => { 
                 console.error('proxyRequest', err)
             })
 
             proxy.web(req, res, {
-                
                 target: config[addr].target,
                 https: true,
                 changeOrigin: true
