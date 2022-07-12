@@ -1,0 +1,121 @@
+Setting proxy --> /syncsketch/*
+Setting proxy --> /syncsketch-v2/*
+Setting proxy --> /syncsketch-upload/*
+Setting proxy --> /typeform/*
+Setting proxy --> /confluence/*
+Setting proxy --> /admin-atlassian/*
+Setting proxy --> /box/*
+Setting proxy --> /box-account/*
+Setting proxy --> /box-rest/*
+Setting proxy --> /pm-socket/*
+Setting proxy --> /cloud-functions/*
+Setting proxy --> /item-data-cdn-syncsketch-com/*
+Setting proxy --> /media-cdn-syncsketch-com/*
+Setting proxy --> /lareposync/*
+projectmgr-react --> listening at: 3000
+{
+  host: 'localhost:3000',
+  connection: 'keep-alive',
+  'cache-control': 'max-age=0',
+  'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+  'sec-ch-ua-mobile': '?0',
+  'sec-ch-ua-platform': '"Windows"',
+  'upgrade-insecure-requests': '1',
+  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+  accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+  'sec-fetch-site': 'none',
+  'sec-fetch-mode': 'navigate',
+  'sec-fetch-user': '?1',
+  'sec-fetch-dest': 'document',
+  'accept-encoding': 'gzip, deflate, br',
+  'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+  'if-none-match': 'W/"54c-181f1984cd4"',
+  'if-modified-since': 'Tue, 12 Jul 2022 08:48:19 GMT'
+}
+{
+  host: 'localhost:3000',
+  connection: 'keep-alive',
+  'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+  'sec-ch-ua-mobile': '?0',
+  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+  'sec-ch-ua-platform': '"Windows"',
+  accept: 'text/css,*/*;q=0.1',
+  'sec-fetch-site': 'same-origin',
+  'sec-fetch-mode': 'no-cors',
+  'sec-fetch-dest': 'style',
+  referer: 'http://localhost:3000/Projects?ProjectId=LADUS6666_TempProjA&BoardId=2871802719&GroupId=topics&FilterStatus=',
+  'accept-encoding': 'gzip, deflate, br',
+  'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+  'if-none-match': 'W/"79328-181f1984cf3"',
+  'if-modified-since': 'Tue, 12 Jul 2022 08:48:19 GMT'
+}
+{
+  host: 'localhost:3000',
+  connection: 'keep-alive',
+  'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+  'sec-ch-ua-mobile': '?0',
+  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+  'sec-ch-ua-platform': '"Windows"',
+  accept: '*/*',
+  'sec-fetch-site': 'same-origin',
+  'sec-fetch-mode': 'no-cors',
+  'sec-fetch-dest': 'script',
+  referer: 'http://localhost:3000/Projects?ProjectId=LADUS6666_TempProjA&BoardId=2871802719&GroupId=topics&FilterStatus=',
+  'accept-encoding': 'gzip, deflate, br',
+  'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+  'if-none-match': 'W/"2ce58a-181f1984cf4"',
+  'if-modified-since': 'Tue, 12 Jul 2022 08:48:19 GMT'
+}
+{
+  host: 'localhost:3000',
+  connection: 'keep-alive',
+  'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+  'sec-ch-ua-mobile': '?0',
+  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+  'sec-ch-ua-platform': '"Windows"',
+  accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+  'sec-fetch-site': 'same-origin',
+  'sec-fetch-mode': 'no-cors',
+  'sec-fetch-dest': 'image',
+  referer: 'http://localhost:3000/Projects?ProjectId=LADUS6666_TempProjA&BoardId=2871802719&GroupId=topics&FilterStatus=',
+  'accept-encoding': 'gzip, deflate, br',
+  'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+  'if-none-match': 'W/"f1e-181a84cacf6"',
+  'if-modified-since': 'Tue, 28 Jun 2022 03:13:26 GMT'
+}
+{
+  host: 'localhost:3000',
+  connection: 'keep-alive',
+  'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+  'sec-ch-ua-mobile': '?0',
+  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+  'sec-ch-ua-platform': '"Windows"',
+  accept: '*/*',
+  'sec-fetch-site': 'same-origin',
+  'sec-fetch-mode': 'cors',
+  'sec-fetch-dest': 'manifest',
+  referer: 'http://localhost:3000/Projects?ProjectId=LADUS6666_TempProjA&BoardId=2871802719&GroupId=topics&FilterStatus=',
+  'accept-encoding': 'gzip, deflate, br',
+  'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+  'if-none-match': 'W/"1ec-181a84cb251"',
+  'if-modified-since': 'Tue, 28 Jun 2022 03:13:27 GMT'
+}
+{
+  host: 'localhost:3000',
+  connection: 'keep-alive',
+  'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+  'sec-ch-ua-mobile': '?0',
+  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+  'sec-ch-ua-platform': '"Windows"',
+  accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+  'sec-fetch-site': 'same-origin',
+  'sec-fetch-mode': 'no-cors',
+  'sec-fetch-dest': 'image',
+  referer: 'http://localhost:3000/Projects?ProjectId=LADUS6666_TempProjA&BoardId=2871802719&GroupId=topics&FilterStatus=',
+  'accept-encoding': 'gzip, deflate, br',
+  'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+  'if-none-match': 'W/"14e3-181a84cb6ed"',
+  'if-modified-since': 'Tue, 28 Jun 2022 03:13:28 GMT'
+}
+/item/11406327/
+https://syncsketch.com/api/v1
