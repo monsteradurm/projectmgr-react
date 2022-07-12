@@ -4,7 +4,8 @@ import * as _ from 'underscore';
 import { take, map, tap } from "rxjs";
 import moment from 'moment'
 const QueryHeaders = {
-    crossDomain: true,
+    'Accept': 'application/json, text/plain, */*',
+    'Content-Type': 'application/json',
     'Authorization': `apikey ${SyncsketchConfig.user}:${SyncsketchConfig.token}`}
 export class SyncsketchService {
     static Query$ = (addr) => {
