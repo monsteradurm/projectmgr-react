@@ -5,11 +5,15 @@ export const SyncsketchConfig = {
     account: '116681',
 }
 
+const proxy = 'https://us-central1-pm-websocket.cloudfunctions.net/app/';
+const apiv1 = 'syncsketch.com/api/v1'
+const apiv2 = 'syncsketch.com/api/v2'
+
 export const SyncsketchQueries = {
-    AllUsers: `/syncsketch-v2/account/${SyncsketchConfig.account}/`,
-    AllProjects: `/syncsketch/project/?active=1&is_archived=0&account__active=1`,
+    AllUsers: `${proxy}${apiv2}/account/${SyncsketchConfig.account}/`,
+    AllProjects: `${proxy}${apiv1}/project/?active=1&is_archived=0&account__active=1`,
 
     ReviewsByName: (name) => `/syncsketch/review/?name__istartswith=${name}&active=1`,
-    ItemById: (id) => `/syncsketch/item/${id}/`,
-    AllFeedback: (itemId) => `/syncsketch/frame/?item__id=${itemId}`
+    ItemById: (id) => `${proxy}${apiv1}/item/${id}/`,
+    AllFeedback: (itemId) => `${proxy}${apiv1}/frame/?item__id=${itemId}`
 }
