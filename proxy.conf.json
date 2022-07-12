@@ -1,6 +1,6 @@
 {
     "/syncsketch/*": {
-        "target": "https://us-central1-pm-websocket.cloudfunctions.net/app/syncsketch.com/api/v1",
+        "target": "https://us-central1-pm-websocket.cloudfunctions.net/app/syncsketch.com/api/v1/",
         "secure": false,
         "changeOrigin": true,
         "loglevel": "debug",
@@ -9,7 +9,7 @@
         }
     },
     "/syncsketch-v2/*": {
-        "target": "https://us-central1-pm-websocket.cloudfunctions.net/app/syncsketch.com/api/v2",
+        "target": "https://us-central1-pm-websocket.cloudfunctions.net/app/syncsketch.com/api/v2/",
         "secure": false,
         "changeOrigin": true,
         "loglevel": "debug",
