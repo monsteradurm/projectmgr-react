@@ -53,7 +53,7 @@ fs.readFile('proxy.conf.json', (err, data) => {
 
     app.options('*', cors())
     app.use(cors());
-    
+    app.disable('x-powered-by');
     app.use((req, res, next) => {
         res.header('Access-Control-Allow-Origin', '*');
         console.log(req.headers);
