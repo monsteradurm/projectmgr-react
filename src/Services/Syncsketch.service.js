@@ -2,6 +2,7 @@ import { ajax } from "rxjs/ajax";
 import { httpOptions, SyncsketchConfig, SyncsketchQueries } from "../Environment/Syncsketch.environment";
 import * as _ from 'underscore';
 import { take, map, tap } from "rxjs";
+import { fromFetch } from 'rxjs/fetch';
 import moment from 'moment'
 const QueryHeaders = {
     'Accept': 'application/json, text/plain, */*',
@@ -10,7 +11,11 @@ const QueryHeaders = {
 export class SyncsketchService {
     static Query$ = (addr) => {
         const start = moment();
-        return ajax.get(addr, QueryHeaders).pipe(
+        return fromFetch(addr, {
+            headers: QueryHeaders,
+            selector: (response) => response.json()
+        }).pipe(
+            tap(console.log),
             tap(t => {
                 const end = moment();
                 console.log(`Syncsketch -- Query Fetch Time ${end.diff(start, 'seconds')} seconds`)
