@@ -25,6 +25,13 @@ export class MondayService {
         })
     }
 
+    static AllUsers$ = () => MondayService.Execute$(
+        MondayGraphQL.Query_AllUsers()
+    ).pipe(
+      map(result => result.users),
+      take(1)
+    )
+
     static SetItemTags = (boardId, itemId, columnId, tags) => {
 
     }

@@ -45,5 +45,6 @@ export const OAuthScopes = {
 };
 
 export const GraphEndpoints = {
-    me: "https://graph.microsoft.com/v1.0/me"
+    me: "https://graph.microsoft.com/v1.0/me",
+    users: "https://graph.microsoft.com/v1.0/users"
 }

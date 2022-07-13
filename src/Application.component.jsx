@@ -12,10 +12,15 @@ import { MondayService } from './Services/Monday.service';
 import { ToastService } from './Services/Toast.service';
 import { Tooltip } from 'primereact/tooltip';
 import { SyncsketchService } from './Services/Syncsketch.service';
+import { AtomSpinner, BreedingRhombusSpinner, SemipolarSpinner } from 'react-epic-spinners';
+import { Stack } from 'react-bootstrap';
+import { UserService } from './Services/User.service';
+import { switchMap, take } from 'rxjs';
 
 export const ApplicationContext = React.createContext(ApplicationState);
 
 function App() {
+  const [fetching, setFetching] = useState(true);
   const [state, dispatch] = useReducer(DispatchApplicationState, ApplicationState)
   const { instance, accounts, inProgress } = useMsal();
   const [accessToken, setAccessToken] = useState(null);
@@ -54,6 +59,21 @@ function App() {
   }, [account, accessToken, inProgress])
 
   useEffect(() => {
+    if (state.User && fetching)
+      setFetching(false);
+
+    UserService.UserPhoto$(account.username)
+      .subscribe((result) => {
+        dispatch({type: 'Photo', value: result})
+      })
+
+    if (state.User)
+      ApplicationObservables.AllUsers$.pipe(take(1))
+        .subscribe((result) => dispatch({type: 'AllUsers', value: result}))
+
+  }, [state.User, account, accessToken])
+
+  useEffect(() => {
     let subs = [];
     
     subs.push(ApplicationObservables.PrimaryColor$.subscribe((u) => {
@@ -75,9 +95,16 @@ function App() {
   return (
       <div className="App">
         <ApplicationContext.Provider value={state}>
-          
           {
-            state.User ? 
+            fetching ? 
+              <Stack direction="vertical" className="mx-auto my-auto" 
+              style={{width: '100%', height: '100%', opacity: 0.5, justifyContent: 'center'}}>
+                <BreedingRhombusSpinner color='gray' size={150} className="mx-auto" style={{opacity:0.7}}/> 
+                <div style={{fontWeight: 300, textAlign: 'center', fontSize: '25px', marginTop: '50px'}}>
+                  Logging in user...
+                </div>
+              </Stack>:
+              state.User ? 
             <>
               <header className="App-header" ref={appHeaderRef}>
                 <NavigationComponent />

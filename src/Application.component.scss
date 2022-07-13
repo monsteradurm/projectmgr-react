@@ -154,7 +154,35 @@
   font-family: 'Open Sans';
   font-weight: bold;
 }
+.pm-avatar-review-image {
+  position:relative;
+}
+.pm-avatar-review-image:hover::after {
+  background: #aaa !important;
+  content: '';
+  display: block;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  border-radius:50%;
+  width: 100%;
+  opacity: 0.5;
+}
 
+.pm-avatar-image {
+  position:relative;
+}
+.pm-avatar-image:hover::after {
+  background: #aaa !important;
+  content: '';
+  display: block;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  border-radius:50%;
+  width: 100%;
+  opacity: 0.5;
+}
 .pm-tooltip {
   font-size:13px !important;
   font-family: 'Open Sans' !important;
@@ -205,7 +233,7 @@
 .navbar-brand {
   padding-top: 0.1rem !important;
   padding-bottom: 0.1rem !important;
-  font-size:20px !important;
+  font-size:18px !important;
   vertical-align: middle !important;
   width:100%;
   letter-spacing: 0.09rem;

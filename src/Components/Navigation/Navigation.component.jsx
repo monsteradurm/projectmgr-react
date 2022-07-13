@@ -8,6 +8,7 @@ import { ProjectDropdown } from './ProjectDropDown.component';
 import './Navigation.component.scss';
 import * as _ from 'underscore';
 import { ApplicationContext } from '../../Application.component';
+import { Avatar } from 'primereact/avatar';
 
 export const NavigationComponent = () => {
     const AppContext = useContext(ApplicationContext);
@@ -102,15 +103,23 @@ export const NavigationComponent = () => {
                         </Dropdown.Menu>
                 </Dropdown>            
                 {
-                    <Navbar.Brand  style={{color:"white", textAlign:"right"}}>
-                        {AppContext.User ? AppContext.User.displayName : ''}
-                    </Navbar.Brand>
-                    
+                    <Stack direction="horizontal" gap={1} style={{width: '100%'}}>
+                        <Navbar.Brand  style={{color:"white", textAlign:"right", 
+                            fontWeight: 300, fontSize: 18}}>
+                            {AppContext.User ? AppContext.User.displayName : ''}
+                        </Navbar.Brand>
+                        {
+                            AppContext.Photo ? 
+                            <img src={AppContext.Photo} className="pm-avatar-image" /> :
+                            <Avatar label="NA" shape="circle" size="large" />
+                        }
+                    </Stack>
                 }
             </Container>
             </Navbar>
             {
-                <div key="title_bar" className="pm-titlebar" style={{background: AppContext.PrimaryColor, color:'white'}}>
+                <div key="title_bar" className="pm-titlebar" 
+                    style={{background: AppContext.PrimaryColor, color:'white'}}>
                     <Stack direction="horizontal" gap={3}>
                         <div className="pm-title">
                             {

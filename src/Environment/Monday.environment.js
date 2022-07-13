@@ -7,6 +7,16 @@ export const MondayConfig = {
 }
 
 export const MondayGraphQL = {
+
+    Query_AllUsers: () => 
+    `query {
+      users {
+        id
+        name
+        email
+      }
+    }`,
+
     Query_ColumnSettings: (id) => 
     `query {
         boards (ids:${id}) {
