@@ -60,19 +60,20 @@ export const filterTags = (filtered, tags) => {
     const TagArr = tags.split(',').filter(t => t && t.length > 0 && t !== null);
 
     return _.filter(filtered, i => {
-        if (!i.Tags?.value?.length)
-            return false;
-        if (_.intersection(i.Tags.value, TagArr).length > 0)
+        if (i.Tags?.value?.length > 0 && _.intersection(i.Tags.value, TagArr).length > 0)
             return true;
 
-        if (!i.subitems?.lengh)
-            return false;
+        if (i.subitems.length > 0) {
+            const last = _.last(i.subitems);
+            
+            if (!last.Tags || !last.Tags.value) return false;
 
-        const last = _.last(i.subitems);
-        if (!last.Tags?.value?.length)
-            return false;
+            if (last.Tags.value.length < 1)
+                return false;
 
-        return _.intersection(last.Tags.value, TagArr).length > 0;
+            return _.intersection(last.Tags.value, TagArr).length > 0;
+        }
+        return false;
     });
 }
 export const sortFilteredItems = (filtered, params) => {

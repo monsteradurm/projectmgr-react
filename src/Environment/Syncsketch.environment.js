@@ -13,7 +13,7 @@ export const SyncsketchQueries = {
     AllUsers: `${proxy}${apiv2}/account/${SyncsketchConfig.account}/`,
     AllProjects: `${proxy}${apiv1}/project/?active=1&is_archived=0&account__active=1`,
 
-    ReviewsByName: (name) => `/syncsketch/review/?name__istartswith=${name}&active=1`,
+    ReviewsByName: (name) => `${proxy}${apiv1}/review/?name__istartswith=${name}&active=1`,
     ItemById: (id) => `${proxy}${apiv1}/item/${id}/`,
     AllFeedback: (itemId) => `${proxy}${apiv1}/frame/?item__id=${itemId}`
 }

@@ -7,10 +7,18 @@ import { NavigationService } from '../../Services/Navigation.service';
 import * as _ from 'underscore';
 import { SyncsketchService } from '../../Services/Syncsketch.service';
 import { ContextMenu } from 'primereact/contextmenu';
+import { Tooltip } from 'primereact/tooltip';
+import moment from 'moment';
+import { toggleArrFilter } from './Overview.filters';
 
-export const ReviewItem = ({status, review, activeTab}) => {
+export const ReviewItem = ({status, review, activeTab, currentReview,
+    tagOptions, searchParams, setSearchParams}) => {
     const [timeline, setTimeline] = useState(null);
-    const [primary, setPrimary] = useState('gray');
+    const [delivered, setDelivered] = useState(null);
+    const [tags, setTags] = useState(null);
+    const [primary, setPrimary] = useState('#aaa');
+    const [artist, setArtist] = useState(null);
+    const [initials, setInitials] = useState(null);
     const [thumbnail, setThumbnail] = useState(null);
     const [reviewLink, setReviewLink] = useState(null);
     const [feedback, setFeedback] = useState(null);
@@ -22,6 +30,9 @@ export const ReviewItem = ({status, review, activeTab}) => {
         {separator: true},
         {label: "Remove Review"}
     ]
+
+    
+
     useEffect(() => {
         if (!reviewLink)
             return;
@@ -42,10 +53,18 @@ export const ReviewItem = ({status, review, activeTab}) => {
                 }, 0);
                 fb.comment_count = comments.length;
                 fb.sketch_count = sketches.length;
-                fb.comment = _.last(comments).text;
+                const last = _.last(comments);
 
-                if (fb.comment.length > 450)
-                    fb.comment = fb.comment.substring(0, 450) + '...'
+                if (last) {
+                    fb.modified = moment(last.modified).format('MMM DD');
+                    fb.user = last.creator.full_name;
+                    fb.comment = last.text;
+                }
+
+                if (fb?.comment?.length > 350)
+                    fb.comment = fb.comment.substring(0, 350) + '... '
+
+                
                 setFeedback(fb);
             }
         )
@@ -53,7 +72,14 @@ export const ReviewItem = ({status, review, activeTab}) => {
     }, [reviewLink])
     useEffect(() => {
         setTimeline(formatTimeline(review.Timeline));   
-        setPrimary(status.info.color);  
+        setPrimary(review?.id == currentReview?.id ? 
+            status.info.color : '#aaa');  
+        
+        if(review && review['Delivered Date'] && review['Delivered Date']?.text?.length > 0) {
+            setDelivered(moment(review['Delivered Date'].text).format('MMM DD'));
+        }
+        else if (delivered != null)
+            setDelivered(null);
 
         if (review?.Link?.text && review.Link.text.length > 0) {
             setReviewLink(review.Link.text);
@@ -63,55 +89,82 @@ export const ReviewItem = ({status, review, activeTab}) => {
             SyncsketchService.ItemById$(id).subscribe(result => {
                 if (result.thumbnail_url)
                     setThumbnail(result.thumbnail_url)
+
+                const name = result.creator.full_name;
+                setInitials(name.split(' ').map(n => n[0]).join(''))
+                setArtist(name);
             });
         }
             
         else if (reviewLink !== null)
             setReviewLink(null);
 
-    },[review])
+        let tags = review.Tags?.value ?
+        review.Tags.value.reduce((acc, t) => {
+            if (tagOptions[t]) {
+                acc.push(t)
+            }
+            return acc;
+        }, []) : [];
+
+        setTags(tags);
+    },[review, currentReview])
+
+    const onTagClick = (evt, t) => {
+        evt.stopPropagation();
+        toggleArrFilter(t, 'Tags', searchParams, setSearchParams);
+    }
 
     return (
     <>
         <ContextMenu model={contextMenu} ref={itemContext} className="pm-task-context"></ContextMenu>
-        <Stack direction="horizontal" gap={2} 
-            onContextMenu={(e) => itemContext.current.show(e)}
-            onMouseEnter={(evt) => setHovering(true)} onMouseLeave={(evt) => setHovering(false)}
-            className={hovering ? "pm-review-hover" : null}>
-            <Stack direction="vertical" gap={2} className="pm-review-item">
+        <Stack direction="horizontal" gap={2}
+            onContextMenu={(e) => itemContext.current.show(e)} 
+            style={{ borderRightColor: primary, borderLeftColor: primary, position: 'relative'}}
+            className={hovering ? "pm-review-hover pm-review-container" : "pm-review-container"}>
+            <Stack direction="vertical" className="pm-review-item">
                 <Stack direction="horizontal" gap={3}>
                     <div style={{maxWidth:'130px', width: '100%'}}>
                         <div className="pm-review-title" style={{textAlign:'center', width: '100%'}}>
                             {review['Feedback Department'].text + ' #' + review.index}
                         </div>
                     </div>
-                    <Stack direction="horizontal" 
+                    
+                    <Stack direction="horizontal" gap={3}
                         style={{width:'100%', position: 'relative'}}>
                         <div className="pm-review-title">
                             {review.name}
-                        </div>
-
-                        <div className="pm-review-title" 
-                            style={{marginLeft:'15px', fontWeight:400}}>
+                            
+                            <span style={{marginLeft:'10px', fontWeight: 400}}>
                             {
                                 feedback ?
-                                `(${feedback.comment_count} comments, ` +
+                                `${feedback.comment_count} comments, ` +
                                 `${feedback.sketch_count} sketches, ` +
-                                `${feedback.attachment_count} attachments)`
+                                `${feedback.attachment_count} attachments`
                                  : null
                             }
+                            </span>
+                            
+                            
+
                         </div>
-                        
-                        <div className="pm-review-timeline" 
-                            style={{marginLeft: '10px', marginRight:'50px',
-                            fontWeight: 400}}>
-                            {
-                                timeline
+                        <div className="ms-auto"></div>
+                        <div className="pm-task-tags" style={{marginRight: '50px'}}>
+                            <Stack direction="horizontal" gap={1} className="pm-tag-row">
+                            {   
+                                tags && tags.length > 0 ?
+                                tags.map((t) => 
+                                <div className="pm-tag" key={tagOptions[t].id} 
+                                    style={{color: primary}}
+                                    onClick={(evt) => onTagClick(evt, t)}>
+                                    {'#' + t}
+                                </div>) : null
                             }
-                        </div>
+                            </Stack>
+                        </div>                   
                     </Stack>
                 </Stack>
-                <Stack direction="horizontal" gap={3}> 
+                <Stack direction="horizontal" gap={3} style={{position:'relative'}}> 
                     {   
                         thumbnail ?
                         <img src={thumbnail} className="pm-review-thumbnail" 
@@ -119,17 +172,42 @@ export const ReviewItem = ({status, review, activeTab}) => {
                         <Skeleton width="130px" height="70px"></Skeleton>
                     }
                     <div style={{width:'100%', marginLeft: '10px',marginRight: '50px',
+                        fontStyle: feedback?.comment ? null : 'italic',
                         position: 'relative', height: '100%'}} className="pm-comment">
-                    {
-                        feedback ?
-                        feedback.comment : null
-                    }
+                            {
+                                feedback ?
+                                ( feedback.comment ? feedback.comment : 'No Feedback has been written for this review...' ) 
+                                : null
+                            }
+                            <span style={{fontStyle: 'italic', color: 'gray'}}>
+                            {
+                                
+                                feedback?.modified ? ` - ${feedback.user}, ${feedback.modified}` : null
+                            }
+                            </span>
                     </div>
                     
                 </Stack>
+                <Stack direction="horizontal" gap={3}>
+                    <div className="pm-review-timeline" style={{maxWidth:'130px', width: '100%'}}>
+                        {
+                            timeline ? timeline : 'No Timeline'
+                        }
+                    </div>
+                    {
+                        delivered ?
+                        <div className="pm-review-delivered">
+                            Delivered {delivered}
+                        </div> : null
+                    }
+                </Stack>
             </Stack>
-            <Avatar size="large" shape="circle" label="NA" 
-            style={{position: 'absolute', top:'20px', right:'0px', background: status.info.color}}  />
+                <Tooltip target=".pm-review-avatar" position="top" className="pm-tooltip" mouseTrack={false}
+                mouseTrackTop={10}/>
+                <Avatar className="pm-review-avatar" size="large" shape="circle" 
+                label={artist ? initials : '?'} 
+                data-pr-tooltip={artist ? artist : 'Not Specified'} data-pr-position="top"
+                style={{position: 'absolute', top:'20px', right:'20px', background: primary}}  />
         </Stack>
     </>
     )

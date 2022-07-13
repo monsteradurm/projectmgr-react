@@ -29,25 +29,8 @@ projectmgr-react --> listening at: 3000
   'sec-fetch-dest': 'document',
   'accept-encoding': 'gzip, deflate, br',
   'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
-  'if-none-match': 'W/"54c-181f1b2ab44"',
-  'if-modified-since': 'Tue, 12 Jul 2022 09:17:07 GMT'
-}
-{
-  host: 'localhost:3000',
-  connection: 'keep-alive',
-  'cache-control': 'max-age=0',
-  'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
-  'sec-ch-ua-mobile': '?0',
-  'sec-ch-ua-platform': '"Windows"',
-  'upgrade-insecure-requests': '1',
-  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
-  accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-  'sec-fetch-site': 'none',
-  'sec-fetch-mode': 'navigate',
-  'sec-fetch-user': '?1',
-  'sec-fetch-dest': 'document',
-  'accept-encoding': 'gzip, deflate, br',
-  'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8'
+  'if-none-match': 'W/"54c-181f1b3f161"',
+  'if-modified-since': 'Tue, 12 Jul 2022 09:18:30 GMT'
 }
 {
   host: 'localhost:3000',
@@ -63,8 +46,8 @@ projectmgr-react --> listening at: 3000
   referer: 'http://localhost:3000/Projects?ProjectId=LADUS6666_TempProjA&BoardId=2871802719&GroupId=topics&FilterStatus=',
   'accept-encoding': 'gzip, deflate, br',
   'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
-  'if-none-match': 'W/"79328-181f1b2ab6c"',
-  'if-modified-since': 'Tue, 12 Jul 2022 09:17:07 GMT'
+  'if-none-match': 'W/"79328-181f1b3f180"',
+  'if-modified-since': 'Tue, 12 Jul 2022 09:18:30 GMT'
 }
 {
   host: 'localhost:3000',
@@ -79,9 +62,7 @@ projectmgr-react --> listening at: 3000
   'sec-fetch-dest': 'script',
   referer: 'http://localhost:3000/Projects?ProjectId=LADUS6666_TempProjA&BoardId=2871802719&GroupId=topics&FilterStatus=',
   'accept-encoding': 'gzip, deflate, br',
-  'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
-  'if-none-match': 'W/"2ce633-181f1b2ab6d"',
-  'if-modified-since': 'Tue, 12 Jul 2022 09:17:07 GMT'
+  'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8'
 }
 {
   host: 'localhost:3000',

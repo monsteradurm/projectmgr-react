@@ -8,7 +8,12 @@ import { InputText } from 'primereact/inputtext'
 import "./UploadReview.component.scss"
 import { ScrollPanel } from 'primereact/scrollpanel';
 import { Button } from 'primereact/button';
-
+import * as _ from 'underscore';
+const defaultReviewGroups = [
+    {label: 'Internal'},
+    {label: 'Client'},
+    {label: 'Franchise'}
+]
 export const UploadReview = ({item, reviews, visibility, setVisibility, children}) => {
     const [ReviewGroup, setReviewGroup] = useState(null);
     const [reviewGroups, setReviewGroups] = useState([]);
@@ -20,11 +25,15 @@ export const UploadReview = ({item, reviews, visibility, setVisibility, children
     const uploader = useRef();
     const dialog = useRef();
     useEffect(() => {
-        let reviewGroups = Object.keys(reviews)
-            .filter(r => r && r.indexOf('All') < 0)
-            .map(r => ({label: r.replace(' Reviews', '')}))
-        reviewGroups.push({label: 'New'});
+        let reviewGroups = _.uniq(
+            defaultReviewGroups
+                .concat(Object.keys(reviews)
+                    .filter(r => r && r.indexOf('All') < 0)
+                    .map(r => ({label: r.replace(' Reviews', '')}))
+            ), (g) => g.label
+        )
 
+        reviewGroups.push({label: 'New'});
         setReviewGroups(reviewGroups);
     }, [reviews])
 
@@ -96,6 +105,7 @@ export const UploadReview = ({item, reviews, visibility, setVisibility, children
                     <Stack direction="horizontal" gap={3}>
                         <span className="p-float-label">
                             <Dropdown inputId="ReviewGroup" value={ReviewGroup} options={reviewGroups} 
+                                placeholder="eg. Internal or Client"
                                 onChange={(e) => setReviewGroup(e.value)}
                                 optionLabel="label" style={{width:'300px'}}/>
                             <label htmlFor="ReviewGroup">Feedback Department</label>

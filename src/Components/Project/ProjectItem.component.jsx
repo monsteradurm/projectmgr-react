@@ -93,12 +93,15 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
         else if (reviewLink !== null)
             setReviewLink(null);
 
-        /*
-        if (CurrentReview?.Thumbnail?.text && CurrentReview.Thumbnail.text.length > 0)
-            setThumbnail(CurrentReview.Thumbnail.text);
-        else if (thumbnail !== null)
-            setThumbnail(null);
-        */
+        let tags = CurrentReview?.Tags?.value ?
+            CurrentReview.Tags.value.reduce((acc, t) => {
+                if (tagOptions[t]) {
+                    acc.push(t)
+                }
+                return acc;
+            }, []) : [];
+        dispatch({ type: 'ReviewTags', value: tags });
+
     }, [CurrentReview])
 
     useEffect(() => {
@@ -359,16 +362,29 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
                         <div className="pm-task-latest-timeline"> ({Timeline})</div>
                     </Stack>         
                 </Stack>
-                <div className="pm-task-tags">
-                    {
-                        Tags.Item.map((t) => 
-                        <div className="pm-tag" key={tagOptions[t].id} 
-                            style={{color: 'black'}}
-                            onClick={(evt) => onTagClick(evt, t)}>
-                            {'#' + t}
-                        </div>)
-                    }
-                </div>
+                <Stack direction="vertical" style={{justifyContent: 'center'}}>
+                    <Stack direction="horizontal" gap={2} className="pm-task-tags">
+                        {
+                            Tags.Item.map((t) => 
+                            <div className="pm-tag" key={tagOptions[t].id} 
+                                style={{color: 'black'}}
+                                onClick={(evt) => onTagClick(evt, t)}>
+                                {'#' + t}
+                            </div>)
+                        }
+                    </Stack>
+                    <Stack direction="horizontal" gap={2} 
+                    className="pm-task-tags" style={{color: Status.info.color}}>
+                        {
+                            Tags.Review.map((t) => 
+                            <div className="pm-tag" key={tagOptions[t].id} 
+                                style={{color: Status.info.color}}
+                                onClick={(evt) => onTagClick(evt, t)}>
+                                {'#' + t}
+                            </div>)
+                        }
+                    </Stack>
+                </Stack>
             </Stack>
         </>
         )
@@ -387,7 +403,9 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
         }
 
         setReviewsHTML(Reviews[ActiveTab].map((i) => 
-                    <ReviewItem key={i.id} status={Status} review={i} activeTab={ActiveTab}></ReviewItem>)
+                    <ReviewItem key={i.id} status={Status} review={i} activeTab={ActiveTab}
+                        currentReview={CurrentReview} tagOptions={tagOptions} searchParams={searchParams} 
+                        setSearchParams={setSearchParams}></ReviewItem>)
         );
     }, [ActiveTab, Reviews, collapsed])
 
