@@ -1,4 +1,5 @@
 #Overview_Items {
+
     .pm-review-hover {
         .pm-comment {
             color: #aaa
@@ -269,13 +270,26 @@
 
     .p-fieldset .p-fieldset-content {
         padding: 0 !important;
+        text-align:justify;
+        font-weight: 300;
+    }
+    #delivery-summary > .pm-summary-group:not(:last-child):after,
+    #review-summary > .pm-summary-group:not(:last-child):after {
+        content: ", ";
+    }
+    #delivery-summary {
+        text-align:right;
+        bottom:0px;
+        position:absolute;
+        right:0px;
+        margin-right: 40px;
     }
     .p-fieldset .p-fieldset-legend {
         padding: 0; 
         border: none;
         color: black;
         background: transparent;
-        font-weight: 400;
+        font-weight: 600;
         text-align:left;
         font-size:16px;
     }

@@ -13,9 +13,8 @@ import { ApplicationObservables } from "../Context/Application.context";
 
 export const ProjectArtist = ({users, background, searchParams, setSearchParams}) => {
     const [displayUsers, setDisplayUsers] = useState(null);
-    const AppContext = useContext(ApplicationContext);
     const [photos, setPhotos] = useState({});
-
+    const AppContext = useContext(ApplicationContext)
     useEffect(() => {
         if (!displayUsers || displayUsers.length < 1 || !AppContext.AllUsers)
             return;

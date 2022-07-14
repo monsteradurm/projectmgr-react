@@ -18,6 +18,7 @@ import { DispatchProjectItemState, ProjectItemState } from '../Context/ProjectIt
 import { UploadReview } from './Dialogs/UploadReview.component';
 import { SyncsketchService } from '../../Services/Syncsketch.service';
 import { NavigationService } from '../../Services/Navigation.service';
+import { ItemSummary } from './ItemSummary.component';
 
 export const ProjectItemContext = React.createContext(ProjectItemState);
 
@@ -147,8 +148,11 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
             )].reverse() : [];
 
             if (!subitems || subitems.length < 1) {
+                
                 dispatch({ type: 'Timeline', value: formatTimeline(projectItem.Timeline) });
-                dispatch({ type: 'Artist', value: projectItem.Artist.value });
+                dispatch({ type: 'Artist', value: 
+                    projectItem.Artist.value.filter(a => a && a.length > 0)
+                });
                 dispatch({ type: 'LastUpdate', value: projectItem.updated_at });
                 dispatch({ type: 'CurrentReview', value: null})
                 dispatch({ type: 'ActiveTab', value: 'Summary' });
@@ -179,7 +183,8 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
         });
         dispatch({ type: 'Artist', value: 
             CurrentReview.Artist?.value && CurrentReview.Artist.value.length > 0 ? 
-            CurrentReview.Artist.value : projectItem.Artist.value
+            CurrentReview.Artist.value.filter(a => a && a.length > 0) : 
+            projectItem.Artist.value.filter(a => a && a.length > 0)
         });
         dispatch({ type: 'LastUpdate', value: 
             CurrentReview.updated_at > projectItem.updated_at ?
@@ -420,15 +425,7 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
     useEffect(() =>
         setSummaryHTML(
             collapsed && ActiveTab.indexOf('Summary') >= 0 ?
-                <div style={{width:'100%'}}>
-                        <Skeleton className="mb-3 mt-3"></Skeleton>
-                        <Skeleton className="mb-3"></Skeleton>
-                        <Skeleton className="mb-3"></Skeleton>
-                        <Skeleton className="mb-3"></Skeleton>
-                        <Skeleton className="mb-3"></Skeleton>
-                        <Skeleton className="mb-3"></Skeleton>
-                        <Skeleton width="10rem" className="mb-6"></Skeleton>
-                </div>
+            <ItemSummary item={projectItem} />
     : null), [])
 
     return (
