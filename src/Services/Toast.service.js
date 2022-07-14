@@ -16,7 +16,7 @@ export class ToastService {
         ToastService.Toast.show({life: 3000, severity: 'warning', summary: 'Warning!', detail: message});
     }
 
-    static SendInfo = (message) => {
-        ToastService.Toast.show({life: 3000, severity: 'info', summary: 'Info!', detail: message});
+    static SendInfo = (title, message) => {
+        ToastService.Toast.show({life: 3000, severity: 'info', summary: title, detail: message});
     }
 }

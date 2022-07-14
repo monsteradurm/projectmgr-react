@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { Stack } from 'react-bootstrap';
 import { Skeleton } from 'primereact/skeleton';
 import { Avatars, ProjectArtist } from './ProjectArtist.component';
@@ -19,7 +19,17 @@ import { UploadReview } from './Dialogs/UploadReview.component';
 import { SyncsketchService } from '../../Services/Syncsketch.service';
 import { NavigationService } from '../../Services/Navigation.service';
 import { ItemSummary } from './ItemSummary.component';
-
+import { BoxService } from '../../Services/Box.service';
+import { map, take } from 'rxjs';
+import { ProjectContext } from './Overview.component';
+import { SemipolarSpinner } from 'react-epic-spinners';
+import { faFaceFrown } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { BoxFile } from '../Box/BoxFile';
+import { LazyThumbnail } from '../General/LazyThumbnail';
+import { Loading } from '../General/Loading';
+import { ErrorLoading } from '../General/ErrorLoading';
+import { ReferenceViewer } from '../Box/ReferenceViewer';
 export const ProjectItemContext = React.createContext(ProjectItemState);
 
 const formatTimeline = (tl) => {
@@ -30,8 +40,7 @@ const formatTimeline = (tl) => {
     return range.map(d => moment(d).format('MMM DD')).join(' - ');
 }
 
-export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions, grouping,
-    departmentOptions, tagOptions, setSearchParams, searchParams}) => {
+export const ProjectItem = ({ projectItem, grouping, setSearchParams, searchParams}) => {
     const [state, dispatch] = useReducer(DispatchProjectItemState, ProjectItemState);
 
     const [statusMenu, setStatusMenu] = useState([]);
@@ -40,7 +49,7 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
     const [contextMenu, setContextMenu] = useState([]);
 
     const [reviewLink, setReviewLink] = useState(null);
-    const [thumbnail, setThumbnail] = useState(null);
+    const [thumbnail$, setThumbnail$] = useState(null);
 
     const [tabMenu, setTabMenu] = useState([]);
     const [reviewsTab, setReviewsTab] = useState(null);
@@ -57,15 +66,18 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
     const [collapsed, setCollapsed] = useState(true);
 
     const [showUploadReviewDlg, setShowUploadReviewDlg] = useState(false);
+    const projectContext = useContext(ProjectContext);
 
     const statusRef = useRef();
-    const itemContext = useRef(null);
+    const itemMenu = useRef(null);
 
     const { Status, Artist, Director, Timeline, 
             CurrentReview, Reviews, Reference, Tags, Badges, 
             LastUpdate, Element, Task } = state.item;
 
     const { ActiveTab } = state.params;
+    const { TagOptions, DepartmentOptions, BadgeOptions, StatusOptions } = projectContext.objects;
+    const { BoardId } = projectContext.params;
 
     useEffect(() => {
         setTabHTML(
@@ -75,6 +87,17 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
         )
     }, [ActiveTab, reviewsHTML, summaryHTML, referenceHTML])
 
+    useEffect(() => {
+        if (collapsed || ActiveTab.indexOf('Reference') < 0)
+            return;
+            
+        const fetching = projectContext.fetching.ReferenceFolder;
+        const folder = projectContext.objects.ReferenceFolder;
+
+        setReferenceHTML(<ReferenceViewer element={Element} primary={Status.info.color}
+            ready={!fetching} tag={ActiveTab.replace(' Reference', '')} parent={folder} />)
+
+    }, [projectContext.fetching.ReferenceFolder, collapsed, ActiveTab, projectContext.objects.ReferenceFolder])
 
     useEffect(() => {
         dispatch({ type: 'Name', value: projectItem.name })
@@ -96,7 +119,7 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
 
         let tags = CurrentReview?.Tags?.value ?
             CurrentReview.Tags.value.reduce((acc, t) => {
-                if (tagOptions[t]) {
+                if (TagOptions[t]) {
                     acc.push(t)
                 }
                 return acc;
@@ -110,33 +133,32 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
             const id = _.first(
                 _.last(reviewLink.split('/#/')).split('/')
             )
-
-            SyncsketchService.ItemById$(id).subscribe(result => {
-                if (result.thumbnail_url)
-                    setThumbnail(result.thumbnail_url)
-            });
+            setThumbnail$(SyncsketchService.ItemById$(id).pipe(
+                take(1),
+                map(result => result.thumbnail_url ? result.thumbnail_url : null)
+            ))
         }
     }, [reviewLink])
     useEffect(() => {
         let badges = projectItem.Badges?.value ?
         projectItem.Badges.value.reduce((acc, b) => {
-                if (tagOptions[b])
+                if (TagOptions[b])
                     acc.push(b)
                 return acc;
             }, []) : [];
         dispatch({ type: 'Badges', value: badges });
-    }, [projectItem.Badges, badgeOptions]);
+    }, [projectItem.Badges, BadgeOptions]);
 
     useEffect(() => {
         let tags = projectItem.Tags?.value ?
             projectItem.Tags.value.reduce((acc, t) => {
-                if (tagOptions[t]) {
+                if (TagOptions[t]) {
                     acc.push(t)
                 }
                 return acc;
             }, []) : [];
         dispatch({ type: 'ItemTags', value: tags });
-    }, [projectItem.Tags, tagOptions])
+    }, [projectItem.Tags, TagOptions])
 
     useEffect(() => {   
         let grouped = {};
@@ -193,34 +215,34 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
     }, [CurrentReview]);
 
     useEffect(() => {
-        setStatusMenu(_.map(statusOptions, (s) => (
+        setStatusMenu(_.map(StatusOptions, (s) => (
             {...s, command: (e) => {
 
                         dispatch({ type: 'Status', value: {...projectItem.Status, text: s.label,
                             info: {...projectItem.Status.info, color: s.style.background }}
                         });
                         
-                        MondayService.SetItemStatus(boardId, projectItem.id, s.column_id, s.id);
+                        MondayService.SetItemStatus(BoardId, projectItem.id, s.column_id, s.id);
                     }
                 }
             )
         ))
-    }, [statusOptions])
+    }, [StatusOptions])
 
     useEffect(() => {
-        const labels = Object.keys(badgeOptions);
+        const labels = Object.keys(BadgeOptions);
         const menu = {label: 'Add Badge', items: []}
         if (labels.length > 0) 
             menu.items = (_.map(_.flatten(Object.values(labels)), (b) => ({
-                label: badgeOptions[b].Title,
-                icon: ItemBadgeIcon(badgeOptions[b]),
-                style: {background: badgeOptions[b].Background},
+                label: BadgeOptions[b].Title,
+                icon: ItemBadgeIcon(BadgeOptions[b]),
+                style: {background: BadgeOptions[b].Background},
                 className: 'pm-status-option'
             }))
         )
     
         setAddBadgeMenu(menu);
-    }, [badgeOptions])
+    }, [BadgeOptions])
 
     useEffect(() => {
         if (!Badges || Badges.length < 1)
@@ -229,14 +251,14 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
         setRemoveBadgeMenu(
             { label: 'Remove Badge', items: _.reduce(projectItem.Badges.value,
                 (acc, cur) => {
-                    const b = badgeOptions[cur.replace(/[A-Z]/g, ' $&').trim()]
+                    const b = BadgeOptions[cur.replace(/[A-Z]/g, ' $&').trim()]
                     if (b)
                         acc.push(b)
                     return acc;
                 }, [])
             }
         )
-        }, [Badges, badgeOptions])
+        }, [Badges, BadgeOptions])
 
     useEffect(() => {
         const result = [
@@ -283,7 +305,7 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
 
     useEffect(() => {
         setReferenceTabItems(
-            departmentOptions.map((d) => {
+            DepartmentOptions.map((d) => {
                 const allSelected =  d.indexOf('All Departments') === 0;
                 const title = allSelected ? 'All Reference' : d;
                 return ({ label: title, command: (event) => 
@@ -293,7 +315,7 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
                 }) // item loop
             }) // departments
         )
-    }, [departmentOptions])
+    }, [DepartmentOptions])
 
     useEffect(() => {
         const reviewSelected = ActiveTab.indexOf('Review') >= 0;
@@ -329,16 +351,11 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
                 <UploadReview item={projectItem} reviews={Reviews}
                 visibility={true} setVisibility={setShowUploadReviewDlg} /> : null
             }
-            <ContextMenu model={contextMenu} ref={itemContext} className="pm-task-context"></ContextMenu>
+            <ContextMenu model={contextMenu} ref={itemMenu} className="pm-task-context"></ContextMenu>
             <Stack direction="horizontal" className={itemClass} 
-                onClick={options.onTogglerClick} onContextMenu={(e) => itemContext.current.show(e)}>
+                onClick={options.onTogglerClick} onContextMenu={(e) => itemMenu.current.show(e)}>
                 <div className="pm-task-thumb-container">
-                    {
-                        thumbnail ? <img src={thumbnail} className="pm-overview-thumbnail" 
-                            onClick={(e) => NavigationService.OpenNewTab(reviewLink, e)}
-                            width="100px" height="100%" /> :
-                            <Skeleton width="100px" height="100%"/>
-                    }
+                    <LazyThumbnail width={100} height={60} thumbnail$={thumbnail$} url={reviewLink}/>
                 </div>
                 <Stack direction="horizontal" gap={0} style={{position:'relative'}}>
                     <div className="pm-task">
@@ -371,7 +388,7 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
                     <Stack direction="horizontal" gap={2} className="pm-task-tags">
                         {
                             Tags.Item.map((t) => 
-                            <div className="pm-tag" key={tagOptions[t].id} 
+                            <div className="pm-tag" key={TagOptions[t].id} 
                                 style={{color: 'black'}}
                                 onClick={(evt) => onTagClick(evt, t)}>
                                 {'#' + t}
@@ -382,7 +399,7 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
                     className="pm-task-tags" style={{color: Status.info.color}}>
                         {
                             Tags.Review.map((t) => 
-                            <div className="pm-tag" key={tagOptions[t].id} 
+                            <div className="pm-tag" key={TagOptions[t].id} 
                                 style={{color: Status.info.color}}
                                 onClick={(evt) => onTagClick(evt, t)}>
                                 {'#' + t}
@@ -409,23 +426,28 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
 
         setReviewsHTML(Reviews[ActiveTab].map((i) => 
                     <ReviewItem key={i.id} status={Status} review={i} activeTab={ActiveTab}
-                        currentReview={CurrentReview} tagOptions={tagOptions} searchParams={searchParams} 
+                        currentReview={CurrentReview} tagOptions={TagOptions} searchParams={searchParams} 
                         setSearchParams={setSearchParams}></ReviewItem>)
         );
     }, [ActiveTab, Reviews, collapsed])
 
 
 
-    useEffect(() => 
-        setReferenceHTML(
-            "Reference Content..."
-        )
-    , [])
+    useEffect(() => {
+        if (collapsed || ActiveTab.indexOf('Reviews') < 0) {
+            setReviewsHTML(null);
+            return;
+        }
+
+        BoxService.SubFolder$(0, 'LADUS_DisneyUS').pipe(take(1)).subscribe((token) => {
+            console.log("Sub Folder", token)
+        })
+    }, [collapsed])
 
     useEffect(() =>
         setSummaryHTML(
             collapsed && ActiveTab.indexOf('Summary') >= 0 ?
-            <ItemSummary item={projectItem} />
+            <ItemSummary item={projectItem} key={projectItem.id + "_ItemSummary"}/>
     : null), [])
 
     return (
@@ -448,15 +470,15 @@ export const ProjectItem = ({ boardId, projectItem, statusOptions, badgeOptions,
             <div key="task-right" className="pm-task-right">
                     <Stack direction="horizontal" gap={2}>
                         {
-                            Badges && badgeOptions ? 
+                            Badges && BadgeOptions ? 
                             Badges.map((b) => 
                                 <Button className="pm-badge p-button-rounded" key={b}
                                     onClick={(evt) => 
                                         toggleArrFilter(b, 'Badges', searchParams, setSearchParams)}
-                                    tooltip={badgeOptions[b].Title}
+                                    tooltip={BadgeOptions[b].Title}
                                     tooltipOptions={{position: 'top', className:"pm-tooltip"}}
-                                    style={{background: badgeOptions[b].Background}}>
-                                        {ItemBadgeIcon(badgeOptions[b])}
+                                    style={{background: BadgeOptions[b].Background}}>
+                                        {ItemBadgeIcon(BadgeOptions[b])}
                                 </Button>) : null
                         }
                     </Stack>

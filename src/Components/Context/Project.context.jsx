@@ -3,6 +3,7 @@ import { FirebaseService } from "../../Services/Firebase.service";
 import * as _ from 'underscore';
 import { MondayService } from "../../Services/Monday.service";
 import { ApplicationObservables } from "./Application.context";
+import { BoxService } from "../../Services/Box.service";
 
 export const ProjectState = {
     params: {
@@ -38,8 +39,11 @@ export const ProjectState = {
         TagOptions: {},
         DirectorOptions: [],
         StatusOptions: [],
+        ReferenceFolder: null
     },
-
+    fetching: {
+        ReferenceFolder: true
+    },
     subscriptions: [],
 }
 
@@ -135,6 +139,11 @@ export class ProjectObservables {
         shareReplay(1)
     );
 
+    static Project$ = ProjectObservables.ProjectId$.pipe(
+        switchMap( id => FirebaseService.Project$(id)),
+        shareReplay(1)
+    )
+
     static Group$ = combineLatest(
         [ProjectObservables.GroupOptions$, ProjectObservables.GroupId$]
     ).pipe(
@@ -163,8 +172,24 @@ export class ProjectObservables {
         shareReplay(1)
     );
 
-    static BadgeMenu$ = ProjectObservables.BadgeOptions$.pipe(
-
+    static ReferenceFolder$ = combineLatest(
+        [ProjectObservables.Project$, ProjectObservables.Board$, ProjectObservables.Group$]
+    ).pipe(
+        map(([project, board, group]) => {
+            if (!project || !board || !group) return null;
+            
+            return project.nesting
+            .concat(['Reference'])
+            .concat(board.name.split('/'))
+            .concat([group.title])
+            .filter(f => f != null && f.length > 0)
+        }),
+        map(folders => _.reject(folders, (f, i) => {
+            return i > 0 && folders[i - 1] === f;
+            })
+        ),
+        switchMap(folders => BoxService.FindFolderRecursively$(folders)),
+        switchMap(folder => folder && folder.id ? BoxService.FolderContents$(folder.id) : of(null))
     )
 
     static SetProjectId = (id) => ProjectObservables._ProjectId.next(id);
@@ -251,6 +276,18 @@ export class ProjectObservables {
             ProjectObservables.Group$.subscribe((group) => 
             {
               dispatch({type: 'Group', value: group});
+            })
+        );
+
+        subs.push(
+            of(null).pipe(
+                tap(t => 
+                    dispatch({type: 'FetchingReferenceFolder', value: true})
+                ),
+                switchMap(t =>  ProjectObservables.ReferenceFolder$)
+            ).subscribe((folder) =>
+            {
+                dispatch({type: 'ReferenceFolder', value: folder})
             })
         );
 
@@ -348,6 +385,20 @@ export const DispatchProjectState = (state, action) => {
                     Group: action.value }
                 }
 
+        case 'FetchingReferenceFolder' : 
+            return { ...state,
+                fetching: {...state.fetching,
+                    ReferenceFolder: action.value}
+            }
+
+        case 'ReferenceFolder' : 
+            return { ...state,
+                objects: {...state.objects,
+                    ReferenceFolder: action.value },
+                fetching: {...state.fetching,
+                    ReferenceFolder: false }
+                }
+        
         case 'GroupOptions' :
             return { ...state, 
                 objects: { ...state.objects, 

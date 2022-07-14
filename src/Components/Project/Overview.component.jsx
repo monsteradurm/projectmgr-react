@@ -257,14 +257,10 @@ export const Overview = ({headerHeight}) => {
                         {
                         filteredItems[i].map(item => 
                             <div key={item.id} className="pm-task-conainer">
-                                <ProjectItem boardId={state.params.BoardId} projectItem={item}
+                                <ProjectItem projectItem={item}
                                     grouping={state.params.Grouping}
-                                    statusOptions={state.objects.StatusOptions} 
-                                    badgeOptions={state.objects.BadgeOptions}
-                                    tagOptions={state.objects.TagOptions}
                                     setSearchParams={setSearchParams}
-                                    searchParams={searchParams}
-                                    departmentOptions={state.objects.DepartmentOptions}/>
+                                    searchParams={searchParams}/>
                             </div>
                            )
                         }

@@ -34,8 +34,11 @@ export const ReviewItem = ({status, review, activeTab, currentReview,
 
     const contextMenu = [
         {label: "Edit Review"},
+        
         {separator: true},
-        {label: "Remove Review"}
+        {label: "Remove Review"},
+        {separator: true},
+        {label: "Copy To..."},
     ]
 
     

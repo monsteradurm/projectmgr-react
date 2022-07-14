@@ -319,6 +319,31 @@
         //border:solid 3px black;
         border:none;
     }
+    .box-file-row > .p-skeleton {
+        border-radius: 0px;
+        border-right: solid 1px gray;
+    }
+    .pm-thumbnail-link:hover {
+        opacity: 0.7;
+    }
+    .box-file-row {
+        padding: 0px;
+        border-bottom: solid 1px gray;
+        border-left: solid 10px lightgray;
+        border-right: 10px solid lightgray;
+        font-weight:400;
+    }
+    .box-file-row:hover > div > img {
+        opacity: 0.7
+    }
+    .box-file-row:hover {
+        background: #eaeaea;
+        font-weight:600;
+        cursor: pointer;
+    }
+    .box-file-row > div > div:hover, .box-file-row > div {
+        cursor: pointer;
+    }
 
     .p-accordion {
         margin-bottom: 10px;

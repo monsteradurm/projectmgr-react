@@ -6,13 +6,13 @@ import * as _ from 'underscore';
 import moment from 'moment';
 import { Stack } from "react-bootstrap";
 
-export const ItemSummary = () => {
+export const ItemSummary = ({item}) => {
     const [reviewSummary, setReviewSummary] = useState(null);
     const [deliverySummary, setDeliverySummary] = useState(null);
 
     const itemContext = useContext(ProjectItemContext);
 
-    const {Item, Reviews} = itemContext.item;
+    const {Reviews} = itemContext.item;
     useEffect(() => {
         if (!Reviews)
             return;
@@ -41,27 +41,30 @@ export const ItemSummary = () => {
 
     }, [Reviews])
 
-    return (<div style={{width:'100%', padding: '40px', paddingTop: '10px', fontWeight: 400}}>
+    useEffect(() => {
+        console.log(reviewSummary, deliverySummary);
+    }, [reviewSummary, deliverySummary])
+    
+    return (
+            <div style={{width:'100%', padding: '40px', paddingTop: '10px', fontWeight: 400}}>
             <Stack direction="horizontal" gap={1} style={{justifyContent: 'end'}}>
-                <div key="review-summary" id="reivew-summary">
                     {
-                        reviewSummary && reviewSummary.length > 0 ?
+                        !!reviewSummary && reviewSummary.length > 0 ?
                         reviewSummary.map(r =>
-                        <span key={r.group + '-reviews'} style={{marginLeft: '10px'}}>
-                            <span key={r.group + '_reviews-length'}>
-                            {r.reviews.length}
-                            </span>
-                            <span  key={r.group + '_reviews-group'} 
-                                className="pm-summary-group" style={{marginLeft: '5px'}}>
-                                {r.group}
+                        <span key={item.id + '_' + r.group + '-reviews'}>
+                            <span style={{marginLeft: '10px'}}>
+                                <span>
+                                {r.reviews.length}
+                                </span>
+                                <span className="pm-summary-group" style={{marginLeft: '5px'}}>
+                                    {r.group}
+                                </span>
                             </span>
                         </span>)
-                        : <span key="no-reviews" style={{fontStyle: 'italic'}}>
-                            Item has had no reviews, </span>
-                    }
-                </div>
-
-                
+                        : <span style={{fontStyle: 'italic'}}>
+                            Item has had no reviews, 
+                        </span>
+                    }     
             </Stack>
             <Fieldset legend="Description">
                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
@@ -69,26 +72,25 @@ export const ItemSummary = () => {
                     Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
                     cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
             </Fieldset>
-            <div key="delivery-summary" id="delivery-summary" style={{marginLeft: '15px'}}>
+            <Stack direction="horizontal" gap={1} style={{position:'absolute', bottom: 0, right: 40}}>
                     {
-                        deliverySummary && deliverySummary.length > 0 ?
+                        !!deliverySummary && deliverySummary.length > 0 ?
                         deliverySummary.map(r => 
-                            <>
-                                <span key={r.group + 'deliveries-last'}>
+                            <span key={item.id + '_' + r.group + '-delivery-summary'}>
+                                <span>
                                     Last delivered
                                 </span>
-                                <span style={{marginLeft: '5px'}} key={r.group + 'deliveries-date'}>
+                                <span style={{marginLeft: '5px'}}>
                                     {r.delivered}
                                 </span>
-                                <span key={r.group + 'deliveries-group'} 
-                                    className="pm-summary-group" style={{marginLeft: '5px'}}>
+                                <span className="pm-summary-group" style={{marginLeft: '5px'}}>
                                     ({r.group.replace(' Reviews', '')}))
                                 </span>
-                            </>)
-                        : <span key="no deliveries" style={{fontStyle: 'italic'}}>
+                            </span>)
+                        : <span style={{fontStyle: 'italic'}}>
                             Item has had no deliveries
                             </span>
                     }
-                </div>
+                </Stack>
         </div>)
 }

@@ -86,6 +86,13 @@ export class FirebaseService {
             );
     }
 
+    static Project$(projectId) {
+        return doc(fsDoc(FirebaseService.db, 'ProjectManager/' + projectId)).pipe(
+            map(doc => doc.exists ? doc.data() : null),
+            take(1)
+        )
+    }
+
     static Board$(projectId, boardId) {
         return FirebaseService
             .SubscribeToDocument$(
