@@ -8,6 +8,7 @@ import { take } from "rxjs";
 
 export const ReferenceViewer = ({ready, parent, tag, primary, element}) => {
     const [html, setHtml] = useState(null);
+    const [entries, setEntries] = useState(null);
     const dTag = tag ? tag : 'All';
     const [root, setRoot] = useState(null);
 
@@ -33,19 +34,28 @@ export const ReferenceViewer = ({ready, parent, tag, primary, element}) => {
         if (!root) return;
 
         BoxService.FolderContents$(root).pipe(take(1)).subscribe((contents) => {
-            const entries = dTag.indexOf('All') === 0 ? contents.entries:
-                _.filter(contents.entries.filter(e => e.tags && e.tags.indexOf(dTag) >= 0));
-  
-            if (entries.length < 1) 
-                setHtml(<ErrorLoading text={`Box Folder "${element}" is Empty!`} />)
-            else {
-                setHtml(
-                    entries.map((e) => <BoxFile key={e.id} file={e} primary={primary}/>)
-                )
-            }
+            setEntries(contents.entries ? contents.entries : [] );
         });
 
     }, [root])
-    useEffect(() => console.log(html), [html])
+
+    useEffect(() => {
+        if (!entries) return
+        else if (entries.length < 1) {
+            setHtml(<ErrorLoading text={`Box Folder "${element}" is Empty!`} />)
+            return;
+        }
+
+        const filtered = dTag.indexOf('All') === 0 ? entries:
+                _.filter(entries.filter(e => e.tags && e.tags.indexOf(dTag) >= 0))
+        if (filtered.length < 1) 
+                setHtml(<ErrorLoading text={`Box Folder "${element}" Has No "${tag}" Reference`} />)
+            else {
+                setHtml(
+                    filtered.map((e) => <BoxFile key={e.id} file={e} primary={primary}/>)
+                )
+            }
+    }, [entries, tag])
+
     return html;
 }

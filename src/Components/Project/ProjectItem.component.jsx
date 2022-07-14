@@ -433,16 +433,7 @@ export const ProjectItem = ({ projectItem, grouping, setSearchParams, searchPara
 
 
 
-    useEffect(() => {
-        if (collapsed || ActiveTab.indexOf('Reviews') < 0) {
-            setReviewsHTML(null);
-            return;
-        }
 
-        BoxService.SubFolder$(0, 'LADUS_DisneyUS').pipe(take(1)).subscribe((token) => {
-            console.log("Sub Folder", token)
-        })
-    }, [collapsed])
 
     useEffect(() =>
         setSummaryHTML(

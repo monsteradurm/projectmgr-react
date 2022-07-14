@@ -23,7 +23,7 @@ export class BoxService {
 
         return ajax.get(BoxEndPoints.Thumbnail(id)).pipe(
             map(result => result?.response ? result.response : null),
-            map(res => res?.file.data ? `data:image/png;base64,${BufferToBase64(res.file.data)}` : 
+            map(res => res?.file?.data ? `data:image/png;base64,${BufferToBase64(res.file.data)}` : 
                 res.location ? res.location : null),
             take(1),
         )
@@ -36,7 +36,7 @@ export class BoxService {
               map(result => result?.response?.shared_link?.url ? 
                 result.response.shared_link.url : null),
               take(1),
-              tap(console.log)
+              
           )
       }
       static FolderContents$ = (folderId) => {
@@ -65,10 +65,6 @@ export class BoxService {
             }),
             reduce((acc, v) => v ? v.response : null)
         )
-      }
-
-      static ElementFolder$ = (projectContainer, project, board, group, element) => {
-          console.log(projectContainer, project, board, group, element)
       }
 
     

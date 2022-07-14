@@ -1,3 +1,4 @@
+import { DeferredContent } from "primereact/deferredcontent";
 import { Skeleton } from "primereact/skeleton";
 import { useEffect, useState } from "react"
 import { Stack } from "react-bootstrap"
@@ -8,7 +9,7 @@ import { LazyThumbnail } from "../General/LazyThumbnail";
 
 export const BoxFile = ({file, primary}) => {
     const [thumbnail$, setThumbnail$] = useState(null);
-    const [hovering, setHovering] = useState(false);
+    const [visible, setVisible] = useState(false);
 
     const onClickHandler = (evt) => {
         
@@ -16,6 +17,7 @@ export const BoxFile = ({file, primary}) => {
             NavigationService.OpenNewTab(file.shared_link.url);
             return;
         }
+
         ToastService.SendInfo("One moment..", "Retrieving URL to selected Box File...")
         BoxService.SharedFile$(file.id).subscribe((link) => {
             if (link)
@@ -26,20 +28,22 @@ export const BoxFile = ({file, primary}) => {
         })
     }
     useEffect(() => {
-        if (file && file.id)
+        if (file && file.id && visible)
             setThumbnail$(BoxService.Thumbnail$(file.id))
-    }, [file])
+    }, [file, visible])
 
     return (
-        <Stack className="box-file-row" direction="horizontal" gap={3}
-            onClick={onClickHandler}
-            style={{borderLeftColor: primary, 
-            borderRightColor:  primary}}>
+        <DeferredContent onLoad={() => setVisible(true)}>
+            <Stack className="box-file-row" direction="horizontal" gap={3}
+                onClick={onClickHandler}
+                style={{borderLeftColor: primary, 
+                borderRightColor:  primary}}>
 
-            <LazyThumbnail thumbnail$={thumbnail$} width={100} height={60} />
-            <div key={file.id}>
-                {file.name}
-            </div>
-        </Stack>
+                <LazyThumbnail thumbnail$={thumbnail$} width={60} height={60} />
+                <div key={file.id}>
+                    {file.name}
+                </div>
+            </Stack>
+        </DeferredContent>
     )
 }

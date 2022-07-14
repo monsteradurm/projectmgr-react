@@ -10,11 +10,13 @@ import { ContextMenu } from 'primereact/contextmenu';
 import { Tooltip } from 'primereact/tooltip';
 import moment from 'moment';
 import { toggleArrFilter } from './Overview.filters';
-import { delay, of, take } from 'rxjs';
+import { delay, map, of, take, tap } from 'rxjs';
 import { AtomSpinner, HollowDotsSpinner, LoopingRhombusesSpinner, SemipolarSpinner, TrinityRingsSpinner } from 'react-epic-spinners';
 import { ApplicationState } from '../Context/Application.context';
 import { ApplicationContext } from '../../Application.component';
 import { UserService } from '../../Services/User.service';
+import { Loading } from '../General/Loading';
+import { LazyThumbnail } from '../General/LazyThumbnail';
 
 export const ReviewItem = ({status, review, activeTab, currentReview,
     tagOptions, searchParams, setSearchParams}) => {
@@ -24,7 +26,7 @@ export const ReviewItem = ({status, review, activeTab, currentReview,
     const [primary, setPrimary] = useState('#aaa');
     const [artist, setArtist] = useState(null);
     const [initials, setInitials] = useState(null);
-    const [thumbnail, setThumbnail] = useState(null);
+    const [thumbnail$, setThumbnail$] = useState(null);
     const [reviewLink, setReviewLink] = useState(null);
     const [feedback, setFeedback] = useState(null);
     const [photo, setPhoto] = useState(null);
@@ -109,17 +111,14 @@ export const ReviewItem = ({status, review, activeTab, currentReview,
             const id = _.first(
                 _.last(review.Link.text.split('/#/')).split('/')
             )
-            SyncsketchService.ItemById$(id).subscribe(result => {
-                if (result.thumbnail_url)
-                    setThumbnail(result.thumbnail_url)
 
+            SyncsketchService.ItemById$(id).pipe(take(1)).subscribe(result => {
+                setFetching(false)
+                setThumbnail$(of(result.thumbnail_url));
                 const name = result.creator.full_name;
                 setInitials(name.split(' ').map(n => n[0]).join(''))
                 setArtist(name);
-                of(null).pipe(
-                    delay(500)
-                ).subscribe(() => setFetching(false));
-            });
+            })
         }
             
         else if (reviewLink !== null)
@@ -150,13 +149,8 @@ export const ReviewItem = ({status, review, activeTab, currentReview,
             className="pm-review-container">
             <Stack direction="vertical" className="pm-review-item">
             { 
-                fetching ? 
-                        <Stack direction="vertical" gap={3} className="mx-auto my-auto" 
-                            style={{justifyContent: 'center', opacity: 0.5}}>
-                            <SemipolarSpinner color={primary} className="mx-auto" size={60}
-                            style={{opacity:1}}/>
-                            <div style={{fontWeight: 600, color: primary}}>Syncsketch</div>
-                        </Stack> : 
+                fetching ?
+                        <Loading text="Fetching Review from Syncsketch" size={60} /> : 
                 <>
                     <Stack direction="horizontal" gap={3}>
                         <div style={{maxWidth:'130px', width: '100%'}}>
@@ -200,12 +194,9 @@ export const ReviewItem = ({status, review, activeTab, currentReview,
                         </Stack>
                     </Stack>   
                     <Stack direction="horizontal" gap={3} style={{position:'relative'}}> 
-                        {   
-                            thumbnail && !fetching?
-                            <img src={thumbnail} className="pm-review-thumbnail" 
-                            onClick={(e) => NavigationService.OpenNewTab(reviewLink, e)}/> :
-                            <Skeleton width="130px" height="70px"></Skeleton>
-                        }
+                        <LazyThumbnail thumbnail$={thumbnail$} url={reviewLink} width={130} height={70} 
+                            borderRadius={5} border="solid 2px black"
+                        />
                         <div style={{width:'100%', marginLeft: '10px',marginRight: '50px',
                             fontStyle: feedback?.comment ? null : 'italic',
                             position: 'relative', height: '100%'}} className="pm-comment">

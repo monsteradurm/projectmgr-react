@@ -4,10 +4,10 @@ import { DeferredContent } from "primereact/deferredcontent";
 import { Skeleton } from "primereact/skeleton";
 import { NavigationService } from "../../Services/Navigation.service";
 
-export const LazyThumbnail = ({thumbnail$, width, height, url}) => {
+export const LazyThumbnail = ({thumbnail$, width, height, url, borderRadius, border}) => {
     const [thumbnail, setThumbnail] = useState(null);
     const [visible, setVisible] = useState(false);
-
+    
     const onClickHandler = (e) => {
         if (!url)
             return;
@@ -16,11 +16,13 @@ export const LazyThumbnail = ({thumbnail$, width, height, url}) => {
     }
 
     useEffect(() => {
+        console.log(visible, thumbnail$);
         if (!visible || !thumbnail$)
             return;
 
         thumbnail$.pipe(take(1)).subscribe((thumb) => {
             if (thumb) setThumbnail(thumb);
+            console.log("HERE THUMB", thumb)
         })
 
     }, [thumbnail$, visible])
@@ -32,7 +34,8 @@ export const LazyThumbnail = ({thumbnail$, width, height, url}) => {
             thumbnail ?
             <Suspense fallback={fallback}>
                 <img src={thumbnail} className={url ? "pm-thumbnail-link" : null}
-                style={{width: width, height:height, cursor: url ? 'pointer' : null}} 
+                style={{width: width, height:height, cursor: url ? 'pointer' : null, objectFit: 'cover',
+                    borderRadius: borderRadius ? borderRadius : null, border: border ? border : null}} 
                     onClick={onClickHandler} />  
             </Suspense>  : fallback
         }
