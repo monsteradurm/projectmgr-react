@@ -16,13 +16,11 @@ export const LazyThumbnail = ({thumbnail$, width, height, url, borderRadius, bor
     }
 
     useEffect(() => {
-        console.log(visible, thumbnail$);
         if (!visible || !thumbnail$)
             return;
 
         thumbnail$.pipe(take(1)).subscribe((thumb) => {
             if (thumb) setThumbnail(thumb);
-            console.log("HERE THUMB", thumb)
         })
 
     }, [thumbnail$, visible])

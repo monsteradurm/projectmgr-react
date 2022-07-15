@@ -20,13 +20,6 @@ export const ItemSummary = ({item}) => {
         const reviewArr = Object.keys(Reviews)
         .filter(r => r.indexOf('All') < 0)
         .map(r => ({group: r, reviews: Reviews[r]}))
-
-        if (reviewArr.length < 1) {
-            setReviewSummary('Item has no reviews');
-            setDeliverySummary('Item has had no deliveries');
-            return;
-        }
-    
         setReviewSummary(reviewArr);
 
         const deliveryArr = reviewArr
@@ -40,16 +33,12 @@ export const ItemSummary = ({item}) => {
         setDeliverySummary(deliveryArr);
 
     }, [Reviews])
-
-    useEffect(() => {
-        console.log(reviewSummary, deliverySummary);
-    }, [reviewSummary, deliverySummary])
     
     return (
             <div style={{width:'100%', padding: '40px', paddingTop: '10px', fontWeight: 400}}>
             <Stack direction="horizontal" gap={1} style={{justifyContent: 'end'}}>
                     {
-                        !!reviewSummary && reviewSummary.length > 0 ?
+                        reviewSummary !== null && reviewSummary.length > 0 ?
                         reviewSummary.map(r =>
                         <span key={item.id + '_' + r.group + '-reviews'}>
                             <span style={{marginLeft: '10px'}}>

@@ -251,9 +251,12 @@ export const ProjectItem = ({ projectItem, grouping, setSearchParams, searchPara
         setRemoveBadgeMenu(
             { label: 'Remove Badge', items: _.reduce(projectItem.Badges.value,
                 (acc, cur) => {
-                    const b = BadgeOptions[cur.replace(/[A-Z]/g, ' $&').trim()]
+                    const b = BadgeOptions[cur];
                     if (b)
-                        acc.push(b)
+                        acc.push({label: b.Title,
+                            icon: ItemBadgeIcon(b),
+                            style: {background: b.Background},
+                            className: 'pm-status-option'})
                     return acc;
                 }, [])
             }
@@ -267,7 +270,7 @@ export const ProjectItem = ({ projectItem, grouping, setSearchParams, searchPara
 
             {separator: true},
             {label: 'Upload Review', command: (evt) => setShowUploadReviewDlg(true)},
-            {label: 'Upload Reference', command: (evt) => {}},
+            //{label: 'Upload Reference', command: (evt) => {}},
             {separator: true},
             {label: 'Edit Task', command: (evt) => {}}
         ];
