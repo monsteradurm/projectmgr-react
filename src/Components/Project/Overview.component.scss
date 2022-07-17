@@ -277,6 +277,9 @@
     #review-summary > .pm-summary-group:not(:last-child):after {
         content: ", ";
     }
+    .pm-comma-list:not(:last-child):after {
+        content: ", ";
+    }
     #delivery-summary {
         text-align:right;
         bottom:0px;
@@ -489,7 +492,7 @@
         position:absolute;
         right: -220px;
         width: 200px;
-        top:20px;
+        top:0px;
         display: flex;
         justify-content: start;
         align-items: start;

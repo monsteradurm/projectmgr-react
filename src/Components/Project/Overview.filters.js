@@ -160,25 +160,19 @@ export const filterSearch = (filtered, filters) => {
                 const s = filters.Search.toLowerCase();
                 const itemQueries = 
                     [i.name.toLowerCase(),
+                        i.CurrentReview ? i.CurrentReview.name.toLowerCase() : '',
+                        i.CurrentReview ? i.CurrentReview.Artist.text.toLowerCase() : '',
                         i.Artist.text.toLowerCase(),
                         i.Director.text.toLowerCase(),
                         i.Status && i.Status.text ? i.Status.text.toLowerCase() : 'Not Started',
                         formatTimeline(i.Timeline).toLowerCase(),
+                        i.CurrentReview ? formatTimeline(i.CurrentReview.Timeline).toLowerCase() : '',
                         i.Badges && i.Badges.text ? i.Badges.text.toLowerCase() : '',
+                        i.CurrentReview && i.CurrentReview.Tags ? i.CurrentReview.Tags.text.toLowerCase() : '',
                         (i.Tags ? i.Tags.text.toLowerCase() : '')
                     ]
 
-                if (!!_.find(itemQueries, (q) => q.indexOf(s) >-1))
-                    return true;
-                
-
-                return !!_.find(i.subitems, (s) => {
-                    const subQueries = [
-                        s.name.toLowerCase(), s.Artist.text.toLowerCase(),
-                        formatTimeline(s.Timeline).toLowerCase(), 
-                        s.Tags ? s.Tags.text.toLowerCase() : '']
-                    return !!_.find(subQueries, (q) => q.indexOf(s) > -1)
-                });
+                return !!_.find(itemQueries, (q) => q.indexOf(s) >-1)
         })
     return filtered;
 }

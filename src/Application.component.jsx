@@ -1,20 +1,17 @@
 
-import { OAuthScopes } from './Environment/Graph.environment';
+import { OAuthScopes } from '@Environment/Graph.environment';
 import './Application.component.scss';
 import { useMsal } from "@azure/msal-react";
 import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { NavigationComponent } from './Components/Navigation/Navigation.component';
+import { NavigationComponent } from '@Components/Navigation/Navigation.component';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { Overview } from './Components/Project/Overview.component';
-import { ApplicationObservables, DispatchApplicationState, ApplicationState } from './Components/Context/Application.context';
+import { Overview } from '@Components/Project/Overview.component';
+import { ApplicationObservables, DispatchApplicationState, ApplicationState } from '@/Application.context';
 import { Toast } from 'primereact/toast';
-import { MondayService } from './Services/Monday.service';
-import { ToastService } from './Services/Toast.service';
-import { Tooltip } from 'primereact/tooltip';
-import { SyncsketchService } from './Services/Syncsketch.service';
+import { ToastService } from '@Services/Toast.service';
 import { AtomSpinner, BreedingRhombusSpinner, SemipolarSpinner } from 'react-epic-spinners';
 import { Stack } from 'react-bootstrap';
-import { UserService } from './Services/User.service';
+import { UserService } from '@Services/User.service';
 import { switchMap, take } from 'rxjs';
 
 export const ApplicationContext = React.createContext(ApplicationState);

@@ -9,12 +9,13 @@ import "./UploadReview.component.scss"
 import { ScrollPanel } from 'primereact/scrollpanel';
 import { Button } from 'primereact/button';
 import * as _ from 'underscore';
+import { useOnClickOutside } from "react-hanger";
 const defaultReviewGroups = [
     {label: 'Internal'},
     {label: 'Client'},
     {label: 'Franchise'}
 ]
-export const UploadReview = ({item, reviews, visibility, setVisibility, children}) => {
+export const UploadReview = ({item, reviews, visibility, showUploadReviewDlg, children}) => {
     const [ReviewGroup, setReviewGroup] = useState(null);
     const [reviewGroups, setReviewGroups] = useState([]);
     const [NewReviewGroup, setNewReviewGroup] = useState('');
@@ -24,6 +25,7 @@ export const UploadReview = ({item, reviews, visibility, setVisibility, children
 
     const uploader = useRef();
     const dialog = useRef();
+
     useEffect(() => {
         let reviewGroups = _.uniq(
             defaultReviewGroups
@@ -60,7 +62,7 @@ export const UploadReview = ({item, reviews, visibility, setVisibility, children
     }, [ReviewGroup, NewReviewGroup, ReviewName])
 
     const closeDlg = (evt) => {
-        setVisibility(false);
+        showUploadReviewDlg.setFalse();
     }
     const UploadItemTemplate = (file, options) => {
 
@@ -97,7 +99,7 @@ export const UploadReview = ({item, reviews, visibility, setVisibility, children
 
     return (
         <Dialog id="pm-upload-review" showHeader={false} visible={visibility}
-        className="pm-dialog" ref={dialog} onHide={() => setVisibility(false)}>
+        className="pm-dialog" ref={dialog} onHide={() => showUploadReviewDlg.setFalse()}>
             {DlgHeader}
             <ScrollPanel className="pm" style={{height: '600px', overflowX: 'hidden',
                 background: 'white'}}>

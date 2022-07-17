@@ -4,6 +4,8 @@ import { getFirestore, collection as fsCollection, doc as fsDoc } from 'firebase
 import { collectionChanges, doc, collection } from 'rxfire/firestore';
 import * as _ from 'underscore';
 import { BehaviorSubject, firstValueFrom, map, switchMap, take, tap } from "rxjs";
+import { ajax } from "rxjs/ajax";
+import { ReverseProxy } from "../Environment/proxy.environment";
 
 const app = firebase.initializeApp(FirebaseConfig);
 export class FirebaseService {
@@ -93,6 +95,15 @@ export class FirebaseService {
         )
     }
 
+
+    ForceProjectItemRefresh(itemId) {
+        ajax.post(`${ReverseProxy}us-central1-pm-websocket.cloudfunctions.net/PMItemUpdate`, 
+            { event: { pulseId: itemId }}).pipe(
+                take(1).subscribe((result) => {
+                    console.log("Forced Refresh", result);
+                })
+            )
+    }
     static Board$(projectId, boardId) {
         return FirebaseService
             .SubscribeToDocument$(

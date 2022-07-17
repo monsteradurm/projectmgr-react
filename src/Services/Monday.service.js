@@ -32,6 +32,51 @@ export class MondayService {
       take(1)
     )
 
+    static AddItemBadge = (boardId, itemId, columnId, badges, entry, id) => {
+      const Tag$ = id ? of(id) : MondayService.Execute$(MondayGraphQL.Query_TagId(entry)).pipe(
+        map(response => response.create_or_get_tag?.id ? response.create_or_get_tag.id : null),
+        take(1)
+      )
+
+      Tag$.pipe(
+        map(tag => tag ? { "tag_ids" : _.pluck(badges, 'id').concat([tag]) } : null),
+        map(v => v ? MondayGraphQL.Mutate_TagsColumn(boardId, itemId, columnId, v) : null),
+        switchMap(mutation => mutation ? MondayService.Execute$(mutation)  : of(null)),
+      ).subscribe((response) => {
+      
+        if (response)
+          ToastService.SendSuccess(entry + 'Badge Added')
+        else 
+          ToastService.SendError("Could Not Add Badge: " + entry)
+    })
+    }
+    //: "{\"tag_ids\":[15202572]}"
+    
+    static ItemUpdates = (id) => {
+      return MondayService.Execute$(MondayGraphQL.Query_ItemUpdates(id)).pipe(
+        map((response) => response?.items ? response.items : null),
+        map((items) => items && items.length > 0 ? items[0] : null),
+        map(item => item?.updates ? item.updates : null),
+        map(updates => updates && updates.length > 0 ? 
+          _.filter(updates, (u) => u.text_body.startsWith('Description:')) : null),
+        map(updates => updates && updates.length > 0 ? updates[0] : null),
+        map(update => update?.body ? update.body : null),
+        tap(description => description ? description.replace('Description:', '') : null),
+        take(1)
+      )
+    }
+    static RemoveItemBadge = (boardId, itemId, columnId, badges, entry, id) => {
+      const arr = _.pluck(badges, 'id').filter(i => i != id);
+      return MondayService.Execute$(
+        MondayGraphQL.Mutate_TagsColumn(boardId, itemId, columnId, {"tag_ids" : arr})
+      ).subscribe((response) => {
+        if (response)
+          ToastService.SendSuccess('"' + entry + '"' + 'Badge Removed');
+        else 
+          ToastService.SendError("Could Not Remove Badge: " + entry);
+      });
+    }
+
     static SetItemTags = (boardId, itemId, columnId, tags) => {
 
     }

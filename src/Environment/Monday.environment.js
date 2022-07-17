@@ -38,16 +38,20 @@ export const MondayGraphQL = {
         }
       }`,
 
-    Query_ItemUpdates: (idArr) => `query {
-        items (ids: [${idArr.join(', ')}]) {
+    Query_ItemUpdates: (id) => `query {
+        items (ids: [${id}]) {
             id
-            updates{
-                text_body id updated_at
+            updates (limit: 50) {
+                text_body id updated_at body
             }
         }
       }`,
 
     Mutate_SimpleColumn: (boardId, itemId, columnId, statusIndex)  => 
         `mutation { change_simple_column_value (board_id: ${boardId}, item_id: ${itemId}, 
-            column_id: "${columnId}", value: "${statusIndex}") { id } }`
+            column_id: "${columnId}", value: "${statusIndex}") { id } }`,
+
+    Mutate_TagsColumn: (boardId, itemId, columnId, val)  => 
+        `mutation { change_column_value (board_id: ${boardId}, item_id: ${itemId}, 
+            column_id: "${columnId}", value: "${JSON.stringify(val).replace(/"/g, '\\"')}") { id } }`
 }

@@ -1,7 +1,7 @@
 import { catchError, of, shareReplay, map, tap, take, switchMap, EMPTY } from "rxjs";
 import { ajax } from "rxjs/ajax";
 import { fromFetch } from "rxjs/fetch"
-import { ApplicationObservables } from "../Components/Context/Application.context";
+import { ApplicationObservables } from "../Application.context";
 export class UserService {
     static UserPhotos = {};
 

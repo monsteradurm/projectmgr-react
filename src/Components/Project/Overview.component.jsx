@@ -1,22 +1,18 @@
 import React, { useState, useEffect, useRef, useReducer, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ScrollingPage } from "../General/ScrollingPage.component";
-import { ProjectItem } from "./ProjectItem.component";
-import { DispatchProjectState, ProjectState } from "../Context/Project.context";
-import { ProjectObservables } from "../Context/Project.context";
-import { ApplicationObservables } from "../Context/Application.context";
+import { ProjectItem } from "./ProjectItem/ProjectItem.component";
+import { DispatchProjectState, ProjectState } from "./Project.context";
+import { ProjectObservables } from "./Project.context";
+import { ApplicationObservables } from "@/Application.context";
 import { filterArtists, filterBadges, filterDepartments, filterSearch, filterStatus, filterTags, 
-    sortFilteredItems, toggleArrFilter, toggleStatusFilter } from "./Overview.filters";
+    sortFilteredItems, toggleArrFilter } from "./Overview.filters";
 import { ProjectFilterBar } from "./ProjectFilterBar.component";
 import * as _ from 'underscore';
 import './Overview.component.scss'
 import { Stack } from "react-bootstrap";
-import { Dialog } from 'primereact/dialog';
+import useString from "../Hooks/useString";
 
-import { ItemBadgeIcon } from "../../Helpers/ProjectItem.helper";
-import DatePicker from "react-datepicker";
-import { UploadReview } from "./Dialogs/UploadReview.component";
-import { of } from "rxjs";
 
 export const ProjectContext = React.createContext(ProjectState);
 
@@ -24,13 +20,13 @@ export const Overview = ({headerHeight}) => {
     const [state, dispatch] = useReducer(DispatchProjectState, ProjectState)
     const [searchParams, setSearchParams] = useSearchParams();
     const [filteredItems, setFilteredItems] = useState([]);
-
+    const [displayCount, setDisplayCount] = useState(0);
     const [badgeFilters, setBadgeFilters] = useState(null);
     const [tagFilters, setTagFilters] = useState(null);
     const [statusFilter, setStatusFilter] = useState(null);
     const [artistFilters, setArtistFilters] = useState(null);
+    const mouseOverItem = useString(null);
 
-    const [itemCount, setItemCount] = useState(0);
     const filterBarRef = useRef();
     const offsetY = headerHeight + filterBarRef?.current ?
                 filterBarRef.current.clientHeight : 0;
@@ -116,9 +112,10 @@ export const Overview = ({headerHeight}) => {
         filtered = filterSearch(filtered, filters);
         filtered = filterBadges(filtered, filters.Badges);
         filtered = filterTags(filtered, filters.Tags);
-        setItemCount(filtered.length);
         const sorted = sortFilteredItems(filtered, params);
         
+        setDisplayCount(sorted.length);
+
         const nested = _.groupBy(sorted, (i) => {
             if (state.params.Grouping == 'Status') {
                 return !!i.Status && !!i.Status.text ? i.Status.text : 'Not Started';
@@ -227,7 +224,7 @@ export const Overview = ({headerHeight}) => {
             <div id="Overview_Items">
                 <Stack direction="horizontal" gap={3}>
                     <div className="pm-tag-filter" style={{color: '#aaa', fontWeight: 400}}>
-                        { itemCount.toString() + ' tasks...' }
+                        {displayCount} tasks...
                     </div>
                     {
                         state.filters.Search && state.filters.Search.trim().length > 0 ?
@@ -256,9 +253,10 @@ export const Overview = ({headerHeight}) => {
                        <div className="pm-element">{i}</div>
                         {
                         filteredItems[i].map(item => 
-                            <div key={item.id} className="pm-task-conainer">
+                            <div key={item.id} className="pm-task-container">                          
                                 <ProjectItem projectItem={item}
                                     grouping={state.params.Grouping}
+                                    mouseOverItem={mouseOverItem}
                                     setSearchParams={setSearchParams}
                                     searchParams={searchParams}/>
                             </div>
