@@ -1,0 +1,39 @@
+.pm-warning-dlg {
+
+    .p-dialog-header {
+        background: black !important;
+        color: white;
+        padding: 15px 40px;
+    }
+    .p-dialog-content {
+        padding: 40px !important;
+        padding-bottom:0px !important;
+        border:none;
+    }
+    .pi-exclamation-triangle:before {
+        content: "\e922";
+        font-size: 50px;
+    }
+    .p-confirm-dialog-message {
+        color: gray;
+        font-weight: 600;
+        font-family: 'Open Sans';
+        font-size: 20px;
+    }
+    .pm-hide {
+        display: none !important;
+    }
+
+    .p-button {
+        background: #333;
+        border-color: black;
+        font-weight: 400;
+        font-family: 'Open Sans';
+      }
+      .p-button:hover {
+        background: #555 !important;
+        border-color:black !important;
+        outline: none !important;
+        font-weight: 600 !important;
+      }
+}

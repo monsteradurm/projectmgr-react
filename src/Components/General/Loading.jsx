@@ -16,7 +16,7 @@ export const Loading = ({size, fontSize, text, opacity, gap, weight, color}) => 
             style={{opacity:dOpacity}}/>
             {
                 text ? 
-                <div style={{fontWeight: {dWeight}, color: {dColor}, fontSize:{dFontSize}}}>
+                <div style={{fontWeight: {dWeight}, color: {dColor}, fontSize:{dFontSize}, textAlign: 'center'}}>
                     {text}
                 </div> : null
             }

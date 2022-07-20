@@ -18,7 +18,7 @@
         }
     },
     "/syncsketch-upload/*": {
-        "target": "https://syncsketch.com",
+        "target": "https://syncsketch.com/items/uploadToReview",
         "secure": false,
         "changeOrigin": true,
         "loglevel": "debug",

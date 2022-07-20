@@ -4,6 +4,7 @@ import * as _ from 'underscore';
 import { MondayService } from "@Services/Monday.service";
 import { ApplicationObservables } from "@/Application.context";
 import { BoxService } from "@Services/Box.service";
+import { SyncsketchService } from "../../Services/Syncsketch.service";
 
 export const ProjectState = {
     params: {
@@ -29,6 +30,7 @@ export const ProjectState = {
     },
 
     objects: {
+        Project: null,
         Board: null,
         Group: null,
         Items: [],
@@ -39,7 +41,8 @@ export const ProjectState = {
         TagOptions: {},
         DirectorOptions: [],
         StatusOptions: [],
-        ReferenceFolder: null
+        ReferenceFolder: null,
+        SyncsketchProject: null,
     },
     fetching: {
         ReferenceFolder: true
@@ -93,6 +96,7 @@ export class ProjectObservables {
             return _.sortBy(result, r => r.label);
         })
     )
+
     static _Items = new BehaviorSubject([]);
     static Items$ = ProjectObservables._Items.asObservable().pipe(shareReplay(1));
 
@@ -154,6 +158,11 @@ export class ProjectObservables {
         switchMap( id => FirebaseService.Project$(id)),
         shareReplay(1)
     )
+
+    static SyncsketchProject$ = ProjectObservables.Project$.pipe(
+        switchMap(project => SyncsketchService.FindProject$(project.name))
+    )
+
 
     static Group$ = combineLatest(
         [ProjectObservables.GroupOptions$, ProjectObservables.GroupId$]
@@ -291,6 +300,13 @@ export class ProjectObservables {
         );
 
         subs.push(
+            ProjectObservables.Project$.subscribe((project) => 
+            {
+              dispatch({type: 'Project', value: project});
+            })
+        );
+
+        subs.push(
             of(null).pipe(
                 tap(t => 
                     dispatch({type: 'FetchingReferenceFolder', value: true})
@@ -324,6 +340,12 @@ export class ProjectObservables {
         subs.push(
             ProjectObservables.GroupOptions$.subscribe((options) => 
               dispatch({type: 'GroupOptions', value: options}))
+        );
+
+        subs.push(
+            ProjectObservables.SyncsketchProject$.subscribe((project) => {
+                dispatch({type: 'SyncsketchProject', value: project})
+            })
         );
 
         subs.push(
@@ -409,7 +431,18 @@ export const DispatchProjectState = (state, action) => {
                 fetching: {...state.fetching,
                     ReferenceFolder: false }
                 }
-        
+        case 'Project' : 
+            return { ...state,
+                objects: { ...state.objects,
+                    Project: action.value }
+                }
+
+        case 'SyncsketchProject' :
+            return { ...state,
+                objects: { ...state.objects,
+                    SyncsketchProject: action.value }
+                }
+
         case 'GroupOptions' :
             return { ...state, 
                 objects: { ...state.objects, 

@@ -37,7 +37,7 @@ export const ProjectItemHeader = ({mouseOverItem, projectItem, collapsed, state,
     const { Grouping } = projectContext.params.Grouping;
     const { BoardId } = projectContext.params;
     const { CurrentReview } = projectItem;
-    
+
     const handleContextMenu = (e) => {
         itemContextMenuRef.current.show(e);
     }
@@ -198,7 +198,7 @@ export const ProjectItemHeader = ({mouseOverItem, projectItem, collapsed, state,
                                 
             {
                 showUploadReviewDlg.value ? 
-                <UploadReview item={projectItem} reviews={Reviews}
+                <UploadReview item={projectItem} reviews={Reviews} state={state}
                 visibility={true} showUploadReviewDlg={showUploadReviewDlg} /> : null
             }      
 

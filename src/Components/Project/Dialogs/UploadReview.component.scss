@@ -6,7 +6,13 @@
     border: solid 1px black;
     background: transparent;
 }
+.pm-noscroll-dropdown {
+  max-height:unset !important;
+}
+
 .pm-dialog {
+
+    
     .p-dropdown-label.p-inputtext {
         border: none !important;
     }
@@ -141,7 +147,7 @@
 
     .p-fileupload .p-fileupload-buttonbar {
         border: none;
-        padding: 0;
+        //padding: 0;
         margin-bottom: 30px;
         display: flex;
         justify-content: end;

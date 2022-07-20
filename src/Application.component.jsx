@@ -13,6 +13,7 @@ import { AtomSpinner, BreedingRhombusSpinner, SemipolarSpinner } from 'react-epi
 import { Stack } from 'react-bootstrap';
 import { UserService } from '@Services/User.service';
 import { switchMap, take } from 'rxjs';
+import { SyncsketchService } from '@Services/Syncsketch.service'
 
 export const ApplicationContext = React.createContext(ApplicationState);
 

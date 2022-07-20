@@ -12,6 +12,9 @@ import * as _ from 'underscore';
 import './Overview.component.scss'
 import { Stack } from "react-bootstrap";
 import useString from "../Hooks/useString";
+import { useBoolean } from "react-hanger";
+import { SyncsketchService } from "../../Services/Syncsketch.service";
+import { WarningDlg } from "./Dialogs/WarningDlg.component";
 
 
 export const ProjectContext = React.createContext(ProjectState);
@@ -25,11 +28,14 @@ export const Overview = ({headerHeight}) => {
     const [tagFilters, setTagFilters] = useState(null);
     const [statusFilter, setStatusFilter] = useState(null);
     const [artistFilters, setArtistFilters] = useState(null);
+    const SyncsketchInvalid = useBoolean(false);
     const mouseOverItem = useString(null);
 
     const filterBarRef = useRef();
     const offsetY = headerHeight + filterBarRef?.current ?
                 filterBarRef.current.clientHeight : 0;
+
+    const { Project } = state.objects;
 
     useEffect(() => {
         const params = state.params;
@@ -135,6 +141,21 @@ export const Overview = ({headerHeight}) => {
     }, [state.objects.Items, state.params, state.filters]);
 
     useEffect(() => {
+        const p = state.objects.SyncsketchProject;
+
+        if (state.objects.SyncsketchProject === SyncsketchService.MissingSyncsketchProject)
+            SyncsketchInvalid.setTrue();
+        else if (SyncsketchInvalid.value) {
+            SyncsketchInvalid.setFalse();
+        }
+        
+        if (p)
+            console.log("Found Syncsketch Project: ", state.objects.SyncsketchProject);
+
+
+    }, [state.objects.SyncsketchProject])
+
+    useEffect(() => {
         if (!state.params.Department)
             dispatch({type: 'Department', value: state.objects.DepartmentOptions[0]})
     }, [state.objects.DepartmentOptions, state.params.Department])
@@ -215,6 +236,11 @@ export const Overview = ({headerHeight}) => {
 
     return (
     <ProjectContext.Provider value={state}>
+        {
+            Project ? 
+            <WarningDlg message={"Could not find Syncsketch Project: \"" +
+                state.objects.Project.name + "\" Please contact your Production Coordinator"} visible={SyncsketchInvalid}/> : null
+        }
         <div ref={filterBarRef}>
             <ProjectFilterBar filters={state.filters} params={state.params} 
                 GroupOptions={state.objects.GroupOptions} Group={state.objects.Group}

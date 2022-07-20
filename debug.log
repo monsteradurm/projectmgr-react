@@ -29,8 +29,8 @@ projectmgr-react --> listening at: 3000
   'sec-fetch-dest': 'document',
   'accept-encoding': 'gzip, deflate, br',
   'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
-  'if-none-match': 'W/"54c-181f1b3f161"',
-  'if-modified-since': 'Tue, 12 Jul 2022 09:18:30 GMT'
+  'if-none-match': 'W/"54c-1821a902189"',
+  'if-modified-since': 'Wed, 20 Jul 2022 07:43:49 GMT'
 }
 {
   host: 'localhost:3000',
@@ -43,11 +43,11 @@ projectmgr-react --> listening at: 3000
   'sec-fetch-site': 'same-origin',
   'sec-fetch-mode': 'no-cors',
   'sec-fetch-dest': 'style',
-  referer: 'http://localhost:3000/Projects?ProjectId=LADUS6666_TempProjA&BoardId=2871802719&GroupId=topics&FilterStatus=',
+  referer: 'http://localhost:3000/Projects?ProjectId=LADUS6666_TempProjA&BoardId=2871802719&GroupId=topics',
   'accept-encoding': 'gzip, deflate, br',
   'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
-  'if-none-match': 'W/"79328-181f1b3f180"',
-  'if-modified-since': 'Tue, 12 Jul 2022 09:18:30 GMT'
+  'if-none-match': 'W/"79e70-1821a9021a9"',
+  'if-modified-since': 'Wed, 20 Jul 2022 07:43:49 GMT'
 }
 {
   host: 'localhost:3000',
@@ -60,7 +60,7 @@ projectmgr-react --> listening at: 3000
   'sec-fetch-site': 'same-origin',
   'sec-fetch-mode': 'no-cors',
   'sec-fetch-dest': 'script',
-  referer: 'http://localhost:3000/Projects?ProjectId=LADUS6666_TempProjA&BoardId=2871802719&GroupId=topics&FilterStatus=',
+  referer: 'http://localhost:3000/Projects?ProjectId=LADUS6666_TempProjA&BoardId=2871802719&GroupId=topics',
   'accept-encoding': 'gzip, deflate, br',
   'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8'
 }
@@ -75,7 +75,7 @@ projectmgr-react --> listening at: 3000
   'sec-fetch-site': 'same-origin',
   'sec-fetch-mode': 'no-cors',
   'sec-fetch-dest': 'image',
-  referer: 'http://localhost:3000/Projects?ProjectId=LADUS6666_TempProjA&BoardId=2871802719&GroupId=topics&FilterStatus=',
+  referer: 'http://localhost:3000/Projects?ProjectId=LADUS6666_TempProjA&BoardId=2871802719&GroupId=topics',
   'accept-encoding': 'gzip, deflate, br',
   'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
   'if-none-match': 'W/"f1e-181a84cacf6"',
@@ -92,7 +92,7 @@ projectmgr-react --> listening at: 3000
   'sec-fetch-site': 'same-origin',
   'sec-fetch-mode': 'cors',
   'sec-fetch-dest': 'manifest',
-  referer: 'http://localhost:3000/Projects?ProjectId=LADUS6666_TempProjA&BoardId=2871802719&GroupId=topics&FilterStatus=',
+  referer: 'http://localhost:3000/Projects?ProjectId=LADUS6666_TempProjA&BoardId=2871802719&GroupId=topics',
   'accept-encoding': 'gzip, deflate, br',
   'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
   'if-none-match': 'W/"1ec-181a84cb251"',
@@ -109,9 +109,29 @@ projectmgr-react --> listening at: 3000
   'sec-fetch-site': 'same-origin',
   'sec-fetch-mode': 'no-cors',
   'sec-fetch-dest': 'image',
-  referer: 'http://localhost:3000/Projects?ProjectId=LADUS6666_TempProjA&BoardId=2871802719&GroupId=topics&FilterStatus=',
+  referer: 'http://localhost:3000/Projects?ProjectId=LADUS6666_TempProjA&BoardId=2871802719&GroupId=topics',
   'accept-encoding': 'gzip, deflate, br',
   'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
   'if-none-match': 'W/"14e3-181a84cb6ed"',
   'if-modified-since': 'Tue, 28 Jun 2022 03:13:28 GMT'
 }
+{
+  host: 'localhost:3000',
+  connection: 'keep-alive',
+  'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+  origin: 'http://localhost:3000',
+  'if-none-match': 'W/"10454-1821a9021a8"',
+  'if-modified-since': 'Wed, 20 Jul 2022 07:43:49 GMT',
+  'sec-ch-ua-mobile': '?0',
+  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+  'sec-ch-ua-platform': '"Windows"',
+  accept: '*/*',
+  'sec-fetch-site': 'same-origin',
+  'sec-fetch-mode': 'cors',
+  'sec-fetch-dest': 'font',
+  referer: 'http://localhost:3000/static/css/main.d5e1e0fe.css',
+  'accept-encoding': 'gzip, deflate, br',
+  'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8'
+}
+/1979876/?noConvertFlag=0
+https://syncsketch.com/items/uploadToReview
