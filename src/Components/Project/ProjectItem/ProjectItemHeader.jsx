@@ -3,7 +3,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { Stack } from "react-bootstrap";
 import { useBoolean } from "react-hanger";
 import useString from "../../Hooks/useString";
-import { UploadReview } from "../Dialogs/UploadReview.component";
+import { UploadReview } from "../Dialogs/UploadReview/UploadReview.component";
 import { ProjectContext } from "../Overview.component";
 import { LazyThumbnail } from "@Components/General/LazyThumbnail";
 import { ItemBadgeIcon } from '@Helpers/ProjectItem.helper';
@@ -12,8 +12,11 @@ import { map, take } from 'rxjs';
 import { ToastService } from '@Services/Toast.service';
 import { MondayService } from '@Services/Monday.service';
 import * as _ from 'underscore';
+import { toggleArrFilter } from "../Overview.filters";
+import { EditTaskDlg } from "../Dialogs/EditTask/EditTaskDlg.componet";
 
-export const ProjectItemHeader = ({mouseOverItem, projectItem, collapsed, state, dispatch}) => {
+export const ProjectItemHeader = ({mouseOverItem, projectItem, collapsed, state, dispatch,
+    searchParams, setSearchParams}) => {
     const [statusMenu, setStatusMenu] = useState([]);
     const [addBadgeMenu, setAddBadgeMenu] = useState([]);
     const [removeBadgeMenu, setRemoveBadgeMenu] = useState(null);
@@ -21,6 +24,8 @@ export const ProjectItemHeader = ({mouseOverItem, projectItem, collapsed, state,
     const [thumbnail$, setThumbnail$] = useState(null);
 
     const showUploadReviewDlg = useBoolean(false);
+    const showEditTaskDlg = useBoolean(false);
+
     const itemContextMenuRef = useRef();
     const statusRef = useRef();
 
@@ -82,9 +87,11 @@ export const ProjectItemHeader = ({mouseOverItem, projectItem, collapsed, state,
 
     useEffect(() => {
         if (reviewLink.value) {
-            const id = _.first(
-                _.last(reviewLink.value.split('/#/')).split('/')
-            )
+
+            const id =  _.first(
+                    _.last(reviewLink.value.split('/#/')).split('/')
+                )
+ 
             setThumbnail$(SyncsketchService.ItemById$(id).pipe(
                 take(1),
                 map(result => result.thumbnail_url ? result.thumbnail_url : null)
@@ -185,7 +192,7 @@ export const ProjectItemHeader = ({mouseOverItem, projectItem, collapsed, state,
             {label: 'Upload Review', command: (evt) => showUploadReviewDlg.setTrue()},
             //{label: 'Upload Reference', command: (evt) => {}},
             {separator: true},
-            {label: 'Edit Task', command: (evt) => {}}
+            {label: 'Edit Task', command: (evt) => {showEditTaskDlg.setTrue()}}
         ];
 
         setItemContextMenu(result);
@@ -199,13 +206,19 @@ export const ProjectItemHeader = ({mouseOverItem, projectItem, collapsed, state,
             {
                 showUploadReviewDlg.value ? 
                 <UploadReview item={projectItem} reviews={Reviews} state={state}
-                visibility={true} showUploadReviewDlg={showUploadReviewDlg} /> : null
+                visibility={true} showUploadReviewDlg={showUploadReviewDlg} artist={Artist}
+                timeline={Timeline} currentIndex={CurrentReview ? CurrentReview.Index.value: 0} /> : null
             }      
-
+            {
+                showEditTaskDlg.value ? 
+                <EditTaskDlg item={projectItem} showEditTaskDlg={showEditTaskDlg} timeline={Timeline} 
+                    artist={Artist} CurrentReview={CurrentReview}
+                    state={state} currentIndex={CurrentReview ? CurrentReview.Index.value : 0} /> : null
+            }
             <Stack direction="horizontal" className={itemClass} 
                 onClick={(e) => collapsed.toggle()} onContextMenu={handleContextMenu}>
                 <div className="pm-task-thumb-container">
-                    <LazyThumbnail width={100} height={60} thumbnail$={thumbnail$} url={reviewLink}/>
+                    <LazyThumbnail width={100} height={60} thumbnail$={thumbnail$} url={reviewLink.value}/>
                 </div>
                 <Stack direction="horizontal" gap={0} style={{position:'relative'}}>
                     <div className="pm-task">

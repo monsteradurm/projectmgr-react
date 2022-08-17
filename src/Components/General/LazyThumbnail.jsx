@@ -27,16 +27,21 @@ export const LazyThumbnail = ({thumbnail$, width, height, url, borderRadius, bor
 
     const fallback = <Skeleton width={width} height={height}/>;
     return(
-        <DeferredContent onLoad={() => setVisible(true)}>
-        {
-            thumbnail ?
-            <Suspense fallback={fallback}>
-                <img src={thumbnail} className={url ? "pm-thumbnail-link" : null}
-                style={{width: width, height:height, cursor: url ? 'pointer' : null, objectFit: 'cover',
-                    borderRadius: borderRadius ? borderRadius : null, border: border ? border : null}} 
-                    onClick={onClickHandler} />  
-            </Suspense>  : fallback
-        }
-        </DeferredContent>
+        <>
+            <DeferredContent onLoad={() => setVisible(true)}>
+            {
+                thumbnail ?
+                <Suspense fallback={fallback}>
+                    <img src={thumbnail} className={url ? "pm-thumbnail-link" : null}
+                    style={{width: width, height:height, cursor: url ? 'pointer' : null, objectFit: 'cover',
+                        borderRadius: borderRadius ? borderRadius : null, border: border ? border : null}} 
+                        onClick={onClickHandler} />  
+                </Suspense>  : fallback
+            }
+            </DeferredContent>
+            {
+                !visible ? fallback : null
+            }
+        </>
     )
 }

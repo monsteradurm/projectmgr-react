@@ -12,18 +12,13 @@ import { combineLatest, switchMap, take, tap } from "rxjs";
 export const ProjectArtist = ({users, background, searchParams, setSearchParams}) => {
     const [displayUsers, setDisplayUsers] = useState(null);
     const [photos, setPhotos] = useState({});
-    const AppContext = useContext(ApplicationContext)
+
     useEffect(() => {
-        if (!displayUsers || displayUsers.length < 1 || !AppContext.AllUsers)
+        if (!displayUsers || displayUsers.length < 1)
             return;
-            
+        
         const ids = _.reduce(displayUsers, (acc, u) => {
-            const key = u.tooltip.toLowerCase();
-            const user = AppContext.AllUsers[key];
-            
-            if (user) {    
-                acc.push([u.tooltip, user.graph.id])    
-            }
+            acc.push([u.tooltip, u.id])    
             return acc;
         }, []);
 
@@ -41,7 +36,8 @@ export const ProjectArtist = ({users, background, searchParams, setSearchParams}
                     setPhotos(result);
                 });
 
-    }, [displayUsers, AppContext.AllUsers])
+    }, [displayUsers])
+
     const onArtistClick = (artist) => {
         if (artist.label[0] == '+')
             return;
@@ -50,21 +46,22 @@ export const ProjectArtist = ({users, background, searchParams, setSearchParams}
     }
 
     useEffect(() => {
-        
         if (!users || users.length < 1) {
             setDisplayUsers(null);
         } else {
 
             const userCount = users.length;
-            let display = users.slice(0, 2).map(u => ({
-                tooltip: u,
-                label: u.split(' ').map(n => n[0]).join('')
+            let display = users.slice(0, 3).map(u => ({
+                tooltip: u.graph.displayName,
+                label: u.graph.initials,
+                id: u.graph.id
             }))
 
-            if (userCount - 2 > 0) {
+            if (userCount - 2 > 1) {
+                display.pop();
                 display.push({
                     label: '+' + (userCount-2).toString(), 
-                    tooltip: users.slice(2).join(', ')
+                    tooltip: users.map(u => u.graph.displayName).slice(2).join(', '),
                 });
             }
 

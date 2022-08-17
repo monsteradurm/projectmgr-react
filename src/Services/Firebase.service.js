@@ -3,7 +3,7 @@ import * as firebase from 'firebase/app';
 import { getFirestore, collection as fsCollection, doc as fsDoc } from 'firebase/firestore';
 import { collectionChanges, doc, collection } from 'rxfire/firestore';
 import * as _ from 'underscore';
-import { BehaviorSubject, firstValueFrom, map, switchMap, take, tap } from "rxjs";
+import { BehaviorSubject, concatAll, concatMap, expand, firstValueFrom, from, map, mergeMap, reduce, switchMap, take, tap, toArray } from "rxjs";
 import { ajax } from "rxjs/ajax";
 import { ReverseProxy } from "../Environment/proxy.environment";
 
@@ -63,6 +63,28 @@ export class FirebaseService {
 
    static get AllWorkspaces$() {
         return FirebaseService.AllDocsFromCollection$('ProjectManager');
+   }
+
+   static MyBoards$(mondayId) {
+       return FirebaseService.Collection$('ProjectManager').pipe(
+
+        switchMap(docs => from(_.pluck(docs, 'id')).pipe(
+            concatMap(ws_id => 
+                FirebaseService.AllDocsFromCollection$(`ProjectManager/${ws_id}/Boards`).pipe(
+                    take(1),
+                    map(boards => _.filter(boards, 
+                        b => b.state === 'active' && b.subscribers.indexOf(mondayId) > -1)),
+                    map(boards => _.map(boards, b => ({projectId: ws_id, boardId: b.id})))
+                    ),
+                ),
+                take(docs.length),
+                toArray(),
+                map(ws_boards => _.flatten(ws_boards))
+            ),
+        ),  
+        take(1),
+        tap(t => console.log("Subscriptions", t))
+       )
    }
    static GetDocument$(col, id) {
         return doc(fsDoc(FirebaseService.db, col + '/' + id)).pipe(

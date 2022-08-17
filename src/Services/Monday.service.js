@@ -32,6 +32,58 @@ export class MondayService {
       take(1)
     )
 
+    static AddSubitem = (itemId, name, index, reviewIndex, link, department, artist, timeline) => {
+      console.log("ADD SUB ITEM", itemId, name, index, reviewIndex, link, department, artist, timeline);
+      return MondayService.Execute$(MondayGraphQL.Create_SubItem(itemId, name)).pipe(
+        map(response => {
+          if (!response.create_subitem){
+            ToastService.SendError("Could not create subitem. Please contact your Technical Director.")
+            throw 'Error creating subitem';
+          }
+
+          return response.create_subitem;
+        }),
+        switchMap(item => {
+          
+          const boardId = item.board.id;
+          const columns = item.column_values;
+          const depCol = _.find(columns, (c) => c.title === 'Feedback Department');
+          const linkCol = _.find(columns, (c) => c.title === 'Link');
+          const artistCol = _.find(columns, (c) => c.title === 'Artist');
+          const timelineCol = _.find(columns, (c) => c.title === 'Timeline');
+          const indexCol = _.find(columns, (c) => c.title === 'Index');
+          const reviewCol = _.find(columns, (c) => c.title === 'Review');
+
+          const values = {};
+          values[depCol.id] = { labels: [department] };
+          values[linkCol.id] = link;
+          values[indexCol.id] = index.toString();
+          values[reviewCol.id] = reviewIndex.toString();
+
+          if (artist && artist.length > 0)
+            values[artistCol.id] = { 
+              personsAndTeams: artist.map(a => ({id: a, kind: "person"}))
+            };
+
+          if (timeline) {
+            values[timelineCol.id] = {from:timeline[0], to:timeline[1]}
+          }
+
+          const mutation = MondayGraphQL.Mutate_Columns(boardId, item.id, values);
+          console.log(mutation);
+          return MondayService.Execute$(mutation);
+        })
+      )
+    }
+
+    static RenameSubitem = (subitemId, name) => {
+
+    }
+
+    static RemoveSubitem = (subitem) => {
+
+    }
+
     static AddItemBadge = (boardId, itemId, columnId, badges, entry, id) => {
       const Tag$ = id ? of(id) : MondayService.Execute$(MondayGraphQL.Query_TagId(entry)).pipe(
         map(response => response.create_or_get_tag?.id ? response.create_or_get_tag.id : null),

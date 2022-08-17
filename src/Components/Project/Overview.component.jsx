@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useReducer, useMemo } from "react";
+import React, { useState, useEffect, useRef, useReducer, useMemo, useContext } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ScrollingPage } from "../General/ScrollingPage.component";
 import { ProjectItem } from "./ProjectItem/ProjectItem.component";
@@ -15,6 +15,10 @@ import useString from "../Hooks/useString";
 import { useBoolean } from "react-hanger";
 import { SyncsketchService } from "../../Services/Syncsketch.service";
 import { WarningDlg } from "./Dialogs/WarningDlg.component";
+import { MondayService } from "../../Services/Monday.service";
+import { ApplicationContext } from "../../Application.component";
+import { ErrorLoading } from "../General/ErrorLoading";
+import { Loading } from "../General/Loading";
 
 
 export const ProjectContext = React.createContext(ProjectState);
@@ -28,6 +32,9 @@ export const Overview = ({headerHeight}) => {
     const [tagFilters, setTagFilters] = useState(null);
     const [statusFilter, setStatusFilter] = useState(null);
     const [artistFilters, setArtistFilters] = useState(null);
+    const [progressMessage, setProgressMessage] = useState('Checking Board Subscription...');
+    const [userSubscribed, setUserSubscribed] = useState(null);
+
     const SyncsketchInvalid = useBoolean(false);
     const mouseOverItem = useString(null);
 
@@ -37,7 +44,23 @@ export const Overview = ({headerHeight}) => {
 
     const { Project } = state.objects;
 
+    const appContext = useContext(ApplicationContext);
+    const {MyBoards} = appContext;
+
     useEffect(() => {
+        if (userSubscribed === true) return;
+
+        if (!MyBoards || MyBoards.length < 1) return;
+
+        const BoardId = searchParams.get('BoardId');
+        setUserSubscribed(
+            _.find(appContext.MyBoards, (b) => b.boardId === BoardId) !== null
+        );
+        setProgressMessage(null);
+    }, [searchParams, MyBoards])
+    
+    useEffect(() => {
+
         const params = state.params;
         const filters = state.filters;
         const BoardId = searchParams.get('BoardId');
@@ -97,6 +120,14 @@ export const Overview = ({headerHeight}) => {
             dispatch({type: 'Grouping', value: Grouping});
 
     }, [searchParams, state.params])
+
+    useEffect(() => {
+        const sub = MondayService.ComplexityExhausted$.subscribe((err) => {
+            console.log("ERROR Overview Component: Monday Complexity", err)
+        })
+
+        return () => sub.unsubscribe();
+    }, [])
 
     //subscribe to state observables
     useEffect(() => {
@@ -234,65 +265,75 @@ export const Overview = ({headerHeight}) => {
         setSearchParams(searchParams);
     }
 
-    return (
-    <ProjectContext.Provider value={state}>
-        {
-            Project ? 
-            <WarningDlg message={"Could not find Syncsketch Project: \"" +
-                state.objects.Project.name + "\" Please contact your Production Coordinator"} visible={SyncsketchInvalid}/> : null
-        }
-        <div ref={filterBarRef}>
-            <ProjectFilterBar filters={state.filters} params={state.params} 
-                GroupOptions={state.objects.GroupOptions} Group={state.objects.Group}
-                DepartmentOptions={state.objects.DepartmentOptions} />
-        </div>
-        <ScrollingPage key="page_scroll" offsetY={offsetY}>
-            <div id="Overview_Items">
-                <Stack direction="horizontal" gap={3}>
-                    <div className="pm-tag-filter" style={{color: '#aaa', fontWeight: 400}}>
-                        {displayCount} tasks...
-                    </div>
-                    {
-                        state.filters.Search && state.filters.Search.trim().length > 0 ?
-                        <div className="pm-tag-filter" 
-                        onClick={ClearSearch}
-                        style={{color: '#aaa', fontWeight: 400}}>
-                            (Searched: {state.filters.Search})
-                        </div> : null
-                    }
-                    {
-                        artistFilters
-                    }
-                    {
-                        statusFilter
-                    }
-                    {
-                        tagFilters
-                    }
-                    {
-                        badgeFilters
-                    }
-                </Stack>
+    if (progressMessage) {
+        return <Loading text={progressMessage} marginTop={80}
+        spinner="breeding-rhombus-spinner" />
+    }
+    return (<>
+    {
+        !userSubscribed ? <ErrorLoading text={"You are not subscribed to this Board.."} /> 
+        
+        : <ProjectContext.Provider value={state}>
             {
-                _.filter(Object.keys(filteredItems), (i) => i !== 'Other').map( i => 
-                   <div key={i} className="pm-item-container">
-                       <div className="pm-element">{i}</div>
-                        {
-                        filteredItems[i].map(item => 
-                            <div key={item.id} className="pm-task-container">                          
-                                <ProjectItem projectItem={item}
-                                    grouping={state.params.Grouping}
-                                    mouseOverItem={mouseOverItem}
-                                    setSearchParams={setSearchParams}
-                                    searchParams={searchParams}/>
-                            </div>
-                           )
-                        }
-                   </div>
-                )
+                Project ? 
+                <WarningDlg message={"Could not find Syncsketch Project: \"" +
+                    state.objects.Project.name + "\" Please contact your Production Coordinator"} 
+                    visible={SyncsketchInvalid}/> : null
             }
+            <div ref={filterBarRef}>
+                <ProjectFilterBar filters={state.filters} params={state.params} 
+                    GroupOptions={state.objects.GroupOptions} Group={state.objects.Group}
+                    DepartmentOptions={state.objects.DepartmentOptions} />
             </div>
-        </ScrollingPage>
-            
-    </ProjectContext.Provider>)
+            <ScrollingPage key="page_scroll" offsetY={offsetY}>
+                <div id="Overview_Items">
+                    <Stack direction="horizontal" gap={3}>
+                        <div className="pm-tag-filter" style={{color: '#aaa', fontWeight: 400}}>
+                            {displayCount} tasks...
+                        </div>
+                        {
+                            state.filters.Search && state.filters.Search.trim().length > 0 ?
+                            <div className="pm-tag-filter" 
+                            onClick={ClearSearch}
+                            style={{color: '#aaa', fontWeight: 400}}>
+                                (Searched: {state.filters.Search})
+                            </div> : null
+                        }
+                        {
+                            artistFilters
+                        }
+                        {
+                            statusFilter
+                        }
+                        {
+                            tagFilters
+                        }
+                        {
+                            badgeFilters
+                        }
+                    </Stack>
+                {
+                    _.filter(Object.keys(filteredItems), (i) => i !== 'Other').map( i => 
+                    <div key={i} className="pm-item-container">
+                        <div className="pm-element">{i}</div>
+                            {
+                            filteredItems[i].map(item => 
+                                <div key={item.id} className="pm-task-container">                          
+                                    <ProjectItem projectItem={item}
+                                        grouping={state.params.Grouping}
+                                        mouseOverItem={mouseOverItem}
+                                        setSearchParams={setSearchParams}
+                                        searchParams={searchParams}/>
+                                </div>
+                            )
+                            }
+                    </div>
+                    )
+                }
+                </div>
+            </ScrollingPage>
+                
+        </ProjectContext.Provider>
+        }
+    </>)
 }

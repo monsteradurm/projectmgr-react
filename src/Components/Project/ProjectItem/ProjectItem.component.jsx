@@ -6,7 +6,6 @@ import { Menubar} from 'primereact/menubar';
 import { ScrollPanel } from 'primereact/scrollpanel'
 import moment from 'moment';
 import { ReviewItem } from './ReviewItem.component';
-import { MondayService } from '@Services/Monday.service';
 import * as _ from 'underscore';
 import { ItemBadgeIcon } from '@Helpers/ProjectItem.helper';
 import { Button } from 'primereact/button';
@@ -17,7 +16,10 @@ import { ProjectContext } from '@Components/Project/Overview.component';
 import { ReferenceViewer } from '@Components/Box/ReferenceViewer';
 import { useBoolean } from 'react-hanger';
 import { ProjectItemHeader } from './ProjectItemHeader';
+import { ApplicationContext } from "@/Application.component";
+
 import useString from '../../Hooks/useString';
+import { FilterItemArtists } from '../../../Helpers/ProjectItem.helper';
 
 export const ProjectItemContext = React.createContext(ProjectItemState);
 
@@ -47,6 +49,8 @@ export const ProjectItem = ({ projectItem, grouping, setSearchParams, searchPara
     const reviewLink = useString(null);
 
     const projectContext = useContext(ProjectContext);
+    const appContext = useContext(ApplicationContext);
+
     const { Status, Artist, Director, Timeline, Reviews, Reference, Tags, Badges, 
             LastUpdate, Element, Task } = state.item;
 
@@ -114,9 +118,8 @@ export const ProjectItem = ({ projectItem, grouping, setSearchParams, searchPara
         const subitems = projectItem.subitems;
             if (!CurrentReview) {
                 dispatch({ type: 'Timeline', value: formatTimeline(projectItem.Timeline) });
-                dispatch({ type: 'Artist', value: 
-                    projectItem.Artist.value.filter(a => a && a.length > 0)
-                });
+                dispatch({ type: 'Artist',
+                 value: FilterItemArtists(projectItem.Artist, appContext.AllUsers) });
                 dispatch({ type: 'LastUpdate', value: projectItem.updated_at });
                 dispatch({ type: 'ActiveTab', value: 'Summary' });
             } else {
@@ -139,15 +142,20 @@ export const ProjectItem = ({ projectItem, grouping, setSearchParams, searchPara
 
         dispatch({ type: 'ActiveTab', value: 
             CurrentReview['Feedback Department'].text + ' Reviews' });
+
         dispatch({ type: 'Timeline', value: 
             formatTimeline(CurrentReview.Timeline?.text?.length > 0 ? 
                 CurrentReview.Timeline : projectItem.Timeline)
         });
+        dispatch({ type: 'Artist',
+                 value: FilterItemArtists(projectItem.Artist, appContext.AllUsers) });
+                 
         dispatch({ type: 'Artist', value: 
             CurrentReview.Artist?.value && CurrentReview.Artist.value.length > 0 ? 
-            CurrentReview.Artist.value.filter(a => a && a.length > 0) : 
-            projectItem.Artist.value.filter(a => a && a.length > 0)
+            FilterItemArtists(CurrentReview.Artist, appContext.AllUsers) : 
+            FilterItemArtists(projectItem.Artist, appContext.AllUsers)
         });
+
         dispatch({ type: 'LastUpdate', value: 
             CurrentReview.updated_at > projectItem.updated_at ?
             CurrentReview.updated_at : projectItem.updated_at
@@ -205,6 +213,7 @@ export const ProjectItem = ({ projectItem, grouping, setSearchParams, searchPara
     const header = (options) => {
         return (
             <ProjectItemHeader mouseOverItem={mouseOverItem} projectItem={projectItem} 
+                searchParams={searchParams} setSearchParams={setSearchParams}
                 state={state} collapsed={collapsed} dispatch={dispatch}/>
         )
     }

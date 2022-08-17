@@ -18,7 +18,7 @@ import { SyncsketchService } from '@Services/Syncsketch.service'
 export const ApplicationContext = React.createContext(ApplicationState);
 
 function App() {
-  const [fetching, setFetching] = useState(true);
+  const [progressMessage, setProgressMessage] = useState('Logging in User...');
   const [state, dispatch] = useReducer(DispatchApplicationState, ApplicationState)
   const { instance, accounts, inProgress } = useMsal();
   const [accessToken, setAccessToken] = useState(null);
@@ -57,19 +57,21 @@ function App() {
   }, [account, accessToken, inProgress])
 
   useEffect(() => {
-    if (state.User && fetching)
-      setFetching(false);
-
     UserService.UserPhoto$(account.username)
       .subscribe((result) => {
         dispatch({type: 'Photo', value: result})
       })
 
-    if (state.User)
+    if (!state.AllUsers && state.User) {
       ApplicationObservables.AllUsers$.pipe(take(1))
         .subscribe((result) => dispatch({type: 'AllUsers', value: result}))
+    }
+  }, [state.User, state.AllUsers, account, accessToken])
 
-  }, [state.User, account, accessToken])
+  useEffect(() => {
+    const sub = ApplicationObservables.ProgressMessage$.subscribe(setProgressMessage);
+    return () => sub.unsubscribe();
+  }, [])
 
   useEffect(() => {
     let subs = [];
@@ -82,9 +84,18 @@ function App() {
       dispatch({type: 'User', value: u})
     }));
 
+    subs.push(ApplicationObservables.AllUsers$.subscribe((u) => {
+      dispatch({type: 'AllUsers', value: u})
+    }));
+
+
     subs.push(ApplicationObservables.Titles$.subscribe((t) => {
       dispatch({type: 'Titles', value: t})
     }));
+
+    subs.push(ApplicationObservables.MyBoards$.subscribe((t) => {
+      dispatch({type: 'MyBoards', value: t})
+    }))
 
     return () => { subs.forEach(s => s.unsubscribe()) }
   }, [])
@@ -94,12 +105,12 @@ function App() {
       <div className="App">
         <ApplicationContext.Provider value={state}>
           {
-            fetching ? 
+            progressMessage ? 
               <Stack direction="vertical" className="mx-auto my-auto" 
               style={{width: '100%', height: '100%', opacity: 0.5, justifyContent: 'center'}}>
                 <BreedingRhombusSpinner color='gray' size={150} className="mx-auto" style={{opacity:0.7}}/> 
                 <div style={{fontWeight: 300, textAlign: 'center', fontSize: '25px', marginTop: '50px'}}>
-                  Logging in user...
+                  {progressMessage}
                 </div>
               </Stack>:
               state.User ? 

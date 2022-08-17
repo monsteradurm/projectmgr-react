@@ -53,5 +53,22 @@ export const MondayGraphQL = {
 
     Mutate_TagsColumn: (boardId, itemId, columnId, val)  => 
         `mutation { change_column_value (board_id: ${boardId}, item_id: ${itemId}, 
-            column_id: "${columnId}", value: "${JSON.stringify(val).replace(/"/g, '\\"')}") { id } }`
+            column_id: "${columnId}", value: "${JSON.stringify(val).replace(/"/g, '\\"')}") { id } }`,
+
+    Mutate_Columns: (boardId, itemId, val) => `
+        mutation { change_multiple_column_values (board_id: ${boardId}, item_id: ${itemId},
+            column_values: "${JSON.stringify(val).replace(/"/g, '\\"')}", create_labels_if_missing: true) 
+          { id }
+        }`,
+
+    Create_SubItem: (itemId, name) => 
+        `mutation {
+            create_subitem (parent_item_id: ${itemId}, item_name: "${name}") {
+                id
+                column_values{
+                  text title id additional_info
+                }
+                board { id }
+            }
+        }`
 }
