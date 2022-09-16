@@ -1,0 +1,58 @@
+#pm-calendar {
+    font-family: 'Open Sans';
+    a {
+        color: white;
+        font-weight: 400;
+        text-decoration: none;
+
+    }
+    table {
+        border: solid 1px black;
+        border-radius: 5px;
+        overflow:hidden !important;
+        
+    }
+    .fc-scroller.fc-scroller-liquid-absolute {
+        overflow: hidden !important;
+    }
+    .fc .fc-daygrid-day.fc-day-today {
+        background-color: lightgray !important;
+    }
+    .fc.fc-theme-standard .fc-view-harness th {
+        border-bottom: solid 1px black;
+    }
+    .fc-theme-standard td, .fc-theme-standard th {
+        border-color: #ccc;
+    }
+    .fc.fc-theme-standard .fc-view-harness th {
+        background: #444;
+        border-color: black !important;
+        color: #ffffff;
+        
+    }
+    .fc-daygrid-day-number {
+        font-weight: 600;
+        color: black;
+    }
+    .fc-day-sat, .fc-day-sun {
+        background: #eee;
+    }
+    .fc.fc-theme-standard .fc-toolbar .fc-button:disabled {
+        opacity: 0.6;
+        color: #ffffff;
+        background: #6c6c6c;
+        border: 1px solid #000000;
+    }
+    .fc.fc-theme-standard .fc-toolbar .fc-button {
+        color: #ffffff;
+        background: #008477;
+        border: 1px solid #000000;
+        font-size: 1rem;
+        transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+        border-radius: 6px;
+    }
+    .fc-event {
+        height: 30px;
+        line-height: 30px;
+    }
+}

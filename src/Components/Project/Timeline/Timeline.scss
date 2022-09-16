@@ -1,0 +1,10 @@
+#gantt-container {
+    flex-grow: 1;
+    overflow: auto;
+}
+
+.container {
+    display: flex;
+    overflow: auto;
+    flex: 1;
+}

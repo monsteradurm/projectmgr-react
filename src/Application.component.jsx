@@ -1,30 +1,51 @@
 
+import { useAppMessageQueue, SetAuthentication, useLoggedInUser } from './Application.context';
 import { OAuthScopes } from '@Environment/Graph.environment';
 import './Application.component.scss';
-import { useMsal } from "@azure/msal-react";
-import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { useIsAuthenticated, useMsal } from "@azure/msal-react";
+import React, { useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { NavigationComponent } from '@Components/Navigation/Navigation.component';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { Overview } from '@Components/Project/Overview.component';
-import { ApplicationObservables, DispatchApplicationState, ApplicationState } from '@/Application.context';
+import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom';
 import { Toast } from 'primereact/toast';
-import { ToastService } from '@Services/Toast.service';
 import { AtomSpinner, BreedingRhombusSpinner, SemipolarSpinner } from 'react-epic-spinners';
 import { Stack } from 'react-bootstrap';
-import { UserService } from '@Services/User.service';
-import { switchMap, take } from 'rxjs';
-import { SyncsketchService } from '@Services/Syncsketch.service'
+import { Project } from './Components/Project/Project.component';
+import { RefreshTags, RefreshBadges } from "./Components/Project/Context/Project.Objects.context";
+import { useAllUsers } from './App.Users.context';
+import { HomeComponent } from './Components/Home/Home.component';
+import { useToaster } from './App.Toasts.context';
+import { AddQueueMessage, CreateMessageQueue, RemoveQueueMessage, useBusyMessage } from './App.MessageQueue.context';
+import moment from 'moment';
 
-export const ApplicationContext = React.createContext(ApplicationState);
+const preventMouseProps = (evt) => {
+  evt.stopPropagation();
+  evt.preventDefault();
+} 
+
+const App_TID = 'PM_ACCESS_TOKEN'
+const RefreshLogin = (instance, authRequest, setAccessToken) => {
+  instance.acquireTokenSilent(authRequest).then((response) => {
+    sessionStorage.setItem(App_TID, JSON.stringify(response));
+    setAccessToken(response.accessToken);
+}).catch((e) => {
+    instance.acquireTokenRedirect(authRequest).then((response) => {
+        sessionStorage.setItem(App_TID, JSON.stringify(response));
+        setAccessToken(response.accessToken);
+    }).catch((x) => { })
+});
+}
+export const APP_QID = '/Application'
 
 function App() {
-  const [progressMessage, setProgressMessage] = useState('Logging in User...');
-  const [state, dispatch] = useReducer(DispatchApplicationState, ApplicationState)
+  const isAuthenticated = useIsAuthenticated();
+  const BusyMessage = useBusyMessage(APP_QID)
+  const User = useLoggedInUser();
+  const AllUsers = useAllUsers() // pre-fetch observable for sharing;
   const { instance, accounts, inProgress } = useMsal();
   const [accessToken, setAccessToken] = useState(null);
   const appHeaderRef = useRef();
   const toastRef = useRef();
-
+  const Toaster = useToaster(toastRef);
   const authRequest = useMemo(() => ({
     ...OAuthScopes,
     account: accounts[0]
@@ -33,102 +54,65 @@ function App() {
   const account = authRequest.account;
 
   useEffect(() => {
-    instance.acquireTokenSilent(authRequest).then((response) => {
-        setAccessToken(response.accessToken);
-    }).catch((e) => {
-        instance.acquireTokenRedirect(authRequest).then((response) => {
-            setAccessToken(response.accessToken);
-        }).catch((x) => { })
-    });
+    const stored = sessionStorage.getItem(App_TID);
+    if (stored) {
+      try {
+        const response = JSON.parse(stored);
+        const expired = moment(response.expiresOn).isBefore();
 
-  }, [instance, authRequest])
+        if (!expired && accessToken !== response.accessToken) {
+          console.log("Using Cached access token...");
+          setAccessToken(response.accessToken)
+          return;
+        }
 
-  useEffect(() => {
-    ToastService.SetToaster(toastRef.current);
-  }, [toastRef.current])
+        else if (!expired)
+          return;
+        
+        console.log("Cached Token has expired, Refreshing...");
+      }
+      catch { }
+    }
+
+    RefreshLogin(instance, authRequest, setAccessToken);
+  }, [instance, authRequest, isAuthenticated])
 
   useEffect(() => {
     if (!account || !accessToken)
       return;
-
-    ApplicationObservables.SetAuthToken(accessToken);
-    ApplicationObservables.SetAuthAccount(account);
-
+      
+      SetAuthentication(accessToken, account);
   }, [account, accessToken, inProgress])
 
-  useEffect(() => {
-    UserService.UserPhoto$(account.username)
-      .subscribe((result) => {
-        dispatch({type: 'Photo', value: result})
-      })
-
-    if (!state.AllUsers && state.User) {
-      ApplicationObservables.AllUsers$.pipe(take(1))
-        .subscribe((result) => dispatch({type: 'AllUsers', value: result}))
-    }
-  }, [state.User, state.AllUsers, account, accessToken])
-
-  useEffect(() => {
-    const sub = ApplicationObservables.ProgressMessage$.subscribe(setProgressMessage);
-    return () => sub.unsubscribe();
-  }, [])
-
-  useEffect(() => {
-    let subs = [];
-    
-    subs.push(ApplicationObservables.PrimaryColor$.subscribe((u) => {
-      dispatch({type: 'PrimaryColor', value: u})
-    }));
-
-    subs.push(ApplicationObservables.User$.subscribe((u) => {
-      dispatch({type: 'User', value: u})
-    }));
-
-    subs.push(ApplicationObservables.AllUsers$.subscribe((u) => {
-      dispatch({type: 'AllUsers', value: u})
-    }));
-
-
-    subs.push(ApplicationObservables.Titles$.subscribe((t) => {
-      dispatch({type: 'Titles', value: t})
-    }));
-
-    subs.push(ApplicationObservables.MyBoards$.subscribe((t) => {
-      dispatch({type: 'MyBoards', value: t})
-    }))
-
-    return () => { subs.forEach(s => s.unsubscribe()) }
-  }, [])
-
-
   return (
-      <div className="App">
-        <ApplicationContext.Provider value={state}>
+      <div className="App" onContextMenu={preventMouseProps}>
+        <BrowserRouter>
+        <header className="App-header" ref={appHeaderRef}>
+            <NavigationComponent User={User}
+              Initializing={BusyMessage?.key === 'init'}/>
+        </header>
           {
-            progressMessage ? 
+            BusyMessage ? 
               <Stack direction="vertical" className="mx-auto my-auto" 
               style={{width: '100%', height: '100%', opacity: 0.5, justifyContent: 'center'}}>
                 <BreedingRhombusSpinner color='gray' size={150} className="mx-auto" style={{opacity:0.7}}/> 
                 <div style={{fontWeight: 300, textAlign: 'center', fontSize: '25px', marginTop: '50px'}}>
-                  {progressMessage}
+                  {BusyMessage.message}
                 </div>
               </Stack>:
-              state.User ? 
+              User ? 
             <>
-              <header className="App-header" ref={appHeaderRef}>
-                <NavigationComponent />
-              </header>
               <Toast ref={toastRef} position="bottom-right"/>
-              <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<div>Placeholder...</div>} />
-                  <Route path="Projects" element={<Overview 
+                  <Route path="Home" element={<HomeComponent />} />
+                  <Route path="Projects" element={<Project 
                     headerHeight={appHeaderRef.current ? appHeaderRef.current.clientHeight : 0} />} />
                 </Routes>
-              </BrowserRouter>
+              
             </> : null
           }
-        </ApplicationContext.Provider>
+          </BrowserRouter>
       </div>
   )
 }

@@ -6,7 +6,7 @@ import { toggleArrFilter } from "./Overview.filters";
 import { ApplicationContext } from "@/Application.component";
 
 import * as _ from 'underscore';
-import { UserService } from "@Services/User.service";
+import * as UserService from "@Services/User.service";
 import { combineLatest, switchMap, take, tap } from "rxjs";
 
 export const ProjectArtist = ({users, background, searchParams, setSearchParams}) => {

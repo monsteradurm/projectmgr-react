@@ -16,7 +16,8 @@ export const ErrorLoading = ({icon, iconSize, fontSize, text, opacity, gap, weig
             <FontAwesomeIcon icon={dIcon} size={dIconSize} style={{color: dColor, opacity: dOpacity}}/>
             {
                 text ? 
-                <div style={{fontWeight: {dWeight}, color: {dColor}, fontSize:{dFontSize}, opacity:{dOpacity}}}>
+                <div style={{fontWeight: {dWeight}, color: {dColor}, fontSize:{dFontSize}, 
+                    opacity:{dOpacity}, textAlign: 'center'}}>
                     {text}
                 </div> : null
             }

@@ -3,9 +3,8 @@ import * as _ from 'underscore';
 import moment from 'moment';
 
 export const toggleArrFilter = (t, key, searchParams, setSearchParams) => {
-
     let filter = t.replace(/\s+/g, '');
-    let tagStr = searchParams.get('Filter' + key);
+    let tagStr = searchParams.get(key);
     tagStr = tagStr === null ? '' : tagStr;
 
     let arr = tagStr.trim().replace(/\s+/g, '').split(',')
@@ -16,17 +15,17 @@ export const toggleArrFilter = (t, key, searchParams, setSearchParams) => {
     else
         arr = arr.filter(tag => tag != filter);
         
-    searchParams.set('Filter' + key, arr.join(','))
+    searchParams.set(key, arr.join(','))
     setSearchParams(searchParams);
 }
 
 export const toggleStatusFilter = (status, searchParams, setSearchParams) => {
-    let current = searchParams.get('Status');
+    let current = searchParams.get('BoardStatusFilter');
 
     if (current !== null && current.length > 0)
-        searchParams.set('Status', '')
+        searchParams.set('BoardStatusFilter', '')
     else 
-        searchParams.set('Status', status.replace(/\s+/g, ''))
+        searchParams.set('BoardStatusFilter', status.replace(/\s+/g, ''))
 
     setSearchParams(searchParams);
 }
@@ -47,10 +46,15 @@ export const filterArtists = (filtered, artists) => {
     const arr = artists.split(',').filter(b => b.length > 0 && b !== null);
 
     return _.filter(filtered, i => {
-        if (!i.Artist?.value?.length)
+        if (!i.Artist?.value?.length && arr.indexOf('Unassigned') < 0)
             return false;
 
-        return _.intersection(i.Artist.value.map(a => a.replace(/\s+/g, '')), arr).length > 0
+        let values;
+        if (!i.Artist?.value?.length)
+            values = ['Unassigned'];
+        else 
+            values = i.Artist.value.map(a => a.replace(/\s+/g, ''));
+        return _.intersection(values, arr).length > 0
     });
 }
 
@@ -154,25 +158,49 @@ export const filterDepartments = (filtered, dep) => {
     return filtered;
 }
 
-export const filterSearch = (filtered, filters) => {
-    if (filters.Search && filters.Search.length > 0 && filters.Search.trim().length > 0)
+export const filterSearch = (filtered, Search) => {
+    if (Search && Search.length > 0 && Search.trim().length > 0)
             filtered = _.filter(filtered, i => {
-                const s = filters.Search.toLowerCase();
+                // search should be case insensitive
+                const s = Search.toLowerCase();
+
                 const itemQueries = 
                     [i.name.toLowerCase(),
+
+                        // consider only most recent review (monday subitem)
                         i.CurrentReview ? i.CurrentReview.name.toLowerCase() : '',
                         i.CurrentReview ? i.CurrentReview.Artist.text.toLowerCase() : '',
+                        i.CurrentReview ? formatTimeline(i.CurrentReview.Timeline).toLowerCase() : '',
+                        i.CurrentReview && i.CurrentReview.Tags ? i.CurrentReview.Tags.text.toLowerCase() : '',
+
+                        //  base item
                         i.Artist.text.toLowerCase(),
                         i.Director.text.toLowerCase(),
                         i.Status && i.Status.text ? i.Status.text.toLowerCase() : 'Not Started',
                         formatTimeline(i.Timeline).toLowerCase(),
-                        i.CurrentReview ? formatTimeline(i.CurrentReview.Timeline).toLowerCase() : '',
                         i.Badges && i.Badges.text ? i.Badges.text.toLowerCase() : '',
-                        i.CurrentReview && i.CurrentReview.Tags ? i.CurrentReview.Tags.text.toLowerCase() : '',
                         (i.Tags ? i.Tags.text.toLowerCase() : '')
                     ]
 
                 return !!_.find(itemQueries, (q) => q.indexOf(s) >-1)
         })
     return filtered;
+}
+
+
+export const onTagClick = (evt, tag, searchParams, setSearchParams) => {
+    toggleArrFilter(tag, "BoardTagsFilter", searchParams, setSearchParams);
+    if (evt?.stopPropagation)
+        evt.stopPropagation();
+}
+
+export const onArtistClick = (artist, searchParams, setSearchParams, affectFilters) => {
+    if (!affectFilters) return;
+    
+    console.log(artist, artist.replace(/\s+/g, ''))
+    if (artist.indexOf('+') > -1)
+        return;
+
+    toggleArrFilter(artist.replace(/\s+/g, ''), 
+        'BoardArtistFilter', searchParams, setSearchParams);
 }

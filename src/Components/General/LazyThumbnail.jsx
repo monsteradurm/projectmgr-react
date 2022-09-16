@@ -3,6 +3,7 @@ import { take } from "rxjs";
 import { DeferredContent } from "primereact/deferredcontent";
 import { Skeleton } from "primereact/skeleton";
 import { NavigationService } from "../../Services/Navigation.service";
+import { SUSPENSE } from "@react-rxjs/core";
 
 export const LazyThumbnail = ({thumbnail$, width, height, url, borderRadius, border}) => {
     const [thumbnail, setThumbnail] = useState(null);
@@ -19,11 +20,19 @@ export const LazyThumbnail = ({thumbnail$, width, height, url, borderRadius, bor
         if (!visible || !thumbnail$)
             return;
 
-        thumbnail$.pipe(take(1)).subscribe((thumb) => {
-            if (thumb) setThumbnail(thumb);
-        })
+        const sub = thumbnail$.subscribe((thumb) => {
+            if (thumb && thumb !== SUSPENSE) {
+                console.log("SETTING THUMBNAIL: " + thumb)
+                setThumbnail(thumb);
+            }
+        });
 
+        return () => sub.unsubscribe();
     }, [thumbnail$, visible])
+
+    useEffect(() => {
+        console.log("THUMBNAIL CHANGED", thumbnail);
+    }, [thumbnail])
 
     const fallback = <Skeleton width={width} height={height}/>;
     return(

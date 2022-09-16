@@ -19,47 +19,48 @@ import { concatAll, concatMap, delay, EMPTY, forkJoin, from, map, merge, of, swi
 import { UploadProgress } from "./UploadProgress.component";
 import { MondayService } from "../../../../Services/Monday.service";
 import { ReviewItemName } from "../../../../Helpers/ProjectItem.helper";
+import { useLoggedInUser } from "../../../../Application.context";
 const defaultReviewGroups = [
     {label: 'Internal'},
     {label: 'Client'},
     {label: 'Franchise'}
 ]
+
+
 export const UploadReview = ({item, reviews, visibility, showUploadReviewDlg, 
         artist, timeline}) => {
+
+    //const [ReviewGroup, setReviewGroup] = useState(null);
+    //const [reviewGroups, setReviewGroups] = useState([]);
+    //const [UploadsSubscription, setUploadsSubscription] = useState(null);
+    //const [uploadProgress, setUploadProgress] = useState(null);
+    //const ValidReviewGroup = useBoolean(false);
+    //const ValidReviewName = useBoolean(false);
+    //const ReviewIndex = useNumber(1);
+    //const NewReviewGroup = useInput('');
+    //const ReviewName = useInput('');
+    //const [syncsketchReview, setSyncsketchReview] = useState(null);
+    //const [syncsketchGroup, setSyncsketchGroup] = useState(null);
+    //const fetchingSyncsketch = useBoolean(false);
+
     const [Uploads$, setUploads$] = useState(null);
-    const [UploadsSubscription, setUploadsSubscription] = useState(null);
-    const [uploadProgress, setUploadProgress] = useState(null);
+    
+    const [uploadItem, setUploadItem] = useState(new UpdateItemModel());
     const itemContext = useContext(ProjectItemContext);
     const projectContext = useContext(ProjectContext);
-    const appContext = useContext(ApplicationContext)
-    const [ReviewGroup, setReviewGroup] = useState(null);
-    const [reviewGroups, setReviewGroups] = useState([]);
 
-    const ValidReviewGroup = useBoolean(false);
-    const ValidReviewName = useBoolean(false);
-    const ReviewIndex = useNumber(1);
-
-    const NewReviewGroup = useInput('');
-    const ReviewName = useInput('');
-    const [syncsketchReview, setSyncsketchReview] = useState(null);
-    const [syncsketchGroup, setSyncsketchGroup] = useState(null);
     const [itemTypes, setItemTypes] = useState({});
     const [files, setFiles] = useState([]);
-    const fetchingSyncsketch = useBoolean(false);
+    
     const uploader = useRef();
     const dialog = useRef();
 
-    const { User } = appContext;
+    const User = useLoggedInUser();
     const { Element, Artist } = itemContext.item;
     const { Group, SyncsketchProject, Board } = projectContext.objects;
     const newNameRef = useRef();
-    const UploadsHandler = (evt) => {
-        const files = evt.files;
-        setUploads$(
-            SyncsketchService.UploadItems$(syncsketchReview.id, 
-            item.Department.text, ReviewIndex.value, ReviewName.value, files, User.displayName)
-        )
-    }
+
+   
 
     useEffect(() => {
         if (Uploads$ === null && UploadsSubscription !== null) {
@@ -491,7 +492,7 @@ export const UploadReview = ({item, reviews, visibility, showUploadReviewDlg,
                     <FileUpload itemTemplate={UploadItemTemplate} multiple
                     onSelect={onFileAdded}
                     files={files}
-                    customUpload={true} uploadHandler={UploadsHandler}
+                    customUpload={true} uploadHandler={(evt) => UploadsHandler(evt, User)}
                     ref={uploader}/>
                     : null
                 }
@@ -510,9 +511,71 @@ export const UploadReview = ({item, reviews, visibility, showUploadReviewDlg,
             <ScrollPanel className="pm" style={{height: '600px', overflowX: 'hidden',
                 background: 'white'}}>
                 {
-                    uploadProgress ? <UploadProgress state={uploadProgress} /> : <UploadForm />
+                    uploadItem.uploadProgress ? 
+                        <UploadProgress state={uploadItem.uploadProgress} /> 
+                        : <UploadForm />
                 }
             </ScrollPanel>
         </Dialog>
     );
+}
+
+class UploadItemModel {
+    ReviewGroup = null;
+    ReviewName = null;
+    ReviewIndex = 1;
+
+    IsNewReviewGroup = false;
+    IsReviewNameValid = false;
+    IsReviewGroupValid = false;
+
+    SyncsketchReview = null;
+    SyncsketchGroup = null;
+    
+    UploadProgress = null;
+    UploadSubscription = null;
+
+    HandleFinished = (evt) => {
+        if (UploadSubscription)
+            UploadSubscription.unsubscribe();
+
+        UploadProgress = null;
+        UploadSubscription = null;
+    } 
+
+    HandleProgress = (progress, index, item) => UploadProgress = {
+        progress, index, item
+    }
+
+    ParseEvent = (uploadEvent) => {
+        const result = ({
+            progress:       Math.round(100 * uploadEvent.loaded / uploadEvent.total),
+            index:          `${upload.index + 1}/${Uploads$.length}`,
+            description:    upload.orig,
+            item:           upload.item,
+            type:           uploadEvent.type,
+            complete:       upload.index + 1 >= Uploads$.length && uploadEvent.type === 'upload_load'
+        })
+
+        console.log('Upload Progress:', result.progress.toString() + '%', 
+            result.index, result.description, result.item);
+        return result;
+    }
+
+    UploadsHandler = (evt, User) => {
+        const files = evt.files;
+        const Uploads$ = from(
+            SyncsketchService.UploadItemsArr$(syncsketchReview.id, 
+            item.Department.text, ReviewIndex, ReviewName, files, User.displayName)
+        );
+
+        from(Uploads$).pipe(
+            tap(console.log),
+            concatMap(upload => 
+                upload.$.pipe(
+                    map(uploadEvent => this.ParseEvent(uploadEvent))
+                ),
+            )
+        )
+    }
 }

@@ -1,13 +1,11 @@
 import { faArrowDownAZ, faChartBar, faChartGantt, faFilter, faLayerGroup, 
     faMagnifyingGlass, faTable, faUserGroup, faObjectGroup } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Accordion, AccordionTab } from "primereact/accordion";
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Dropdown, FormControl, Stack } from "react-bootstrap"
 import { useSearchParams } from "react-router-dom";
-import DatePicker from "react-datepicker";
 import './ProjectFilterBar.component.scss'
-import { state } from "@react-rxjs/core";
+
 const ViewIconMap = {
     Table: faTable,
     Chart: faChartBar,

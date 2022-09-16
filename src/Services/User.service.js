@@ -1,36 +1,48 @@
-import { catchError, of, shareReplay, map, tap, take, switchMap, EMPTY } from "rxjs";
+import { catchError, of, EMPTY } from "rxjs";
+import { map, tap, take, switchMap, expand, reduce } from 'rxjs/operators';
 import { ajax } from "rxjs/ajax";
 import { fromFetch } from "rxjs/fetch"
-import { ApplicationObservables } from "../Application.context";
-export class UserService {
-    static UserPhotos = {};
+import { GraphEndpoints } from "@Environment/Graph.environment";
 
-    static UserPhoto$ = (id) => {
-        if (!id) return of(null);
-        
-        if (UserService.UserPhotos[id]) 
-            return of(UserService.UserPhotos[id]);
+// --- Fetch all Users from Active Directory ---
+const FetchAllUsers$ = (token) => ajax.get(GraphEndpoints.users, {Authorization: 'Bearer ' + token}).pipe(
+    catchError(t => {
+        console.log(t)
+        return EMPTY
+    }),
+    expand((result, i) => result.response['@odata.nextLink'] ? 
+        ajax.get(result.response['@odata.nextLink'], {Authorization: 'Bearer ' + token}) : EMPTY),
+    reduce((acc, result) => {
+        return acc.concat(result.response.value);
+        }, []),
+)
 
-        return ApplicationObservables.AuthToken$.pipe(
-            switchMap(token => token ? of(token) : EMPTY),
-            switchMap(token =>
-                fromFetch(
-                    `https://graph.microsoft.com/v1.0/users/${id}/photo/$value`, {headers: {
-                        'Authorization': `Bearer ${token}`
-                        }, observe: 'body', responseType: 'blob'
-                    }).pipe(
-                        switchMap(response => response.blob()),
-                        map(blob => window.URL.createObjectURL(blob)),
-                        catchError(err => {
-                            return of(null);
-                        })
-                    )
-                ),
-                take(1),
-                tap((photo) => {
-                    if (photo) UserService.UserPhotos[id] = photo;
-                    console.log(photo);
-                })
-        )
-    }
+const Me$ = (auth) => ajax.get(GraphEndpoints.me, {Authorization: 'Bearer ' + auth.token}).pipe(
+    map(result => result.response),
+    take(1)    
+)
+
+const UserPhoto$ = (userId, token) => {
+    if (!userId || !token) return of(null);
+
+    return fromFetch(
+        `https://graph.microsoft.com/v1.0/users/${userId}/photo/$value`, {headers: {
+            'Authorization': `Bearer ${token}`
+            }, observe: 'body', responseType: 'blob'
+        }).pipe(
+            switchMap(response => 
+                response?.status === 200 ? response.blob() : of(null)),
+            map(blob => blob ? window.URL.createObjectURL(blob) : null),
+            catchError(err => {
+                return of(null);
+            }),
+            take(1),
+    )
 }
+
+
+export {
+    UserPhoto$,
+    FetchAllUsers$,
+    Me$
+};

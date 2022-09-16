@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Dropdown } from "react-bootstrap";
 import { take } from "rxjs";
+import { useMyBoardIds } from "../../App.Users.context";
 import { FirebaseService } from "../../Services/Firebase.service";
 import { NestedDropdown } from "../General/NestedDropDown.component";
 
@@ -38,11 +39,10 @@ function NestHierarchyFromName(board, nested) {
             last = last[nameArr[n]].children;
         }
     }
-    console.log(nested);
     return nested;
 }
 
-function NestedHierarchyToMenu(items, projectId) {
+function NestedHierarchyToMenu(items, projectId, boardIds) {
     let result = [];
     items.forEach( entry => {
 
@@ -87,6 +87,7 @@ function NestedHierarchyToMenu(items, projectId) {
 }
 
 export function ProjectDropdown({projectId, children}) {
+    const MyBoardIds = useMyBoardIds(projectId);
     const [show, setShow] = useState(false);
     const [boards, setBoards] = useState(null);
     const [displayHTML, setDisplayHTML] = useState(loadingProjectHTML);
@@ -99,9 +100,11 @@ export function ProjectDropdown({projectId, children}) {
         .subscribe((boards) => {
             let result = {};
 
-            boards.forEach(b => {
+            boards.filter(b => b.state === 'active' && MyBoardIds.indexOf(b.id) > -1)
+            .forEach(b => {
                 result = NestHierarchyFromName(b, result);
-            })
+            });
+
             const html = NestedHierarchyToMenu(Object.entries(result), projectId);
             setDisplayHTML(html);
         })

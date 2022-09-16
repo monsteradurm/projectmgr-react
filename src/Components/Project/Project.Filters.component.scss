@@ -1,0 +1,128 @@
+.pm-filterbar {
+    .form-control {
+        border: none;
+        box-shadow: none !important;
+        outline: none !important;
+        border-bottom: solid 2px lightgray !important;
+    }
+    .form-control:focus-visible {
+        border-bottom: solid 2px black !important;
+    }
+    .react-datepicker__day--keyboard-selected, .react-datepicker__month-text--keyboard-selected, .react-datepicker__quarter-text--keyboard-selected, .react-datepicker__year-text--keyboard-selected {
+        background-color: black !important;
+    }
+    .react-datepicker__input-container > input {
+        border:none !important;
+        border-bottom: solid 2px lightgray !important;
+        outline: none !important;
+        background: transparent !important;
+        padding-top: 5px;
+    }
+    input.react-datepicker-ignore-onclickoutside:focus-visible {
+        border:none;
+        outline: none !important;
+        border-bottom: solid 2px rgb(0, 133, 119) !important;
+    }
+    .dropdown-item, .dropdown-menu  {
+        background-color: white !important;
+        color: black;
+        font-weight:400;
+    }
+    .dropdown-menu {
+        min-width: 7.5rem;
+    }
+    .dropend > .btn {
+        padding: 0 0 !important;
+        text-align: left !important;
+        font-size: 15px !important;
+        font-weight:400
+    }
+    a.dropdown-item {
+        font-size: 15px !important;
+        font-weight:400
+    }
+    .dropend:hover, .dropdown-item:hover {
+        background-color: lightgray !important;
+        font-weight:600;
+    }
+    .btn-primary {
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        color: black !important;
+        font-weight:400
+    }
+    .dropdown-toggle:after { 
+        color: gray !important;
+        margin-left: 0.5rem;
+    }
+    .p-to
+    .form-control {
+        box-shadow:none !important;
+        border-top: none !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-bottom: none !important;
+        //border-bottom: solid 1px gray;
+        padding:0px !important;
+        margin:0px;
+    }
+
+    #filtersMenu {
+            width:400px !important;
+        }
+    .accordion-button:focus {
+        border-color:gray;
+        box-shadow:none !important;
+    }
+    .accordion-button:not(.collapsed) {
+        background-color:lightgray;
+        color:black;
+    }
+    .accordion-button:not(.collapsed)::after {
+        background-image:unset !important;
+    }
+    
+    .p-accordion-header-text {
+        line-height: unset;
+        font-family: 'Open Sans';
+        padding: 0;
+        margin: 0;
+        font-weight:bold;
+        font-size: 15px;
+        padding-bottom: 5px;
+        font-weight: bold;
+        //letter-spacing: 0.15rem;
+        color: black;
+    }
+    .p-accordion .p-accordion-header .p-accordion-header-link {
+        padding: 0.5rem;
+        background:white;
+        border:none;
+        //border-top: solid 1px gray;
+        //border-bottom:solid 1px gray;
+    }
+    
+    .p-accordion .p-accordion-tab {
+        margin-bottom: 4px;
+        padding-left: 5px;
+    }
+    .p-accordion .p-accordion-content {
+        padding: 0.5rem 2rem;
+        background: #f5f5f5;
+        box-shadow: inset 0px 7px 10px -5px lightgrey;
+    }
+    .p-accordion .p-accordion-header:not(.p-disabled) .p-accordion-header-link:focus {
+        box-shadow:none;
+ 
+    }
+    .p-accordion .p-accordion-header .p-accordion-header-link {
+        padding: 0.5rem;
+        background: white;
+        box-shadow: 0px 2px 10px -7px black;
+    }
+    .search-tab {
+        box-shadow: 0px 2px 10px -7px black;
+        padding-bottom:10px;
+    }
+}

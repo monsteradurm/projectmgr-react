@@ -60,6 +60,9 @@ header {
     .bg-dark, .dropdown-menu-dark {
         background-color: #333 !important;
     }
+    .dropdown-menu {
+        box-shadow: 0px 5px 15px -5px rgba(0, 0, 0, 0.5);
+    }
     .btn-primary {
         background-color: transparent !important;
         border: none !important;
@@ -81,17 +84,22 @@ header {
         text-align: left !important;
         font-size: 16px !important;
         //letter-spacing: 0.1rem;
+        font-weight:300;
+        opacity:0.8;
     }
     a.dropdown-item, div.dropdown-item {
         font-size: 16px !important;
         //letter-spacing: 0.1rem !important;
         padding-top: 0.25rem !important;
         padding-bottom: 0.25rem !important;
+        font-weight:300;
+        opacity:0.8;
         //margin: 2px 0px;
     }
     .dropend:hover, .dropdown-item:hover {
         background-color: #444 !important;
-        font-weight:600;
+        -webkit-text-stroke-width: 0.35px;
+        opacity: 1;
     }
 
     .dropdown-toggle:after { 
@@ -103,6 +111,8 @@ header {
         font-weight: 600 !important;
       }
     .dropend > button:hover, .dropdown-item:hover{
-        font-weight:600 !important;
+        //font-weight:600 !important;
+        -webkit-text-stroke-width: 0.5px;
+        opacity: 1;
     }
 }

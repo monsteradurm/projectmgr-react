@@ -14,6 +14,21 @@ export const FilterItemArtists = (artistCol, allUsers) => {
         }, []
     );
 }
+
+export const ParseBoardItemName = (name) => {
+    if (name.indexOf('/') < 0)
+        // no task provided
+        return [name, null]
+
+    const nameArr = name.split('/');
+    const element = nameArr.shift();
+
+    // account for multiple / written into names
+    const task = nameArr.join('/');
+
+    return [element, task];
+}
+
 export const ReviewItemName = (dep, index, name, filename, fileCount=1, fileIndex=null) => {
     console.log("DEP", dep, "INDEX", index, "name", name, "filename", filename, fileCount, fileIndex)
     let indexLabel = String(index).padStart(3, '0')

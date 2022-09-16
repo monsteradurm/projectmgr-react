@@ -40,6 +40,7 @@ export class BoxService {
           )
       }
       static FolderContents$ = (folderId) => {
+          console.log("Fetching Box Contents: ", folderId);
           if (!folderId)
             return of(null);
 

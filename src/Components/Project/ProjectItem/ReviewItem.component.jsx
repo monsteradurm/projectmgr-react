@@ -10,9 +10,10 @@ import moment from 'moment';
 import { toggleArrFilter } from '@Components/Project/Overview.filters';
 import { delay, map, of, take, tap } from 'rxjs';
 import { ApplicationContext } from '@/Application.component';
-import { UserService } from '@Services/User.service';
+import * as UserService from "@Services/User.service";
 import { Loading } from '@Components/General/Loading';
 import { LazyThumbnail } from '@Components/General/LazyThumbnail';
+import { useAllUsers } from '../../../Application.context';
 
 export const ReviewItem = ({status, review, activeTab, currentReview,
     tagOptions, searchParams, setSearchParams}) => {
@@ -28,7 +29,8 @@ export const ReviewItem = ({status, review, activeTab, currentReview,
     const [photo, setPhoto] = useState(null);
     const[fetching, setFetching] = useState(true)
     const itemContext = useRef();
-    const AppContext = useContext(ApplicationContext);
+    
+    const AllUsers = useAllUsers();
 
     const contextMenu = [
         {label: "Edit Review"},
@@ -41,10 +43,10 @@ export const ReviewItem = ({status, review, activeTab, currentReview,
 
     
     useEffect(() => {
-        if (!AppContext.AllUsers || !artist)
+        if (!AllUsers || !artist)
             return;
         const key = artist.toLowerCase();
-        const user = AppContext.AllUsers[key];
+        const user = AllUsers[key];
 
         if (!user) return;
 
@@ -52,7 +54,7 @@ export const ReviewItem = ({status, review, activeTab, currentReview,
         photo$.pipe(take(1)).subscribe((result) => {
             setPhoto(result);
         })
-    }, [AppContext.AllUsers, artist])
+    }, [AllUsers, artist])
 
     useEffect(() => {
         if (!reviewLink)

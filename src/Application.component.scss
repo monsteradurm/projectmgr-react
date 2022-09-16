@@ -132,7 +132,7 @@
   background-color: #555 !important;
 }
 .p-menuitem-active > .p-menuitem-link {
-  font-weight: bold !important;
+  -webkit-text-stroke: 0.3px;
 }
 .p-skeleton {
   opacity: 0.6 !important;

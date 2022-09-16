@@ -1,10 +1,10 @@
+/*
 import React, { useState, useEffect, useRef, useReducer, useMemo, useContext } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ScrollingPage } from "../General/ScrollingPage.component";
 import { ProjectItem } from "./ProjectItem/ProjectItem.component";
 import { DispatchProjectState, ProjectState } from "./Project.context";
 import { ProjectObservables } from "./Project.context";
-import { ApplicationObservables } from "@/Application.context";
 import { filterArtists, filterBadges, filterDepartments, filterSearch, filterStatus, filterTags, 
     sortFilteredItems, toggleArrFilter } from "./Overview.filters";
 import { ProjectFilterBar } from "./ProjectFilterBar.component";
@@ -16,14 +16,15 @@ import { useBoolean } from "react-hanger";
 import { SyncsketchService } from "../../Services/Syncsketch.service";
 import { WarningDlg } from "./Dialogs/WarningDlg.component";
 import { MondayService } from "../../Services/Monday.service";
-import { ApplicationContext } from "../../Application.component";
 import { ErrorLoading } from "../General/ErrorLoading";
 import { Loading } from "../General/Loading";
+import { SetPrimaryColor, useMyBoards } from "../../Application.context";
 
 
 export const ProjectContext = React.createContext(ProjectState);
 
 export const Overview = ({headerHeight}) => {
+
     const [state, dispatch] = useReducer(DispatchProjectState, ProjectState)
     const [searchParams, setSearchParams] = useSearchParams();
     const [filteredItems, setFilteredItems] = useState([]);
@@ -43,9 +44,7 @@ export const Overview = ({headerHeight}) => {
                 filterBarRef.current.clientHeight : 0;
 
     const { Project } = state.objects;
-
-    const appContext = useContext(ApplicationContext);
-    const {MyBoards} = appContext;
+    const MyBoards = useMyBoards();
 
     useEffect(() => {
         if (userSubscribed === true) return;
@@ -54,7 +53,7 @@ export const Overview = ({headerHeight}) => {
 
         const BoardId = searchParams.get('BoardId');
         setUserSubscribed(
-            _.find(appContext.MyBoards, (b) => b.boardId === BoardId) !== null
+            _.find(MyBoards, (b) => b.boardId === BoardId) !== null
         );
         setProgressMessage(null);
     }, [searchParams, MyBoards])
@@ -131,8 +130,7 @@ export const Overview = ({headerHeight}) => {
 
     //subscribe to state observables
     useEffect(() => {
-        
-        ApplicationObservables.SetPrimaryColor('Projects');
+        SetPrimaryColor('Projects');
         ProjectObservables.Initialize([], dispatch);
 
         return () => ProjectObservables.Unsubscribe(state.Subscriptions);
@@ -336,4 +334,4 @@ export const Overview = ({headerHeight}) => {
         </ProjectContext.Provider>
         }
     </>)
-}
+}*/

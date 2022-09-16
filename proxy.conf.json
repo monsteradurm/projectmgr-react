@@ -8,6 +8,15 @@
             "^/syncsketch/*": ""
         }
     },
+    "/reverseProxy/*": {
+        "target": "https://us-central1-pm-websocket.cloudfunctions.net/app/",
+        "secure": false,
+        "changeOrigin": true,
+        "loglevel": "debug",
+        "pathRewrite": {
+            "^/reverseProxy/*": ""
+        }
+    },
     "/syncsketch-v2/*": {
         "target": "https://syncsketch.com/api/v2",
         "secure": false,

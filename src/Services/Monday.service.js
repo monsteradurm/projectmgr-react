@@ -20,9 +20,7 @@ export class MondayService {
 
     static SetItemStatus = (boardId, itemId, columnId, statusIndex) => {
         const mutation = MondayGraphQL.Mutate_SimpleColumn(boardId, itemId, columnId, statusIndex);
-        MondayService.Execute$(mutation).pipe(take(1)).subscribe((t) => {
-            ToastService.SendSuccess('Status Updated')
-        })
+        return MondayService.Execute$(mutation)
     }
 
     static AllUsers$ = () => MondayService.Execute$(
@@ -84,31 +82,41 @@ export class MondayService {
 
     }
 
-    static AddItemBadge = (boardId, itemId, columnId, badges, entry, id) => {
-      const Tag$ = id ? of(id) : MondayService.Execute$(MondayGraphQL.Query_TagId(entry)).pipe(
+    static QueryTag$ = (entry) => MondayService.Execute$(MondayGraphQL.Query_TagId(entry)).pipe(
+        tap(console.log),
         map(response => response.create_or_get_tag?.id ? response.create_or_get_tag.id : null),
         take(1)
       )
 
-      Tag$.pipe(
-        map(tag => tag ? { "tag_ids" : _.pluck(badges, 'id').concat([tag]) } : null),
-        map(v => v ? MondayGraphQL.Mutate_TagsColumn(boardId, itemId, columnId, v) : null),
-        switchMap(mutation => mutation ? MondayService.Execute$(mutation)  : of(null)),
-      ).subscribe((response) => {
+    static AddItemBadge = (boardId, itemId, columnId, badges, entry, id) => {
+      console.log(entry, badges)
+      const Tag$ = id ? of(id) : MondayService.QueryTag$(entry);
       
-        if (response)
-          ToastService.SendSuccess(entry + 'Badge Added')
-        else 
-          ToastService.SendError("Could Not Add Badge: " + entry)
-    })
+
+      return Tag$.pipe(
+        tap(t => console.log("TAG RESULT",t )),
+        map(tag => tag ? { "tag_ids" : _.pluck(badges, 'id').concat([tag]) } : null),
+        tap(console.log),
+        map(v => v ? MondayGraphQL.Mutate_TagsColumn(boardId, itemId, columnId, v) : null),
+        tap(console.log),
+        switchMap(mutation => mutation ? MondayService.Execute$(mutation)  : of(null)),
+      )
     }
-    //: "{\"tag_ids\":[15202572]}"
+
+    static RemoveItemBadge = (boardId, itemId, columnId, badges, entry, id) => {
+      const arr = _.pluck(badges, 'id').filter(i => i != id);
+      return MondayService.Execute$(
+        MondayGraphQL.Mutate_TagsColumn(boardId, itemId, columnId, {"tag_ids" : arr})
+      )
+    }
     
-    static ItemUpdates = (id) => {
+
+    static ItemDescription = (id) => {
       return MondayService.Execute$(MondayGraphQL.Query_ItemUpdates(id)).pipe(
         map((response) => response?.items ? response.items : null),
         map((items) => items && items.length > 0 ? items[0] : null),
         map(item => item?.updates ? item.updates : null),
+        tap(console.log),
         map(updates => updates && updates.length > 0 ? 
           _.filter(updates, (u) => u.text_body.startsWith('Description:')) : null),
         map(updates => updates && updates.length > 0 ? updates[0] : null),
@@ -117,17 +125,7 @@ export class MondayService {
         take(1)
       )
     }
-    static RemoveItemBadge = (boardId, itemId, columnId, badges, entry, id) => {
-      const arr = _.pluck(badges, 'id').filter(i => i != id);
-      return MondayService.Execute$(
-        MondayGraphQL.Mutate_TagsColumn(boardId, itemId, columnId, {"tag_ids" : arr})
-      ).subscribe((response) => {
-        if (response)
-          ToastService.SendSuccess('"' + entry + '"' + 'Badge Removed');
-        else 
-          ToastService.SendError("Could Not Remove Badge: " + entry);
-      });
-    }
+    
 
     static SetItemTags = (boardId, itemId, columnId, tags) => {
 
@@ -150,6 +148,7 @@ export class MondayService {
         }, {})),
         take(1)
     )
+
     static ColumnSettings = (boardId) => MondayService.Execute$(
         MondayGraphQL.Query_ColumnSettings(boardId)
     ).pipe(

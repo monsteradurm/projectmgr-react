@@ -20,6 +20,7 @@ import { ApplicationContext } from "@/Application.component";
 
 import useString from '../../Hooks/useString';
 import { FilterItemArtists } from '../../../Helpers/ProjectItem.helper';
+import { useAllUsers } from '../../../Application.context';
 
 export const ProjectItemContext = React.createContext(ProjectItemState);
 
@@ -49,7 +50,6 @@ export const ProjectItem = ({ projectItem, grouping, setSearchParams, searchPara
     const reviewLink = useString(null);
 
     const projectContext = useContext(ProjectContext);
-    const appContext = useContext(ApplicationContext);
 
     const { Status, Artist, Director, Timeline, Reviews, Reference, Tags, Badges, 
             LastUpdate, Element, Task } = state.item;
@@ -58,6 +58,8 @@ export const ProjectItem = ({ projectItem, grouping, setSearchParams, searchPara
     const { TagOptions, DepartmentOptions, BadgeOptions, StatusOptions } = projectContext.objects;
 
     const { CurrentReview} = projectItem;
+
+    const AllUsers = useAllUsers()
  
     useEffect(() => {
         setTabHTML(
@@ -119,7 +121,7 @@ export const ProjectItem = ({ projectItem, grouping, setSearchParams, searchPara
             if (!CurrentReview) {
                 dispatch({ type: 'Timeline', value: formatTimeline(projectItem.Timeline) });
                 dispatch({ type: 'Artist',
-                 value: FilterItemArtists(projectItem.Artist, appContext.AllUsers) });
+                 value: FilterItemArtists(projectItem.Artist, AllUsers) });
                 dispatch({ type: 'LastUpdate', value: projectItem.updated_at });
                 dispatch({ type: 'ActiveTab', value: 'Summary' });
             } else {
@@ -148,12 +150,12 @@ export const ProjectItem = ({ projectItem, grouping, setSearchParams, searchPara
                 CurrentReview.Timeline : projectItem.Timeline)
         });
         dispatch({ type: 'Artist',
-                 value: FilterItemArtists(projectItem.Artist, appContext.AllUsers) });
+                 value: FilterItemArtists(projectItem.Artist, AllUsers) });
                  
         dispatch({ type: 'Artist', value: 
             CurrentReview.Artist?.value && CurrentReview.Artist.value.length > 0 ? 
-            FilterItemArtists(CurrentReview.Artist, appContext.AllUsers) : 
-            FilterItemArtists(projectItem.Artist, appContext.AllUsers)
+            FilterItemArtists(CurrentReview.Artist, AllUsers) : 
+            FilterItemArtists(projectItem.Artist, AllUsers)
         });
 
         dispatch({ type: 'LastUpdate', value: 
