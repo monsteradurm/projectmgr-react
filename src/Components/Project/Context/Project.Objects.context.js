@@ -289,7 +289,7 @@ const [useProjectReference, ProjectReference$] = bind(
             return BoxService.FindFolderRecursively$(folders).pipe(
                 tap(folder => {
                     if (folder?.id) {
-                        console.log("STORING CACHE: ", key, entry.id)
+                        console.log("STORING CACHE: ", key, folder.id)
                         sessionStorage.setItem(key, folder.id);
                     }
                 }),
