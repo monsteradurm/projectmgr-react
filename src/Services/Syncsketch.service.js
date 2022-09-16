@@ -51,13 +51,16 @@ export class SyncsketchService {
 
     }
 
-    static UploadItem$ = (reviewId, file, params, index, count) => {
+    static UploadItem$ = (reviewId, file, params, index, count, type) => {
+       
+        const url = SyncsketchPosts.UploadFile(reviewId, type);
+        console.log("UPLOADING...", url, type)
         const formdata = new FormData();
         formdata.append("reviewFile", file, params.filename);
         formdata.append("artist", params.artist);
         formdata.append("description", params.description);
         return ajax({
-            url: SyncsketchPosts.UploadFile(reviewId),
+            url,
             method: 'POST',
             headers: UploadHeaders,
             body: formdata,
@@ -293,7 +296,7 @@ export class SyncsketchService {
     static AllFeedback$ = (id) => {
         if (!id || id === SUSPENSE)
             return of(SUSPENSE)
-            
+
         return SyncsketchService.Query$(
                 SyncsketchQueries.AllFeedback(id)
             ).pipe(map(result => result.objects)

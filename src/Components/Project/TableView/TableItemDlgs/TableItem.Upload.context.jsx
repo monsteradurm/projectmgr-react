@@ -336,12 +336,13 @@ export const [useUploadEvent, OnUploadEvent$] = bind(
                     artist
                 };
                 
-                return {file: f.file, reviewId, params, index: i}
+                return {file: f.file, reviewId, params, index: i, type: f.type}
             });
 
             console.log("Uploading.. ", toUpload);
             return from(toUpload).pipe(
-                concatMap(u => SyncsketchService.UploadItem$(u.reviewId, u.file, u.params, u.index, files.length).pipe(
+                concatMap(u => SyncsketchService.UploadItem$(u.reviewId, u.file, u.params, u.index, 
+                    files.length, u.type).pipe(
                         tap(evt => SendUploadProgress(evt)),
                         takeUntil(CancelUploadEvent$.pipe(
                             tap(t => {
