@@ -201,4 +201,15 @@ export class FirebaseService {
                 map(snapshot => snapshot.data()),
             );
     }
+
+    static Notices$ = FirebaseService.SubscribeToCollection$('Noticeboard').pipe(
+        concatMap(reviewArr => from(reviewArr).pipe(
+            switchMap(change => FirebaseService.GetDocument$('Noticeboard', change.doc.id).pipe(
+                        map(doc => ({...doc.data(), change: change.type, id: change.doc.id}))
+                    )
+                ),
+            )
+        ),
+    )
 }
+
