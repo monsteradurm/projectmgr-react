@@ -1,0 +1,16 @@
+.pm-statusItem {
+    border: solid 1px black;
+    border-radius: 5px;
+    min-height: 150px;
+    max-width: 40%;
+    
+    .pm-statusItem-header {
+        color: white;
+        padding: 10px 30px;
+    }
+    
+    .pm-statusItem-reviewTitle {
+        font-weight: bold;
+        padding: 0px 30px;
+    }
+}

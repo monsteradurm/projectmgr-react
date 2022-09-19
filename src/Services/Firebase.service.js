@@ -1,6 +1,6 @@
 import { FirebaseConfig } from "../Environment/Firebase.environment"
 import * as firebase from 'firebase/app';
-import { getFirestore, collection as fsCollection, doc as fsDoc, query } from 'firebase/firestore';
+import { getFirestore, collection as fsCollection, doc as fsDoc, query, runTransaction } from 'firebase/firestore';
 import { collectionChanges, doc, collection } from 'rxfire/firestore';
 import * as _ from 'underscore';
 import { BehaviorSubject, concatAll, concatMap, EMPTY, expand, firstValueFrom, from, map, mergeMap, reduce, skip, switchMap, take, tap, toArray } from "rxjs";
@@ -138,11 +138,50 @@ export class FirebaseService {
             )
     }
 
+    static ItemsByStatus$(Status) {
+        const collection = `MondayStatus/${Status}/items`;
+        return FirebaseService.SubscribeToCollection$(collection).pipe(
+                concatMap(reviewArr => from(reviewArr)),
+                switchMap(change => FirebaseService.GetDocument$(collection, change.doc.id).pipe(
+                    map(doc => ({...doc.data(), change: change.type}))
+                    )
+                ),
+            )
+    }
+
     static Project$(projectId) {
         return doc(fsDoc(FirebaseService.db, 'ProjectManager/' + projectId)).pipe(
             map(doc => doc.exists ? doc.data() : null),
             take(1)
         )
+    }
+
+    static GetBatchedMondayItems(items) {
+        const fs = getFirestore();
+        const references = []
+
+        items.forEach(i => {
+            const { board_description, board, group, id } = i;
+            let project = board_description;
+            if (project.indexOf('/') >= 0)
+                project = project.split('/')[1]
+             
+            const path = `ProjectManager/${project}/Boards/${board}/Groups/${group}/Items/${id}`;
+            const ref = fsDoc(FirebaseService.db, path)
+            references.push(ref);
+        })
+      
+        return runTransaction(FirebaseService.db, async (t) => {
+            const results = []
+            for(var i=0; i < references.length; i++) {
+                const sfDoc = await t.get(references[i]);
+                if (sfDoc.exists()) {
+                    results.push(sfDoc.data())
+                }
+            }
+
+            return Promise.all(results);
+        })
     }
 
 

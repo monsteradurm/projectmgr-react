@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useBoardParams, SetBoardParam, PROJ_QID, ProjectProvider } from "./Context/Project.context";
 import { ProjectFilters } from "./Project.Filters.component";
@@ -28,7 +28,7 @@ export const Project = ({headerHeight}) => {
     const offsetY = headerHeight + (filterBarRef?.current ?
                 filterBarRef.current.clientHeight : 0);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (Board === SUSPENSE)
             return;
 

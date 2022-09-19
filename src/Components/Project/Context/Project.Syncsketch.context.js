@@ -318,5 +318,6 @@ export {
     syncsketchReviewDepartments$,
     SyncsketchProject$,
     SyncsketchGroup$,
-    SyncsketchThumbnail$
+    SyncsketchThumbnail$,
+    ItemIdFromSyncLink
 }

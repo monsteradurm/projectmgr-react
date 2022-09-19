@@ -14,14 +14,18 @@ import { DelayBy } from '../General/DelayBy';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useMyWorkspaces } from '../../App.Users.context';
 import { SUSPENSE } from '@react-rxjs/core';
+import { useHomeMenu } from '../Home/Home.context';
 
 export const NavigationComponent = ({User, Initializing}) => {
+    const PrimaryColor = usePrimaryColor();
     const [workspaces, setWorkspaces] = useState([]);
     const navRef = useRef();
     const MyBoards = useMyBoards();
     const MyAvatar = useMyAvatar();
     const MyWorkspaces = useMyWorkspaces();
-    const PrimaryColor = usePrimaryColor();
+    const HomeMenuOptions = useHomeMenu();
+
+    console.log("HomeMenuOptions", HomeMenuOptions);
     const Titles = useTitles();
     const navigate = useNavigate()
 
@@ -49,10 +53,15 @@ export const NavigationComponent = ({User, Initializing}) => {
                 <Navbar.Brand href="#home" style={{color:"white", textAlign:"left"}}>Project Manager</Navbar.Brand>
                 {   User && !Initializing?
                     <>
-                        <FontAwesomeIcon icon={faHome} 
-                            style={{color: 'white', cursor: 'pointer'}}
-                            onClick={() => {navigate('/Home')}}/>
-
+                        <Dropdown autoClose="outside">
+                            <Dropdown.Toggle style={{fontSize:'20px'}}><FontAwesomeIcon icon={faHome} /></Dropdown.Toggle>
+                        
+                            <Dropdown.Menu variant="dark">
+                            {
+                                HomeMenuOptions
+                            }
+                            </Dropdown.Menu>
+                        </Dropdown>
                         <Dropdown autoClose="outside">
                             <Dropdown.Toggle style={{fontSize:'20px'}}><FontAwesomeIcon icon={faList} /></Dropdown.Toggle>
 

@@ -297,6 +297,7 @@ const [useMyWorkspaces, ] = bind(
 export {
     AllUsers$,
     LoggedInUser$,
+    MyBoards$,
     useMyBoards,
     useAllUsers,
     useMondayUser,

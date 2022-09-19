@@ -1,11 +1,11 @@
 
-import { useAppMessageQueue, SetAuthentication, useLoggedInUser } from './Application.context';
+import { useAppMessageQueue, SetAuthentication, useLoggedInUser, UpdateLocation, useCurrentRoute, SetCurrentRoute, useTitles } from './Application.context';
 import { OAuthScopes } from '@Environment/Graph.environment';
 import './Application.component.scss';
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 import React, { useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { NavigationComponent } from '@Components/Navigation/Navigation.component';
-import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { Toast } from 'primereact/toast';
 import { AtomSpinner, BreedingRhombusSpinner, SemipolarSpinner } from 'react-epic-spinners';
 import { Stack } from 'react-bootstrap';
@@ -37,6 +37,8 @@ const RefreshLogin = (instance, authRequest, setAccessToken) => {
 export const APP_QID = '/Application'
 
 function App() {
+  const CurrentRoute = useCurrentRoute();
+  const Titles = useTitles();
   const isAuthenticated = useIsAuthenticated();
   const BusyMessage = useBusyMessage(APP_QID)
   const User = useLoggedInUser();
@@ -52,6 +54,12 @@ function App() {
   }), [accounts]);
 
   const account = authRequest.account;
+  
+  useEffect(() => {
+    if (CurrentRoute !== window.location.href) {
+      SetCurrentRoute(window.location.href);
+    }
+  }, [CurrentRoute, Titles])
 
   useEffect(() => {
     const stored = sessionStorage.getItem(App_TID);
@@ -104,10 +112,10 @@ function App() {
             <>
               <Toast ref={toastRef} position="bottom-right"/>
                 <Routes>
-                  <Route path="/" element={<div>Placeholder...</div>} />
-                  <Route path="Home" element={<HomeComponent />} />
+                  <Route path="/" element={<HomeComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
+                  <Route path="Home" element={<HomeComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
                   <Route path="Projects" element={<Project 
-                    headerHeight={appHeaderRef.current ? appHeaderRef.current.clientHeight : 0} />} />
+                    headerHeight={appHeaderRef.current?.clientHeight ?? 0} />} />
                 </Routes>
               
             </> : null
