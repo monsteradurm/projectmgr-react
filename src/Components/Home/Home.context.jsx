@@ -92,6 +92,32 @@ const BuildEmptyStatusMenu = (status) => {
     )
 }
 
+const BuildStatusDropdownMenu = (item, url) => {
+    const keys = Object.keys(item);
+
+    return keys.filter(k => k != 'key').map(title => {
+
+        if (item[title].items?.length) {
+            const color = item[title].items[0].color;
+            const count = item[title].items.length
+            const itemsURL = url + '&Nesting=' + item[title].nesting.join(',');
+            StoreStatusItemsByURL(itemsURL, item[title].items);
+            return <Dropdown.Item key={item[title].key} onClick={
+                (e) => {
+                    console.log(itemsURL);
+                    SetHomeNavigation(itemsURL)
+            }}>
+                {title}<Badge value={count} style={{marginLeft: 10, background: color}}></Badge>
+            </Dropdown.Item>
+        }
+        return <NestedDropdown title={title} key={item[title].key}>
+            { 
+                BuildStatusDropdownMenu(item[title], url)
+            }
+        </NestedDropdown>
+    })  
+}
+
 const InitialReviewMenu = BuildInitialStatusMenu('Reviews', 'Loading...');
 const InitialFeedbackMenu = BuildInitialStatusMenu('Feedback', 'Loading...');
 const InitialProgressMenu = BuildInitialStatusMenu('In Progress', 'Loading...');
@@ -277,29 +303,6 @@ export const [useStatusAssignedArtists, StatusAssignedArtists$] = bind(
     ), SUSPENSE
 )
 
-const BuildStatusDropdownMenu = (item, url) => {
-    const keys = Object.keys(item);
-
-    return keys.filter(k => k != 'key').map(title => {
-
-        if (item[title].items?.length) {
-            const color = item[title].items[0].color;
-            const count = item[title].items.length
-            const itemsURL = url + '&Nesting=' + item[title].nesting.join(',');
-            StoreStatusItemsByURL(itemsURL, item[title].items);
-            return <Dropdown.Item key={item[title].key} onClick={
-                () => SetHomeNavigation(itemsURL)
-            }>
-                {title}<Badge value={count} style={{marginLeft: 10, background: color}}></Badge>
-            </Dropdown.Item>
-        }
-        return <NestedDropdown title={title} key={item[title].key}>
-            { 
-                BuildStatusDropdownMenu(item[title], url)
-            }
-        </NestedDropdown>
-    })  
-}
 export const [ViewChanged$, SetHomeView] = createSignal(view => view);
 export const [useHomeView, HomeView$] = bind(
     ViewChanged$, SUSPENSE
