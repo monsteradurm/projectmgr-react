@@ -1,5 +1,5 @@
 import { switchMap, map, retry, shareReplay, delay, BehaviorSubject, 
-    tap, of, EMPTY, expand, concatMap, concat, reduce, take } from "rxjs";
+    tap, of, EMPTY, expand, concatMap, concat, reduce, take, catchError } from "rxjs";
 import { ajax } from "rxjs/ajax";
 import { authOptions, BoxAuthorizationString, BoxEndPoints } from "../Environment/Box.environment";
 import { Buffer } from 'buffer';
@@ -39,6 +39,7 @@ export class BoxService {
               
           )
       }
+
       static FolderContents$ = (folderId) => {
           console.log("Fetching Box Contents: ", folderId);
           if (!folderId)
@@ -59,12 +60,18 @@ export class BoxService {
                 if (result === null)
                     return BoxService.SubFolder$(0, folderArr[0]);
 
+                else if (!result.resonse)
+                    return of(null);
                 else if (i >= folderArr.length)
                     return EMPTY
                 
                 return BoxService.SubFolder$(result.response.id, folderArr[i]);
             }),
-            reduce((acc, v) => v ? v.response : null)
+            reduce((acc, v) => v ? v.response : null),
+            catchError(err => {
+                console.log(err);
+                return of(null);
+            })
         )
       }
 

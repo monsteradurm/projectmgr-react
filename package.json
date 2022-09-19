@@ -58,6 +58,8 @@
     "react-scripts": "5.0.1",
     "rxfire": "^6.0.3",
     "rxjs": "^7.5.6",
+    "slate": "^0.82.1",
+    "slate-react": "^0.82.2",
     "svelte-gantt": "^4.0.7-beta",
     "underscore": "^1.13.4",
     "util": "^0.12.4",

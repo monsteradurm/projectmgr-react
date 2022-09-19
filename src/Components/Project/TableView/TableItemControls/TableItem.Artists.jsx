@@ -28,6 +28,8 @@ export const TableItemArtists = () => {
         
     const color = status === SUSPENSE ? null : status.color;
     
+    if (!artists)
+        return <></>
     return (
         <>
             <Tooltip target=".pm-avatar" position="top" className="pm-tooltip" mouseTrack={false}
