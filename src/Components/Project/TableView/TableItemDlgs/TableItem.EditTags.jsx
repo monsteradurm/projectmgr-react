@@ -11,8 +11,8 @@ import { CenteredSummaryContainer } from "../TableItemControls/TableItem.Summary
 import { SummaryText } from "../TableItemControls/TableItem.SummaryText";
 import { ShowEditTagsDialog, useEditTagsDlg } from "./TableItem.EditTags.context";
 import "./TableItem.EditTags.scss";
-
-const TagHint = ({reviewId, style}) => {
+import { Button } from "primereact/button";
+const TagHint = ({reviewId, style, reviewOnly}) => {
     const id = useId();
     const RowB = [
         {text: 'Task Tags', bold: true, id: id + '1'},
@@ -20,21 +20,28 @@ const TagHint = ({reviewId, style}) => {
     ]
     const RowC = [
         {text: 'Review Tags', bold: true, id: id + '3'},
-        {text: 'are valid only to current Review Item', id: id + '4'}
+        {text: 'display only under the current review item', id: id + '4'}
     ]
 
     return (
-        <CenteredSummaryContainer styl={style}>
-            <SummaryText textArr={RowB} />
+        <CenteredSummaryContainer style={style}>
+            {
+                !reviewOnly &&
+                <SummaryText textArr={RowB} />
+            }
             {
                 reviewId &&
-                <SummaryText textArr={RowC} />
+                <>
+                    <div style={{marginTop: !reviewOnly? 20 : 0}}></div>
+                    <SummaryText textArr={RowC} style={{marginTop: !reviewOnly ? 20 : 0}}/>
+                </>
+                
             }
         </CenteredSummaryContainer>)
 }
 
 export const TableItemEditTags = ({}) => {
-    const {BoardItemId, CurrentReviewId} = useEditTagsDlg();
+    const {BoardItemId, CurrentReviewId, reviewOnly} = useEditTagsDlg();
     const dialogRef = useRef();
     const [Element, Task] = useBoardItemName(BoardItemId);
     const Status = useBoardItemStatus(BoardItemId);
@@ -50,7 +57,6 @@ export const TableItemEditTags = ({}) => {
     }
 
     const TagChip = (tag) => {
-        console.log(tag);
         return (
             <div style={{background: Status.color, color: 'white'}}>{tag.name}
             <span className="pi pi-times"></span>
@@ -68,23 +74,27 @@ export const TableItemEditTags = ({}) => {
         header={header} closable={false}
         className="pm-dialog" ref={dialogRef} onHide={() => ShowEditTagsDialog(null)}>
             <Stack direction="vertical" gap={3} style={{padding: 30, height: '100%'}}>
-                
-                <span className="p-float-label">
-                    <Chips id="ItemTags" value={itemTags} max={3} itemTemplate={TagChip}
-                        onChange={(e) => setTags(e.value, 'Task')} />
-                    <label htmlFor="ItemTags">Task Tags</label>
-                </span>
+                {
+                    !reviewOnly &&
+                        <span className="p-float-label">
+                            <Chips id="ItemTags" value={itemTags} max={3} itemTemplate={TagChip}
+                                onChange={(e) => setTags(e.value, 'Task')} />
+                            <label htmlFor="ItemTags">Task Tags</label>
+                        </span>
+                }
                 {
                     CurrentReviewId &&
                     <>
-                        <span className="p-float-label" style={{marginTop: 10}}>
+                        <span className="p-float-label" style={{marginTop: reviewOnly ? 0 : 30}}>
                             <Chips id="ReviewTags" value={reviewTags} max={3} itemTemplate={TagChip}
                                 onChange={(e) => setTags(e.value, 'Review')} />
                             <label htmlFor="ReviewTags">Review Tags</label>
                         </span>
                     </>
                 }
-                <TagHint reviewId={CurrentReviewId} style={{height:'100%'}}/>
+                <TagHint reviewId={CurrentReviewId} reviewOnly={reviewOnly} style={{height:'100%'}}/>
+                <Button label="Submit" onClick={() => SubmitDescription(BoardItemId, 'Description:' + editorState) }
+                    style={{width: 100, position: 'absolute', bottom: 20, right: 20}}/>
             </Stack>
         </Dialog>
     )

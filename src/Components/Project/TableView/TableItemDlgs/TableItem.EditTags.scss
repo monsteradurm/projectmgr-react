@@ -58,4 +58,32 @@
         top: -0.75px;
         color: black;
     }
+    .p-datepicker {
+        padding: 0px;
+        border-color: black;
+    }
+    .p-datepicker .p-datepicker-header {
+        padding: 0.5rem;
+        color: #ffffff;
+        background: #333;
+        font-weight: 600;
+        margin: 0;
+        border-bottom: 1px solid #dee2e6;
+        border-top-right-radius: 6px;
+        border-top-left-radius: 6px;
+    }
+    .p-datepicker .p-datepicker-header .p-datepicker-title .p-datepicker-year, .p-datepicker .p-datepicker-header .p-datepicker-title .p-datepicker-month {
+        color: #ffffff;
+        transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+        font-weight: 600;
+        font-size: 22px;
+        padding: 0.25rem 0rem;
+    }
+    .p-datepicker table td > span:focus {
+        box-shadow: none !important;
+    }
+    .p-datepicker table td > span.p-highlight {
+        color: #ffffff;
+        background: #4e4e4e;
+    }
 }

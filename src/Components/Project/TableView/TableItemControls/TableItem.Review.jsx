@@ -1,8 +1,8 @@
 import { SUSPENSE } from "@react-rxjs/core";
-import { useContext, useEffect, useId, useMemo, useState } from "react";
+import { useContext, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Stack } from "react-bootstrap";
 import { BoardItemContext, useBoardItemName, useBoardItemStatus } from "../../Context/Project.Item.context";
-import { useReviewDelivered, useReviewDepartment, useReviewIndex, useReviewItem, useReviewName, useReviewTags, useReviewTimeline } from "../../Context/Project.Review.context";
+import { useReviewArtists, useReviewDelivered, useReviewDepartment, useReviewIndex, useReviewItem, useReviewName, useReviewTags, useReviewTimeline } from "../../Context/Project.Review.context";
 import { LatestThumbnail$, useSyncsketchComments, useSyncsketchItems, useSyncsketchReview, useSyncsketchThumbnail } from "../../Context/Project.Syncsketch.context";
 import { CenteredSummaryContainer } from "./TableItem.SummaryContainer";
 import { SummaryText } from "./TableItem.SummaryText";
@@ -13,6 +13,9 @@ import { faArrowCircleLeft, faChevronLeft, faChevronRight } from "@fortawesome/f
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { TableItemReviewComments } from "./TableItem.Review.Comments";
 import * as _ from 'underscore';
+import { TableItemReviewContextMenu } from "./TableItem.Review.ContextMenu";
+import { AutoCloseReviewItemContext, ShowReviewContextMenu } from "./TableItem.Review.Context";
+import moment from 'moment';
 
 const NoItems = ({style}) => {
     const id = useId();
@@ -39,6 +42,29 @@ const ReviewTags = ({Tags}) => {
         Tags?.map(t => <div key={t.id}>#{t.name}</div>) : null
     }
     </Stack>)
+}
+
+const ReviewArtists = ({Artists, Timeline}) => {
+    const id = useId();
+    
+    const dates = Timeline?.text && Timeline?.text.indexOf(' - ') >= 0 ?
+        Timeline.text.split(' - ') : null
+    const style = {marginLeft: 5, marginTop:-20, fontSize: 13, color: 'gray'};
+    if ([Artists, Timeline].indexOf(SUSPENSE) >= 0)
+        return <></>
+    return (
+    <>
+        {
+            Artists && Artists.length > 0 && <div style={style}>{Artists?.join(', ')}</div>
+        }
+        {
+            dates &&
+            <div style={style}>({moment(dates[0]).format('MMM DD, YYYY') + ' - ' + 
+                moment(dates[1]).format('MMM DD, YYYY') })</div>
+        }
+        
+    </>
+    )
 }
 const ReviewThumbnail = ({Thumbnail, URL}) => {
     return (<div style={{height: 100}}>
@@ -98,12 +124,12 @@ const SyncReviewSummary = ({Comments}) => {
 }
 
 const ReviewDelivered = ({Delivered, primary}) => {
-    const style = {marginLeft: 20, marginTop: -10, width: 160, textAlign: 'center',
+    const style = {marginLeft: 0, marginTop: -10, width: 160, textAlign: 'center',
     fontSize: 12}
     if (!Delivered)
         return (<></>)
     
-    return (<div style={{...style, color: primary }}>Delivered: {Delivered}</div>) 
+    return (<div style={{...style, color: 'black' }}>Delivered: {Delivered}</div>) 
 }
 
 export const TableItemReview = ({ReviewId, ActiveDepartment, primary}) => {
@@ -119,7 +145,10 @@ export const TableItemReview = ({ReviewId, ActiveDepartment, primary}) => {
     const Comments = useSyncsketchComments(CurrentReview?.id);
     const Delivered = useReviewDelivered(ReviewId);
     const Tags = useReviewTags(ReviewId);
-
+    const ReviewContextMenuRef = useRef();
+    const AutoCloseReview = AutoCloseReviewItemContext();
+    const Artists = useReviewArtists(ReviewId);
+    const Timeline = useReviewTimeline(ReviewId);
     const reviewContainerStyle = useMemo(() => {
         const color = CurrentReviewId === ReviewId ? 
             Status.color : '#BBB';
@@ -154,7 +183,11 @@ export const TableItemReview = ({ReviewId, ActiveDepartment, primary}) => {
     }, [ReviewItems, CurrentItemIndex])
 
     return (
-        <Stack direction="vertical" gap={1} style={reviewContainerStyle} className="pm-review-container">
+        <Stack direction="vertical" gap={1} style={reviewContainerStyle} className="pm-review-container"
+        onContextMenu={(evt) => ShowReviewContextMenu(evt,CurrentReviewId, ReviewContextMenuRef)}>
+            <TableItemReviewContextMenu CurrentReviewId={ReviewId} ReviewItems={ReviewItems} 
+                Artists={Artists} BoardItemId={BoardItemId}
+                Delivered={Delivered} CurrentItemIndex={CurrentItemIndex} ContextMenuRef={ReviewContextMenuRef}/>
              {
                 // arrow for previous item, if index > 0
                 ReviewItems?.length > 1 && CurrentItemIndex > 0 ?
@@ -174,7 +207,11 @@ export const TableItemReview = ({ReviewId, ActiveDepartment, primary}) => {
                     <TableItemReviewComments ItemId={CurrentReview?.id} Comments={Comments}/>
                 </Stack>
             </Stack>
-            <ReviewDelivered Delivered={Delivered} primary={primary}/>
+            <Stack direction="horizontal" gap={1} style={{padding: '0px 20px'}}>
+                <ReviewDelivered Delivered={Delivered} primary={primary}/>
+                <div className="mx-auto"></div>
+                <ReviewArtists Artists={Artists} Timeline={Timeline}/>
+            </Stack>
             {
                 // arrow for next item, if there are more above current index
                 ReviewItems?.length > 1 && CurrentItemIndex < ReviewItems.length - 1?

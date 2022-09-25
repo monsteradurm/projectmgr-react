@@ -28,7 +28,6 @@ const [useSyncsketchProject, SyncsketchProject$] = bind(
             if (stored) {
                 try {
                     const data = JSON.parse(stored);
-                    console.log(key, data);
                     return of(data);
                 }
                 catch { }
@@ -60,7 +59,6 @@ const [useSyncsketchGroups, SyncsketchGroups$] = bind(
 const [useSyncsketchGroup, SyncsketchGroup$] = bind(
     combineLatest([SyncsketchGroups$, Board$]).pipe(
         map(([groups, board]) => {
-            console.log(groups, board);
             if (groups === SUSPENSE || board === SUSPENSE)
                 return SUSPENSE;
 
@@ -143,7 +141,6 @@ const [useSyncsketchReviewsFromElement,] = bind(
                 return SUSPENSE;
             return reviews;
         }),
-        tap(t => console.log("REVIEWS BY ELEMENT", element, t))
     ), SUSPENSE
 )
 
@@ -162,7 +159,6 @@ const [useSyncsketchReview, SyncsketchReview$] = bind(
                 return SUSPENSE;
             if (reviews === null || reviews === undefined)
                 return null;
-            console.log("HERE", element, reviews);
             return reviews.filter(r => r.department === feedbackDepartment)
         }),
         map(reviews => reviews.length > 0 ? reviews[0] : null)

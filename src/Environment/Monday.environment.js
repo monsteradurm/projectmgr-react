@@ -8,6 +8,12 @@ export const MondayConfig = {
 
 export const MondayGraphQL = {
 
+    Query_BoardId: (itemId) => `query {
+      items (ids:${itemId}){
+        board { id }
+      }
+    }`,
+
     Query_AllUsers: () => 
     `query {
       users {
@@ -47,6 +53,12 @@ export const MondayGraphQL = {
         }
       }`,
 
+    Mutate_Update: (id, content) => 
+        `mutation {
+          create_update (item_id: ${id}, body: "${content}") {
+              id
+          }
+        }`,
     Mutate_SimpleColumn: (boardId, itemId, columnId, statusIndex)  => 
         `mutation { change_simple_column_value (board_id: ${boardId}, item_id: ${itemId}, 
             column_id: "${columnId}", value: "${statusIndex}") { id } }`,
@@ -60,6 +72,37 @@ export const MondayGraphQL = {
             column_values: "${JSON.stringify(val).replace(/"/g, '\\"')}", create_labels_if_missing: true) 
           { id }
         }`,
+
+      Mutate_DateColumn: (boardId, itemId, columnId, date) => {
+      const value = date ? {date} : { }
+       return `mutation {
+        change_column_value(item_id:${itemId}, board_id:${boardId}, 
+          column_id: ${columnId}, value: "${JSON.stringify(value).replace(/"/g, '\\"')}") {
+            id
+          }
+        }`
+      },
+
+      Mutate_TimelineColumn: (boardId, itemId, columnId, from, to) => {
+        const value = {from, to }
+         return `mutation {
+          change_column_value(item_id:${itemId}, board_id:${boardId}, 
+            column_id: ${columnId}, value: "${JSON.stringify(value).replace(/"/g, '\\"')}") {
+              id
+            }
+          }`
+        },
+
+      Mutate_PeopleColumn: (boardId, itemId, columnId, ids) => {
+        const data = {personsAndTeams: ids.map(id => ({id, kind:"person"}))};
+        let values = JSON.stringify(data).replace(/"/g, '\\"');
+        return `mutation {
+          change_column_value(item_id: ${itemId}, board_id: ${boardId}, 
+            column_id: ${columnId}, value: "${values}") {
+                id
+              }
+          }`
+    },
 
     Create_SubItem: (itemId, name) => 
         `mutation {

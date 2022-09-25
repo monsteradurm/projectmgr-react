@@ -10,7 +10,6 @@ export const TableItemReviewSummary = () => {
     const ReviewName = useReviewName(CurrentReviewId);
     const Timeline = useAssignedTimeline(BoardItemId, CurrentReviewId);
     const [TimelineHTML, setTimelineHTML] = useState(null);
-
     useEffect(() => {
         const tl = formatTimeline(Timeline);
 

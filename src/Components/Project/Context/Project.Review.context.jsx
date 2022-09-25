@@ -73,7 +73,16 @@ const [useReviewIds, ] = bind(
 )
 
 // retrieve review item from id
-const [useReviewItem, ReviewItem$] = bind((reviewId) => ReviewById(reviewId), SUSPENSE);
+const [useReviewItem, ReviewItem$] = bind((reviewId) => 
+    ReviewIds$.pipe(
+        map(ids => 
+            reviewId ?
+                ids.filter(i => !!i).map(i => i.toString())
+                    .indexOf(reviewId.toString()) >= 0
+                : false
+        ),
+        switchMap(exists => exists ? ReviewById(reviewId) : of(null))
+    ), SUSPENSE);
 
 // get id of current review (top of Reviews$)
 const [useCurrentReviewId, CurrentReviewId$] = bind(
@@ -141,14 +150,10 @@ const [useReviewDelivered,] = bind(
                 return null;
 
             const delivered = item['Delivered Date'];
-
-            console.log(delivered);
             if (!delivered || !delivered.text?.length)
                 return null;
 
-            const dateArr= delivered.text.split('-')
-            
-            return moment(new Date(...dateArr)).format('MMM DD, YYYY')
+            return moment(new Date(delivered.text)).format('MMM DD, YYYY')
         })
     ), 'SUSPENSE'
 )
@@ -231,12 +236,14 @@ export {
     useReviewLink,
     useReviews,
     useReviewItem,
+    useReviewArtists,
     useReviewIds,
     useReviewIndex,
     useReviewDelivered,
     ReviewArtists$,
     ReviewTimeline$,
     ReviewLink$,
+    ReviewItem$,
     ReviewDepartments$,
     CurrentReview$
 }

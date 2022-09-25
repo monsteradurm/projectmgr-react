@@ -89,16 +89,12 @@ export class MondayService {
       )
 
     static AddItemBadge = (boardId, itemId, columnId, badges, entry, id) => {
-      console.log(entry, badges)
       const Tag$ = id ? of(id) : MondayService.QueryTag$(entry);
       
 
       return Tag$.pipe(
-        tap(t => console.log("TAG RESULT",t )),
         map(tag => tag ? { "tag_ids" : _.pluck(badges, 'id').concat([tag]) } : null),
-        tap(console.log),
         map(v => v ? MondayGraphQL.Mutate_TagsColumn(boardId, itemId, columnId, v) : null),
-        tap(console.log),
         switchMap(mutation => mutation ? MondayService.Execute$(mutation)  : of(null)),
       )
     }
@@ -111,12 +107,47 @@ export class MondayService {
     }
     
 
+    static StoreUpdate$ = (id, content) => {
+      return MondayService.Execute$(MondayGraphQL.Mutate_Update(id, content)).pipe(
+      )
+    }
+
+    static MutateDate = (boardId, itemId, columnId, date) => {
+      const mutation = MondayGraphQL.Mutate_DateColumn(boardId, itemId, columnId, date);
+
+
+      return MondayService.Execute$(mutation).pipe(
+      )
+    }
+
+    static MutateTimeline = (boardId, itemId, columnId, from, to) => {
+      const mutation = MondayGraphQL.Mutate_TimelineColumn(boardId, itemId, columnId, from, to);
+
+      console.log(mutation);
+      return MondayService.Execute$(mutation).pipe(
+      )
+    }
+
+    static MutatePeople = (boardId, itemId, columnId, ids) => {
+      const mutation = MondayGraphQL.Mutate_PeopleColumn(boardId, itemId, columnId, ids);
+
+      console.log(mutation);
+      return MondayService.Execute$(mutation).pipe(
+      )
+    }
+
+    static Query_BoardId = (itemId) => MondayService.Execute$(
+      MondayGraphQL.Query_BoardId(itemId)
+        ).pipe(
+          map(response => response?.items ? response.items : null ),
+          map(items => items && items.length > 0 ? items[0].board.id : null)
+      )
+
     static ItemDescription = (id) => {
       return MondayService.Execute$(MondayGraphQL.Query_ItemUpdates(id)).pipe(
         map((response) => response?.items ? response.items : null),
         map((items) => items && items.length > 0 ? items[0] : null),
         map(item => item?.updates ? item.updates : null),
-        tap(console.log),
         map(updates => updates && updates.length > 0 ? 
           _.filter(updates, (u) => u.text_body.startsWith('Description:')) : null),
         map(updates => updates && updates.length > 0 ? updates[0] : null),

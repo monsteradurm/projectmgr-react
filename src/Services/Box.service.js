@@ -41,7 +41,7 @@ export class BoxService {
       }
 
       static FolderContents$ = (folderId) => {
-          console.log("Fetching Box Contents: ", folderId);
+          //("Fetching Box Contents: ", folderId);
           if (!folderId)
             return of(null);
 
@@ -66,7 +66,7 @@ export class BoxService {
                 else if (i >= folderArr.length)
                     return EMPTY
                 
-                console.log("Retrieving SubFolder: ", result.response.id, folderArr[i]);
+                //console.log("Retrieving SubFolder: ", result.response.id, folderArr[i]);
                 return BoxService.SubFolder$(result.response.id, folderArr[i]);
             }),
             reduce((acc, v) => v ? v.response : null),

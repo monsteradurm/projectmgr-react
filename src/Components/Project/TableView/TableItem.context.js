@@ -2,17 +2,22 @@ import { CombineOrSuspend, ReadyOrSuspend$ } from "@Helpers/Context.helper";
 import { bind, SUSPENSE } from "@react-rxjs/core";
 import { createSignal, partitionByKey } from "@react-rxjs/utils";
 import React, { useEffect, useState } from "react";
-import { combineLatest, EMPTY, map, merge, of, pairwise, scan, startWith, switchMap, take, tap } from "rxjs";
+import { combineLatest, EMPTY, forkJoin, map, merge, of, pairwise, scan, startWith, switchMap, take, tap, withLatestFrom } from "rxjs";
 import { ItemBadgeIcon } from "../../../Helpers/ProjectItem.helper";
 import { AddBoardItemBadge, AssignedArtists$, BoardItemBadges$, RemoveBoardItemBadge, 
-    SetBoardItemStatus, BoardItem$, GetPersonValues } from "../Context/Project.Item.context";
+    SetBoardItemStatus, BoardItem$, GetPersonValues, BoardItemRescheduled$ } from "../Context/Project.Item.context";
 import { BadgeOptions$, DepartmentOptions$, StatusOptions$ } from "../Context/Project.Objects.context";
-import { ReviewDepartments$ } from "../Context/Project.Review.context";
+import { ReviewDepartments$, ReviewItem$ } from "../Context/Project.Review.context";
 import * as _ from 'underscore';
 import { ShowUploadReviewDialog } from "./TableItemDlgs/TableItem.Upload.context";
 import { AllUsers$ } from "../../../App.Users.context";
-import { SendToastWarning } from "../../../App.Toasts.context";
+import { SendToastError, SendToastSuccess, SendToastWarning } from "../../../App.Toasts.context";
 import { ShowEditTagsDialog } from "./TableItemDlgs/TableItem.EditTags.context";
+import { ShowEditDescriptionDialog } from "./TableItemDlgs/TableItem.EditDescription.context";
+import { ShowEditTimelineDialog } from "./TableItemDlgs/TableItem.EditTimeline.context";
+import { AutoCloseReviewItemContext } from "./TableItemControls/TableItem.Review.Context";
+import { BoardId$ } from "../Context/Project.Params.context";
+import { MondayService } from "../../../Services/Monday.service";
 
 // current tabs stored according to boarditem
 const _activeTabMap = (BoardItemId, ActiveTab) => ({BoardItemId, ActiveTab});
@@ -88,32 +93,83 @@ const [, AddArtistMenu$] = bind(
         map(([users, assigned]) => _.map(Object.values(users)
             .filter(u => assigned.map(a => a.toLowerCase()).indexOf(u.monday.name.toLowerCase()) < 0), 
                 user => user.monday)),
+        map(users => _.sortBy(users, u => u.name)),
         map(users => _.map(users, u => ({label: u.name, command: () => OnAddArtist(BoardItemId, CurrentReviewId, u)})))
     ), SUSPENSE
 )
 
 const OnRemoveArtist = (BoardItemId, CurrentReviewId, artist) => {
-    BoardItem$(BoardItemId).pipe(
-        take(1)
-    ).subscribe((item) => {
-        console.log("NOT YET IMPLEMENTED")
-        SendToastWarning("Artist Allocation NYI")
-        console.log(item);
-        const itemArtists = GetPersonValues(item.Artist);
-        let reviewArtists = null;
-        const review = CurrentReviewId ? _.find(item.subitems,  s => s.id === CurrentReviewId) : null;
-        const reallocated = item.subitems.filter(s => s.Artist?.text?.lengt).length > 0;
+    combineLatest([
+        BoardId$,
+        BoardItem$(BoardItemId),
+        ReviewItem$(CurrentReviewId),
+        BoardItemRescheduled$(BoardItemId),
+        AssignedArtists$(BoardItemId, CurrentReviewId),
+        AllUsers$
+    ]
+).pipe(
+    switchMap(params => params.indexOf(SUSPENSE) >= 0 ? EMPTY : of(params)),
+    take(1)
+).subscribe(([boardId, item, review, rescheduled, artists, allUsers]) => {
+    const columnId = !CurrentReviewId ? item.Artist.id : review.Artist.id;
+    const elementId = !CurrentReviewId ? item.id : review.id;
+    const ids = artists.map(a => allUsers[a.toLowerCase()])
+        .filter(a => !!a).map(a => a.monday)
+        .filter(a => !!a).map(a => a.id)
+        .filter(a => !!a && a.toString() !== artist.id.toString())
 
-        const changeId = reallocated ? review.id : item.id; 
-
-    });
+    of(boardId).pipe(
+        switchMap(board => !CurrentReviewId ? of(board) : MondayService.Query_BoardId(elementId)),
+        switchMap(board => MondayService.MutatePeople(board, elementId, columnId, ids))
+    )
+   .pipe(
+       take(1)
+    ).subscribe(res => {
+            if (res?.change_column_value?.id) {
+                SendToastSuccess("Artists Successfully Updated");
+            }
+            else {
+                SendToastError("Unable to update Artists");
+            }
+    })
+});
 }
 const OnAddArtist = (BoardItemId, CurrentReviewId, artist) => {
-    BoardItem$(BoardItemId).pipe(
+    combineLatest([
+            BoardId$,
+            BoardItem$(BoardItemId),
+            ReviewItem$(CurrentReviewId),
+            BoardItemRescheduled$(BoardItemId),
+            AssignedArtists$(BoardItemId, CurrentReviewId),
+            AllUsers$
+        ]
+    ).pipe(
+        switchMap(params => params.indexOf(SUSPENSE) >= 0 ? EMPTY : of(params)),
         take(1)
-    ).subscribe((item) => {
-        console.log("NOT YET IMPLEMENTED")
-        SendToastWarning("Artist Allocation NYI")
+    ).subscribe(([boardId, item, review, rescheduled, artists, allUsers]) => {
+        const columnId = !CurrentReviewId ? item.Artist.id : review.Artist.id;
+        const elementId = !CurrentReviewId ? item.id : review.id;
+        const ids = artists.map(a => allUsers[a.toLowerCase()])
+            .filter(a => !!a).map(a => a.monday)
+            .filter(a => !!a)
+            .map(a => a.id);
+
+        ids.push(artist.id);
+
+        of(boardId).pipe(
+            switchMap(board => !CurrentReviewId ? of(board) : MondayService.Query_BoardId(elementId)),
+            switchMap(board => MondayService.MutatePeople(board, elementId, columnId, ids))
+        )
+       .pipe(
+           take(1)
+        ).subscribe(res => {
+            if (res?.change_column_value?.id) {
+                SendToastSuccess("Artists Successfully Updated");
+            }
+            else {
+                SendToastError("Unable to update Artists");
+            }
+        })
     });
 }
 
@@ -122,6 +178,7 @@ const [, RemoveArtistMenu$] = bind(
     combineLatest([AllUsers$, AssignedArtists$(BoardItemId, CurrentReviewId)]).pipe(
         switchMap(params => params.indexOf(SUSPENSE) >= 0 ? EMPTY : of(params)),
         map(([users, assigned]) => assigned ? assigned.map(a => users[a.toLowerCase()].monday) : []),
+        map(users => _.sortBy(users, u => u.name)),
         map(users => _.map(users, u => ({label: u.name, 
             command: () => OnRemoveArtist(BoardItemId, CurrentReviewId, u)})))
     ), SUSPENSE
@@ -225,9 +282,9 @@ const [useTableItemContextMenu, TableItemContextMenu] = bind(
             { separator: true},
             ...Artists,
             { separator: true},
-            {label: 'Description'},
+            {label: 'Description', command: () => ShowEditDescriptionDialog(BoardItemId)},
             {label: 'Tags', command: () => ShowEditTagsDialog(BoardItemId, CurrentReviewId)},  
-            { label: 'Timeline'},
+            { label: 'Timeline', command: () => ShowEditTimelineDialog(BoardItemId, CurrentReviewId)},
             { separator: true},
             { label: 'Upload New Review', 
               command: (evt) => ShowUploadReviewDialog(BoardItemId)
@@ -298,7 +355,6 @@ const TableItemProvider = ({BoardItemId, CurrentReviewId, children}) => {
     const [state, setState] = useState(DefaultTableItemState)
     const ActiveTab = useActiveTab(BoardItemId);
     const AutoClose = AutoCloseBoardItemContext();
-
     useEffect(() => {
         if (BoardItemId === SUSPENSE || CurrentReviewId === SUSPENSE)
             return;

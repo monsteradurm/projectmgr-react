@@ -223,17 +223,21 @@ const [useBoardItemTimeline, BoardItemTimeline$] = bind(
             map((item) => item?.Timeline),
     ), SUSPENSE
 )
+const [useBoardItemRescheduled, BoardItemRescheduled$] = bind(
+    itemId => BoardItemById(itemId).pipe(
+        map(item => item.subitems?.filter(s => s.Timeline?.text?.length > 0).length > 0)    
+    ), SUSPENSE
+)
 
 const [useAssignedTimeline, AssignedTimeline$] = bind(
     (itemId, reviewId) => 
         combineLatest([
             ReadyOrSuspend$(itemId, BoardItemTimeline$),
             ReadyOrSuspend$(reviewId, ReviewTimeline$),
-            BoardItemById(itemId)
+            ReadyOrSuspend$(itemId, BoardItemRescheduled$)
         ]).pipe(
-            map(([itl, rtl, item]) => {
-                const reallocated = item.subitems?.filter(s => s.Timeline?.value).length > 0;
-                return reallocated ? rtl : itl;
+            map(([itl, rtl, rescheduled]) => {
+                return rescheduled ? rtl : itl;
             })
     ), SUSPENSE
 )
@@ -413,7 +417,6 @@ const [useElementReference, ElementReference$] = bind(
                 map(entry => entry?.id ? entry.id : null)
             )
         }),
-        tap(t => console.log("BOX ID?", t)),
         switchMap(id => id ? BoxService.FolderContents$(id) : of (null))
     ), SUSPENSE
 )
@@ -441,10 +444,7 @@ const [useLastDelivered, LastDelivered$] = bind(
         map(subitems => subitems.map(s => s['Delivered Date']?.text)),
         map(dates => dates.length > 0 ? dates.sort().reverse()[0] : null),
         map(date => {
-            if (!date) return null
-
-            const dateArr = date.split('-');
-            return moment(new Date(...dateArr)).format('MMM DD, YYYY')
+            return moment(new Date(date)).format('MMM DD, YYYY')
         })
     ), SUSPENSE
 )
@@ -473,6 +473,8 @@ export {
     useBoardItemColumnId,
     useBoardItemName,
     useBoardItemTags,
+    useBoardItemTimeline,
+    useBoardItemRescheduled,
     useBoardItemLastUpdate,
     useBoardItemBadges,
     useBoardItemDepartment,
@@ -483,6 +485,7 @@ export {
     BoardItemName$,
     BoardItemContext,
     BoardItemMap$,
+    BoardItemRescheduled$,
     BoardItemBadges$,
     BoardItem$,
     GetPersonValues,
