@@ -1,12 +1,12 @@
 import { ReverseProxy } from "./proxy.environment";
 
 export const BoxEndPoints = {
-    Subfolder: (root, folder) => '/box-rest/subfolder?root=' + 
+    Subfolder: (root, folder) => ReverseProxy + 'liquidanimation.live/box-rest/subfolder?root=' + 
         root + '&folder=' + folder,
 
-    FolderContents: (id) => '/box-rest/folderItems?root=' + id,
+    FolderContents: (id) => ReverseProxy + 'liquidanimation.live/box-rest/folderItems?root=' + id,
 
-    Thumbnail: (id) => '/box-rest/thumbnail?id=' + id,
+    Thumbnail: (id) => ReverseProxy + `liquidanimation.live/box-rest/thumbnail?id=` + id,
 
-    SharedFile: (id) => '/box-rest/sharedfile?id=' + id
+    SharedFile: (id) => ReverseProxy + `liquidanimation.live/box-rest/sharedfile?id=` + id
 }
