@@ -28,7 +28,7 @@ export const TableItemStatus = () => {
     const statusRef = useRef();
 
     const showDepartment = Department && (
-        Status.text.indexOf('Feedback') >= 0 || Status.text.indexOf('Review') >= 0
+        Status.text.indexOf('Feedback') >= 0 || Status.text.indexOf('Review') >= 0 || Status.text.indexOf('Approved') >= 0
     )
     return (
     <div className="pm-status" ref={statusRef}
