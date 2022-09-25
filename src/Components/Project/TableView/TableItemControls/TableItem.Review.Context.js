@@ -5,6 +5,7 @@ import _ from "underscore";
 import { SendToastError, SendToastSuccess } from "../../../../App.Toasts.context";
 import { AllUsers$ } from "../../../../App.Users.context";
 import { MondayService } from "../../../../Services/Monday.service";
+import { DeleteMultipleSyncsketchItems, DeleteMultipleSyncsketchItems$, DeleteSyncsketchItem } from "../../Context/Project.Syncsketch.context";
 import { ReviewItem$ } from "../../Context/Project.Review.context";
 import { ShowEditTagsDialog } from "../TableItemDlgs/TableItem.EditTags.context";
 import { ShowEditDeliveredDateDialog, ShowEditTimelineDialog } from "../TableItemDlgs/TableItem.EditTimeline.context";
@@ -18,9 +19,10 @@ export const [useReviewContextMenu, ReviewContextMenu$] = bind(
     (BoardItemId, CurrentReviewId, ReviewItems, CurrentItemIndex, Delivered, Artists) =>
     AllUsers$.pipe(
         map((allUsers) => {
-            let reviews = [{label: 'Delete Review'}]
+            let reviews = [{label: 'Delete Review', command: () => OnDeleteReview(CurrentReviewId, ReviewItems)}];
             if (ReviewItems.length > 1)
-                reviews = [{label: 'Delete Item'}, ...reviews]
+                reviews = [{label: 'Delete Item', command: () => DeleteSyncsketchItem(ReviewItems[CurrentItemIndex])
+                             }, ...reviews]
 
             const removeArtistMenu = Artists !== SUSPENSE && Artists?.length > 0? 
                 Artists.sort().map(a => ({label: a, command: () => 
@@ -68,7 +70,6 @@ export const [AutoCloseReviewItemContext,] = bind(
             if (prev?.ref?.current)
                 prev.ref.current.hide(prev.evt);
 
-            console.log(prev, cur);
             if (cur.ref?.current)
                 cur.ref.current.show(cur.evt);
             return cur;
@@ -128,6 +129,18 @@ const OnAddArtist = (reviewId, artists, artistId, allUsers) => {
     });
 }
 
+const OnDeleteReview = (reviewId, items) => {
+    DeleteMultipleSyncsketchItems$(items).pipe(
+        tap(t => console.log),
+        switchMap(() => MondayService.ArchiveItem$(reviewId))
+    ).subscribe((res) => {
+        if (res?.archive_item?.id) {
+            SendToastSuccess("Syncsketch Review and associated items were removed.")
+        } else {
+            SendToastError("There was an issue removing this Syncsketch Review")
+        }
+    })
+}
 
 const OnRemoveArtist = (reviewId, artists, artistId, allUsers) => {
     combineLatest([

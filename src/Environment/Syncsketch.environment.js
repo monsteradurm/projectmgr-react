@@ -20,6 +20,7 @@ export const SyncsketchPosts = {
     UpdateItemSort: (reviewId) => `/syncsketch-v2/review/${reviewId}/sort_items/`,
     
     CreateReview: `/syncsketch/review/`,
+    DeleteItems: `/syncsketch-v2/bulk-delete-items/`
 }
 
 export const SyncsketchQueries = {

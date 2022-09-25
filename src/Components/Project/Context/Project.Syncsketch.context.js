@@ -1,5 +1,6 @@
 import { bind, SUSPENSE } from "@react-rxjs/core";
-import { BehaviorSubject, combineLatest, concat, concatAll, concatMap, concatWith, debounceTime, EMPTY, filter, from, map, merge, of, reduce, scan, switchMap, take, tap, withLatestFrom } from "rxjs";
+import { BehaviorSubject, combineLatest, concat, concatAll, concatMap, toArray,
+    concatWith, debounceTime, EMPTY, filter, from, map, merge, of, reduce, scan, switchMap, take, tap, withLatestFrom } from "rxjs";
 import { SyncsketchService } from "@Services/Syncsketch.service";
 import { Board$, Group$, Project$ } from "./Project.Objects.context";
 import { ReviewById, ReviewLink$ } from "./Project.Review.context";
@@ -12,6 +13,7 @@ import { AddRepoMessage, PROJ_QID, RemoveRepoMessage } from "./Project.context";
 import { AttrOrSuspend, AttrOrSuspend$ } from "../../../Helpers/Context.helper";
 import { AddQueueMessage, RemoveQueueMessage } from "../../../App.MessageQueue.context";
 import { compareByFieldSpec } from "@fullcalendar/react";
+import { FirebaseService } from "../../../Services/Firebase.service";
 
 
 
@@ -294,6 +296,33 @@ const [useLatestThumbnail, LatestThumbnail$] = bind(
     )
 )
 
+const HandleDelete = (res) => {
+    console.log(res);
+}
+const DeleteSyncsketchItem$ = (item) => {
+    return SyncsketchService.ItemById$(item.id).pipe(
+        switchMap(res => {
+            if (res?.active)
+                 return SyncsketchService.DeleteItems$([item.id]).pipe(
+                     take(1),
+                     switchMap(() => FirebaseService.DeleteSyncsketchItem(item))
+                )
+             return FirebaseService.DeleteSyncsketchItem(item);
+         })
+     )
+}
+const DeleteSyncsketchItem = (item) => {
+    DeleteSyncsketchItem$(item).subscribe(HandleDelete);
+}
+
+const DeleteMultipleSyncsketchItems$ = (itemArray) => {
+    console.log("Removing SyncsketchItems", itemArray);
+    return from(itemArray).pipe(
+        concatMap(item => DeleteSyncsketchItem$(item)),
+        take(itemArray.length),
+        toArray()
+    )
+}
 
 export {
     LatestThumbnail$,
@@ -315,5 +344,7 @@ export {
     SyncsketchProject$,
     SyncsketchGroup$,
     SyncsketchThumbnail$,
-    ItemIdFromSyncLink
+    ItemIdFromSyncLink,
+    DeleteSyncsketchItem,
+    DeleteMultipleSyncsketchItems$
 }

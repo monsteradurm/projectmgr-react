@@ -54,6 +54,13 @@ export class FirebaseService {
         // doc.data() is never undefined for query doc snapshots
         });
     }
+    static DeleteSyncsketchItem(item) {
+        const docRef = fsDoc(FirebaseService.db, 
+            `SyncsketchItems/${item.project}/groups/${item.group}/reviews/${item.sketchId}/items/${item.id}`);
+
+        return from(deleteDoc(docRef))
+    }
+
     static SyncsketchItemsFromPulseId(projectId, pulse) {
 
         const itemsRef = collection(db, "SyncsketchItems")

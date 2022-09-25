@@ -6,6 +6,7 @@ import moment from 'moment'
 import { ReviewItemName } from "../Helpers/ProjectItem.helper";
 import { SUSPENSE } from "@react-rxjs/core";
 import { FirebaseService } from "./Firebase.service";
+import { SendToastError } from "../App.Toasts.context";
 
 const QueryHeaders = {
     'Accept': 'application/json, text/plain, */*',
@@ -49,6 +50,18 @@ export class SyncsketchService {
 
     static RenameItem$ = (itemId, name) => {
 
+    }
+
+    static DeleteItems$ = (itemArr) => {
+        if (!Array.isArray(itemArr)) {
+            //SendToastError("Item/s could not be removed from Syncsketch");
+            return of(null);
+        }
+
+        const url = SyncsketchPosts.DeleteItems;
+        return ajax.post(url, {"item_ids": itemArr.map(i => parseInt(i))}, QueryHeaders).pipe(
+            tap(t => console.log("DELETE RESULT", t))
+        )
     }
 
     static UploadItem$ = (reviewId, file, params, index, count, type) => {

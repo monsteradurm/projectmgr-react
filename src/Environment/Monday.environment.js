@@ -72,8 +72,14 @@ export const MondayGraphQL = {
             column_values: "${JSON.stringify(val).replace(/"/g, '\\"')}", create_labels_if_missing: true) 
           { id }
         }`,
+    
+    ArchiveItem: (itemId) => `mutation {
+      archive_item (item_id: ${itemId}) {
+          id
+      }
+    }`,
 
-      Mutate_DateColumn: (boardId, itemId, columnId, date) => {
+    Mutate_DateColumn: (boardId, itemId, columnId, date) => {
       const value = date ? {date} : { }
        return `mutation {
         change_column_value(item_id:${itemId}, board_id:${boardId}, 

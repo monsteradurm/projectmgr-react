@@ -9,7 +9,7 @@ import { BoardItemContext, useBoardItemDepartment, useBoardItemName, useBoardIte
 import { useReviewTags } from "../../Context/Project.Review.context";
 import { CenteredSummaryContainer } from "../TableItemControls/TableItem.SummaryContainer";
 import { SummaryText } from "../TableItemControls/TableItem.SummaryText";
-import { ShowEditTagsDialog, useEditTagsDlg } from "./TableItem.EditTags.context";
+import { OnTagsUpdate, ShowEditTagsDialog, useEditTagsDlg } from "./TableItem.EditTags.context";
 import "./TableItem.EditTags.scss";
 import { Button } from "primereact/button";
 const TagHint = ({reviewId, style, reviewOnly}) => {
@@ -45,25 +45,80 @@ export const TableItemEditTags = ({}) => {
     const dialogRef = useRef();
     const [Element, Task] = useBoardItemName(BoardItemId);
     const Status = useBoardItemStatus(BoardItemId);
-    const itemTags = useBoardItemTags(BoardItemId);
-    const reviewTags = useReviewTags(CurrentReviewId)
+    const itemTagState = useBoardItemTags(BoardItemId);
+    const reviewTagState = useReviewTags(CurrentReviewId)
     const Department = useBoardItemDepartment(BoardItemId);
+    const [itemTags, setItemTags] = useState([]);
+    const [reviewTags, setReviewTags] = useState([]);
+
+    const [itemTagsChanged, setItemTagsChanged] = useState(false);
+    const [reviewTagsChanged, setReviewTagsChanged] = useState(false);
+
+    const setTags = (tags, type) => {
+        if (type === 'Review' && reviewTagState && reviewTagState !== SUSPENSE) {
+            setReviewTags(tags.map(t => t.replace(/\s+/g, '')));
+            setReviewTagsChanged(
+                JSON.stringify(reviewTagState.map(t => t.name)) !== JSON.stringify(tags)
+                )
+        }
+
+        else if (type === 'Task' && itemTagState && itemTagState !== SUSPENSE){
+            setItemTags(tags.map(t => t.replace(/\s+/g, '')));
+            setItemTagsChanged(
+                JSON.stringify(itemTagState.map(t => t.name)) !== JSON.stringify(tags)
+            )
+        }
+    }
+
+    useEffect(() => {
+
+        if ((!itemTagState || itemTagState === SUSPENSE || itemTagState.length < 1) && itemTags.length > 1)
+            setTags([], 'Task');
+        else if (itemTagState?.length > 0) {
+            setTags(itemTagState.map(t => t.name), 'Task')
+        }
+        
+        if ((!reviewTagState || reviewTagState === SUSPENSE || reviewTagState.length < 1) && reviewTags.length > 1)
+            setTags([], 'Review');
+        else if (reviewTagState?.length > 0) {
+            setTags(reviewTagState.map(t => t.name), 'Review')
+        }
+    }, [itemTagState, reviewTagState]);
 
     if ([Status, Element, Task, BoardItemId, CurrentReviewId, reviewTags, itemTags].indexOf(SUSPENSE) >= 0)
         return <></>
 
-    const setTags = (tags, type) => {
-        console.log(tags, type);
-    }
+    
 
+    const RemoveChip = (e, chip) => {
+        const p = e.target.parentElement.parentElement.parentElement.parentElement.parentElement.id;
+        if (p === 'ItemTags')
+            setTags(
+                itemTags.filter(t => t !== chip), 'Task'
+            )
+        else 
+            setTags(
+                reviewTags.filter(t => t !== chip), 'Review'
+        )
+
+    }
+    
     const TagChip = (tag) => {
         return (
-            <div style={{background: Status.color, color: 'white'}}>{tag.name}
-            <span className="pi pi-times"></span>
+            <div style={{background: Status.color, color: 'white'}}>{tag}
+            <span className="pi pi-times" onClick={(e) => RemoveChip(e, tag)}></span>
             </div>
         );
     }
+
+    const SubmitTags = () => {
+        if (CurrentReviewId && reviewTagsChanged)
+            OnTagsUpdate(CurrentReviewId, reviewTags, 'Review');
         
+        if (BoardItemId && itemTagsChanged)
+            OnTagsUpdate(BoardItemId, itemTags, 'Task');
+    }
+
     const header = (
         <DialogHeader color={Status?.color} Header={Task ? Element + ", " + Task : Element}
             HeaderLeft="Edit Tags:" HeaderRight={Department} onClose={() => ShowEditTagsDialog(null)}/>
@@ -93,8 +148,11 @@ export const TableItemEditTags = ({}) => {
                     </>
                 }
                 <TagHint reviewId={CurrentReviewId} reviewOnly={reviewOnly} style={{height:'100%'}}/>
-                <Button label="Submit" onClick={() => SubmitDescription(BoardItemId, 'Description:' + editorState) }
-                    style={{width: 100, position: 'absolute', bottom: 20, right: 20}}/>
+                {
+                    (itemTagsChanged || reviewTagsChanged) &&
+                    <Button label="Submit" onClick={() => SubmitTags() }
+                        style={{width: 100, position: 'absolute', bottom: 20, right: 20}}/>
+                }
             </Stack>
         </Dialog>
     )

@@ -1,5 +1,5 @@
-import { BehaviorSubject, finalize, map, Observable, of, 
-    retry, shareReplay, switchMap, take, takeWhile, tap, timer } from "rxjs";
+import { BehaviorSubject, concatMap, finalize, from, map, Observable, of, 
+    retry, shareReplay, switchMap, take, takeWhile, tap, timer, toArray } from "rxjs";
 import { MondayConfig, MondayGraphQL } from "../Environment/Monday.environment";
 import * as _ from 'underscore';
 import mondaySdk from 'monday-sdk-js';
@@ -78,8 +78,10 @@ export class MondayService {
 
     }
 
-    static RemoveSubitem = (subitem) => {
-
+    static ArchiveItem$ = (itemId) => {
+      return MondayService.Execute$(
+        MondayGraphQL.ArchiveItem(itemId)
+      )
     }
 
     static QueryTag$ = (entry) => MondayService.Execute$(MondayGraphQL.Query_TagId(entry)).pipe(
@@ -158,13 +160,31 @@ export class MondayService {
     }
     
 
-    static SetItemTags = (boardId, itemId, columnId, tags) => {
+    static MutateTags = (boardId, itemId, columnId, tags) => {
+      console.log({boardId, itemId, columnId, tags})
+      if (tags.length < 1)
+        return MondayService.Execute$(MondayGraphQL.Mutate_TagsColumn(
+            boardId, itemId, columnId, { "tag_ids" : [] }
+          ).pipe(take(1))
+        );
 
-    }
-    
-    static AddTagOption = (label) => {
-
-    }
+      return from(tags).pipe(
+        concatMap(t => MondayService.Execute$(MondayGraphQL.Query_TagId(t)).pipe(
+          map(res => res.create_or_get_tag.id)
+        )),
+        take(tags.length),
+        toArray(),
+        tap(t => console.log(MondayGraphQL.Mutate_TagsColumn(
+          boardId, itemId, columnId, {"tag_ids": t}
+        ))),
+        switchMap(ids => MondayService.Execute$(MondayGraphQL.Mutate_TagsColumn(
+            boardId, itemId, columnId, {"tag_ids": ids}))
+          .pipe(
+            take(1)
+          )
+        )
+      )
+    } 
 
     static AllTags = () => MondayService.Execute$(
         MondayGraphQL.Query_AllTags()
