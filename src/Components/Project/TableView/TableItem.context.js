@@ -2,13 +2,17 @@ import { CombineOrSuspend, ReadyOrSuspend$ } from "@Helpers/Context.helper";
 import { bind, SUSPENSE } from "@react-rxjs/core";
 import { createSignal, partitionByKey } from "@react-rxjs/utils";
 import React, { useEffect, useState } from "react";
-import { combineLatest, EMPTY, map, merge, of, pairwise, scan, startWith, switchMap, tap } from "rxjs";
+import { combineLatest, EMPTY, map, merge, of, pairwise, scan, startWith, switchMap, take, tap } from "rxjs";
 import { ItemBadgeIcon } from "../../../Helpers/ProjectItem.helper";
-import { AddBoardItemBadge, BoardItemBadges$, RemoveBoardItemBadge, SetBoardItemStatus } from "../Context/Project.Item.context";
+import { AddBoardItemBadge, AssignedArtists$, BoardItemBadges$, RemoveBoardItemBadge, 
+    SetBoardItemStatus, BoardItem$, GetPersonValues } from "../Context/Project.Item.context";
 import { BadgeOptions$, DepartmentOptions$, StatusOptions$ } from "../Context/Project.Objects.context";
 import { ReviewDepartments$ } from "../Context/Project.Review.context";
 import * as _ from 'underscore';
 import { ShowUploadReviewDialog } from "./TableItemDlgs/TableItem.Upload.context";
+import { AllUsers$ } from "../../../App.Users.context";
+import { SendToastWarning } from "../../../App.Toasts.context";
+import { ShowEditTagsDialog } from "./TableItemDlgs/TableItem.EditTags.context";
 
 // current tabs stored according to boarditem
 const _activeTabMap = (BoardItemId, ActiveTab) => ({BoardItemId, ActiveTab});
@@ -77,6 +81,65 @@ const [,StatusMenu$] = bind(
     )
 )
 
+const [, AddArtistMenu$] = bind(
+    (BoardItemId, CurrentReviewId) => 
+    combineLatest([AllUsers$, AssignedArtists$(BoardItemId, CurrentReviewId)]).pipe(
+        switchMap(params => params.indexOf(SUSPENSE) >= 0 ? EMPTY : of(params)),
+        map(([users, assigned]) => _.map(Object.values(users)
+            .filter(u => assigned.map(a => a.toLowerCase()).indexOf(u.monday.name.toLowerCase()) < 0), 
+                user => user.monday)),
+        map(users => _.map(users, u => ({label: u.name, command: () => OnAddArtist(BoardItemId, CurrentReviewId, u)})))
+    ), SUSPENSE
+)
+
+const OnRemoveArtist = (BoardItemId, CurrentReviewId, artist) => {
+    BoardItem$(BoardItemId).pipe(
+        take(1)
+    ).subscribe((item) => {
+        console.log("NOT YET IMPLEMENTED")
+        SendToastWarning("Artist Allocation NYI")
+        console.log(item);
+        const itemArtists = GetPersonValues(item.Artist);
+        let reviewArtists = null;
+        const review = CurrentReviewId ? _.find(item.subitems,  s => s.id === CurrentReviewId) : null;
+        const reallocated = item.subitems.filter(s => s.Artist?.text?.lengt).length > 0;
+
+        const changeId = reallocated ? review.id : item.id; 
+
+    });
+}
+const OnAddArtist = (BoardItemId, CurrentReviewId, artist) => {
+    BoardItem$(BoardItemId).pipe(
+        take(1)
+    ).subscribe((item) => {
+        console.log("NOT YET IMPLEMENTED")
+        SendToastWarning("Artist Allocation NYI")
+    });
+}
+
+const [, RemoveArtistMenu$] = bind(
+    (BoardItemId, CurrentReviewId) => 
+    combineLatest([AllUsers$, AssignedArtists$(BoardItemId, CurrentReviewId)]).pipe(
+        switchMap(params => params.indexOf(SUSPENSE) >= 0 ? EMPTY : of(params)),
+        map(([users, assigned]) => assigned ? assigned.map(a => users[a.toLowerCase()].monday) : []),
+        map(users => _.map(users, u => ({label: u.name, 
+            command: () => OnRemoveArtist(BoardItemId, CurrentReviewId, u)})))
+    ), SUSPENSE
+)
+
+const [, ArtistMenu$] = bind(
+    (BoardItemId, CurrentReviewId) =>
+    combineLatest([AddArtistMenu$(BoardItemId, CurrentReviewId), RemoveArtistMenu$(BoardItemId, CurrentReviewId)]).pipe(
+        switchMap((params) => params.indexOf(SUSPENSE) > 0 ? EMPTY : of(params)),
+        map(([add, remove]) => {
+            const menu = [{label: 'Add Artist', items: add}, {label: 'Remove Artist', items: remove}];
+            if (remove.length < 1)
+                menu[1].items = [{label: 'No Assigned Artists', style: { fontStyle: 'italic'}}];
+            return menu;
+        })
+    ), SUSPENSE
+)
+
 const [, AddBadgeMenu$] = bind(
     BoardItemId =>
     combineLatest([BoardItemBadges$(BoardItemId), BadgeOptions$])
@@ -143,25 +206,28 @@ const _showContextMap = (evt, id, ref) => ({evt, id, ref});
 const [visibleContextMenusChanged$, ShowContextMenu] = createSignal(_showContextMap)
 
 const [, TableItemDependencies$] = bind(
-    BoardItemId => 
-    combineLatest([StatusMenu$(BoardItemId), BadgeMenu$(BoardItemId)]).pipe(
+    (BoardItemId, CurrentReviewId) => 
+    combineLatest([StatusMenu$(BoardItemId), BadgeMenu$(BoardItemId), ArtistMenu$(BoardItemId, CurrentReviewId)]).pipe(
         switchMap(params => params.indexOf(SUSPENSE) >= 0 ? EMPTY : of(params)),
-        map(([Status, Badges]) => ({Status, Badges}))
+        map(([Status, Badges, Artists]) => ({Status, Badges, Artists}))
     ), SUSPENSE
 )
 
 const [useTableItemContextMenu, TableItemContextMenu] = bind(
-    BoardItemId =>
-    TableItemDependencies$(BoardItemId).pipe(
-        map(({Status, Badges}) => ([
+    (BoardItemId, CurrentReviewId) =>
+    TableItemDependencies$(BoardItemId, CurrentReviewId).pipe(
+        map(({Status, Badges, Artists}) => ([
             {   label: 'Status',
                 items: Status
             },
             { separator: true},
                 ...Badges,
             { separator: true},
-            { label: 'Edit Task'},
-            { label: 'Edit Review'},
+            ...Artists,
+            { separator: true},
+            {label: 'Description'},
+            {label: 'Tags', command: () => ShowEditTagsDialog(BoardItemId, CurrentReviewId)},  
+            { label: 'Timeline'},
             { separator: true},
             { label: 'Upload New Review', 
               command: (evt) => ShowUploadReviewDialog(BoardItemId)

@@ -1,6 +1,6 @@
-import { BehaviorSubject, map, of, take, tap } from "rxjs";
+import { BehaviorSubject, combineLatest, map, of, take, tap, withLatestFrom, EMPTY } from "rxjs";
 import * as _ from 'underscore';
-import { bind } from "@react-rxjs/core"
+import { bind, SUSPENSE } from "@react-rxjs/core"
 import { createSignal } from "@react-rxjs/utils"
 import { MessageQueue } from "./App.MessageQueue.context";
 import { setToastReference, SendToastError, SendToastSuccess,
@@ -24,19 +24,29 @@ const [useCurrentRoute, currentRoute$] = bind(
     RouteChangedEvent$, null
 )
 
+const [NavigationHandlerChanged$, SetNavigationHandler] = createSignal(navigate => navigate);
+const [useNavigationHandler, NavigationHandler$] = bind(
+    RouteChangedEvent$.pipe(
+        withLatestFrom(NavigationHandlerChanged$)
+    ), [SUSPENSE, SUSPENSE]
+)
+
 const [usePrimaryColor, PrimaryColor$] = bind(
     RouteChangedEvent$.pipe(
         map(location => {
-            let route = location.split('/');
-            route.splice(0, 3);
+            if (location === '' || location === '/')
+                return 'Home'
+            let route = location;
+            if (location[0] === '/')
+                route = location.split('/')[1];
 
-            if (route[0].indexOf('?') >= 1)
-                route = route[0].split('?')[0]
+            if (route.indexOf('?') >= 1)
+                route = route.split('?')[0]
             return route;
         }),
         tap(t => console.log("Route Changed: ", t)),
         map(t => PrimaryColors[t] ? PrimaryColors[t] : PrimaryColors['default']) 
-    ), PrimaryColors.default)
+    ), EMPTY)
 
 const _M_RetrievingWorkspaces = ['get-workspaces', 'Retrieving Your Workspaces...'];
 const _M_RetrievingUsers = ['get-users', 'Retrieving Users from Monday & ActiveDirectory...'];
@@ -45,6 +55,8 @@ export {
     SetTitles,
     useTitles,
     usePrimaryColor,
+    useNavigationHandler,
+    SetNavigationHandler,
     SendToastError,
     SendToastSuccess,
     SendToastInfo,

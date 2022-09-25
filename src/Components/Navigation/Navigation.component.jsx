@@ -24,10 +24,7 @@ export const NavigationComponent = ({User, Initializing}) => {
     const MyAvatar = useMyAvatar();
     const MyWorkspaces = useMyWorkspaces();
     const HomeMenuOptions = useHomeMenu();
-
-    console.log("HomeMenuOptions", HomeMenuOptions);
     const Titles = useTitles();
-    const navigate = useNavigate()
 
     useEffect(() => {
         if (MyWorkspaces === SUSPENSE || !MyWorkspaces || MyWorkspaces.length < 1)

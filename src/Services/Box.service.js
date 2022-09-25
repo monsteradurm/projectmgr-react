@@ -14,7 +14,9 @@ export class BoxService {
         /*  root should be box id for this folder, eg. 0 (for the root)
             folder should be the folder name, ie. LADUS_DisneyUS */
 
-        return ajax.get(BoxEndPoints.Subfolder(root, folder)).pipe(take(1))
+        return ajax.get(BoxEndPoints.Subfolder(root, folder)).pipe(
+            tap(console.log),
+            take(1))
       }
 
       
@@ -57,9 +59,11 @@ export class BoxService {
 
         return of(null).pipe(
             expand((result, i) => {
-                if (result === null)
+                console.log("HERE", result, i);
+                if (result === null && i < 1)
                     return BoxService.SubFolder$(0, folderArr[0]);
-
+                else if (result === null && i > 0)
+                    throw 'Box Folder Not Found: ' + folderArr;
                 else if (!result.resonse)
                     return of(null);
                 else if (i >= folderArr.length)

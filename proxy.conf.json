@@ -81,8 +81,8 @@
         }
     },
     "/box-rest/*": {
-        "target": "http://localhost:63235/box-rest/",
-        "secure": true,
+        "target": "https://liquidanimation.live/box-rest/",
+        "secure": false,
         "changeOrigin": true,
         "loglevel": "debug",
         "pathRewrite": {

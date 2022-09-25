@@ -17,7 +17,7 @@ export const SyncsketchPosts = {
             type === '360 video' ? '&type=video360' : '&type=image360'
         )
     }`,
-    UpdateItemSort: (reviewId) => `${ReverseProxy}${apiv2}/review/${reviewId}/sort_items/`,
+    UpdateItemSort: (reviewId) => `/syncsketch-v2/review/${reviewId}/sort_items/`,
     
     CreateReview: `/syncsketch/review/`,
 }

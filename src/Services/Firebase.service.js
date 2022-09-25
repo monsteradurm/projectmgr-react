@@ -1,11 +1,13 @@
 import { FirebaseConfig } from "../Environment/Firebase.environment"
 import * as firebase from 'firebase/app';
-import { getFirestore, collection as fsCollection, doc as fsDoc, query, runTransaction } from 'firebase/firestore';
+import { getFirestore, collection as fsCollection, doc as fsDoc, query, runTransaction, setDoc,
+    deleteDoc  } from 'firebase/firestore';
 import { collectionChanges, doc, collection } from 'rxfire/firestore';
 import * as _ from 'underscore';
 import { BehaviorSubject, concatAll, concatMap, EMPTY, expand, firstValueFrom, from, map, mergeMap, reduce, skip, switchMap, take, tap, toArray } from "rxjs";
 import { ajax } from "rxjs/ajax";
 import { ReverseProxy } from "../Environment/proxy.environment";
+import moment from 'moment';
 
 const app = firebase.initializeApp(FirebaseConfig);
 export class FirebaseService {
@@ -50,7 +52,6 @@ export class FirebaseService {
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
         // doc.data() is never undefined for query doc snapshots
-        console.log(doc.id, " => ", doc.data());
         });
     }
     static SyncsketchItemsFromPulseId(projectId, pulse) {
@@ -100,7 +101,6 @@ export class FirebaseService {
             ),
         ),  
         take(1),
-        tap(t => console.log("Subscriptions", t))
        )
    }
    static GetDocument$(col, id) {
@@ -204,12 +204,27 @@ export class FirebaseService {
 
     static Notices$ = FirebaseService.SubscribeToCollection$('Noticeboard').pipe(
         concatMap(reviewArr => from(reviewArr).pipe(
-            switchMap(change => FirebaseService.GetDocument$('Noticeboard', change.doc.id).pipe(
+            concatMap(change => FirebaseService.GetDocument$('Noticeboard', change.doc.id).pipe(
                         map(doc => ({...doc.data(), change: change.type, id: change.doc.id}))
                     )
                 ),
             )
         ),
     )
+
+    static DeleteNotice$ = (id) => {
+        const docRef = fsDoc(FirebaseService.db, 'Noticeboard/' + id);
+        return from(deleteDoc(docRef))
+    }
+
+    static StoreNotice$ = (notice) => {
+        const docRef = fsDoc(FirebaseService.db, 'Noticeboard/' + notice.id);
+        const result = from(setDoc(docRef, 
+            {id: notice.id, content: notice.content, updated_at: moment(moment.now()).format('YYYY-MM-DD HH:mm')}
+            )
+        )
+
+        return result;
+    }
 }
 

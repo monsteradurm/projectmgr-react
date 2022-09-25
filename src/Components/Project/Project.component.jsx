@@ -1,9 +1,9 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useBoardParams, SetBoardParam, PROJ_QID, ProjectProvider } from "./Context/Project.context";
 import { ProjectFilters } from "./Project.Filters.component";
 import { useBoard } from "./Context/Project.Objects.context";
-import { SetTitles } from "../../Application.context";
+import { SetNavigationHandler, SetTitles } from "../../Application.context";
 import { ProjectHeader } from "./Project.Header.component";
 import { ScrollingPage } from "../General/ScrollingPage.component";
 import { TableView } from "./TableView/TableView";
@@ -28,6 +28,7 @@ export const Project = ({headerHeight}) => {
     const offsetY = headerHeight + (filterBarRef?.current ?
                 filterBarRef.current.clientHeight : 0);
 
+    SetNavigationHandler(useNavigate());
     useLayoutEffect(() => {
         if (Board === SUSPENSE)
             return;

@@ -1,5 +1,5 @@
 
-import { useAppMessageQueue, SetAuthentication, useLoggedInUser, UpdateLocation, useCurrentRoute, SetCurrentRoute, useTitles } from './Application.context';
+import { useAppMessageQueue, SetAuthentication, useLoggedInUser, UpdateLocation, useCurrentRoute, SetCurrentRoute, useTitles, useNavigationHandler } from './Application.context';
 import { OAuthScopes } from '@Environment/Graph.environment';
 import './Application.component.scss';
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
@@ -16,6 +16,7 @@ import { HomeComponent } from './Components/Home/Home.component';
 import { useToaster } from './App.Toasts.context';
 import { AddQueueMessage, CreateMessageQueue, RemoveQueueMessage, useBusyMessage } from './App.MessageQueue.context';
 import moment from 'moment';
+import { SUSPENSE } from '@react-rxjs/core';
 
 const preventMouseProps = (evt) => {
   evt.stopPropagation();
@@ -48,18 +49,30 @@ function App() {
   const appHeaderRef = useRef();
   const toastRef = useRef();
   const Toaster = useToaster(toastRef);
+
+  const [URL, NavigationHandler] = useNavigationHandler()
+
   const authRequest = useMemo(() => ({
     ...OAuthScopes,
     account: accounts[0]
   }), [accounts]);
 
   const account = authRequest.account;
-  
+
   useEffect(() => {
-    if (CurrentRoute !== window.location.href) {
-      SetCurrentRoute(window.location.href);
-    }
-  }, [CurrentRoute, Titles])
+    if (CurrentRoute === null)
+      SetCurrentRoute(window.location.pathname)
+  })
+
+  useEffect(() => {
+    if ([URL, NavigationHandler].indexOf(SUSPENSE) >= 0)
+      return;
+
+    if (URL.indexOf(window.location.pathname) < 0)
+      window.location = URL;
+    
+    else NavigationHandler(URL);
+  }, [URL, NavigationHandler])
 
   useEffect(() => {
     const stored = sessionStorage.getItem(App_TID);

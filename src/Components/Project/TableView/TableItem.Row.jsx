@@ -21,7 +21,8 @@ export const TableItemRow = ({isCollapsed, setCollapsed}) => {
             onClick={(() => setCollapsed(!isCollapsed))} 
             onContextMenu={(evt) => ShowContextMenu(evt, BoardItemId, RowContextMenuRef)}
             className={isCollapsed ? "pm-projectItem" : "pm-projectItem expanded"}>
-            <TableItemContextMenu BoardItemId={BoardItemId} ContextMenuRef={RowContextMenuRef}/>
+            <TableItemContextMenu BoardItemId={BoardItemId} CurrentReviewId={CurrentReviewId}
+                ContextMenuRef={RowContextMenuRef}/>
             <TableItemThumbnail />
             <TableItemTask />
             <TableItemStatus />

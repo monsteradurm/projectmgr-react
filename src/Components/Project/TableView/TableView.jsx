@@ -7,6 +7,7 @@ import { createSignal } from "@react-rxjs/utils";
 import { bind } from "@react-rxjs/core";
 import { BehaviorSubject } from "rxjs";
 import { TableItemUploadReview } from "./TableItemDlgs/TableItem.UploadReview";
+import { TableItemEditTags } from "./TableItemDlgs/TableItem.EditTags";
 
 // hold boarditem id for when a mouse is over a boarditem row
 const [MouseOverRowChanged$, SetMouseOverRow] = createSignal()
@@ -21,6 +22,7 @@ export const TableView = () => {
 
     return(<>
         <TableItemUploadReview />
+        <TableItemEditTags />
         {
             GroupedBoardItems.map(([group, ids]) => {
                 

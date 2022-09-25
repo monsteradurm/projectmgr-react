@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Dropdown } from "react-bootstrap";
 import { take } from "rxjs";
 import { useMyBoardIds } from "../../App.Users.context";
+import { SetCurrentRoute } from "../../Application.context";
 import { FirebaseService } from "../../Services/Firebase.service";
 import { NestedDropdown } from "../General/NestedDropDown.component";
 
@@ -69,16 +70,20 @@ function NestedHierarchyToMenu(items, projectId, boardIds) {
                                     b.groups.length > 0 ?
                                         b.groups.map(g => 
                                             <Dropdown.Item key={g.id} 
-                                            href={`Projects?ProjectId=${projectId}&BoardId=${b.id}&GroupId=${g.id}`}>
-                                                {g.title}
+                                            onClick={
+                                                (e) =>
+                                                    SetCurrentRoute(
+                                                        `Projects?ProjectId=${projectId}&BoardId=${b.id}&GroupId=${g.id}`
+                                                    )}> {g.title}
                                             </Dropdown.Item>)
                                         : emptyGroupHTML
                                     : loadingGroupHTML
                             }
                         </NestedDropdown>
                     : <Dropdown.Item key={b.id} 
-                        href={`Projects?ProjectId=${projectId}&BoardId=${b.id}&GroupId=${b.groups[0].id}`}
-                        >{name}</Dropdown.Item>
+                        onClick={(e) => SetCurrentRoute(
+                            `Projects?ProjectId=${projectId}&BoardId=${b.id}&GroupId=${b.groups[0].id}`
+                        )}>{name}</Dropdown.Item>
                 )
             })
         }

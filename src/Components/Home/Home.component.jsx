@@ -6,7 +6,7 @@ import { EMPTY, of, tap } from "rxjs";
 import { ScrollingPage } from "../General/ScrollingPage.component";
 import { useBusyMessage } from "../../App.MessageQueue.context";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { SetTitles } from "../../Application.context";
+import { SetNavigationHandler, SetTitles } from "../../Application.context";
 import { HomeNotices } from "./Home.Notices";
 import { HomeStatus } from "./Home.Status";
 import { LastHomeNavigationEvent, useStatusNesting, SetStatusNesting, SetHomeView, useHomeView, useAllStatusItemIds, useStatusItemURLs } from "./Home.context";
@@ -19,9 +19,7 @@ export const HomeComponent = ({headerHeight}) => {
     const View = useHomeView();
     const Nesting = useStatusNesting();
     const offsetY = headerHeight;
-    const NavigationRequest = LastHomeNavigationEvent();
-    const [LastNavigated, SetLastNavigated] = useState(null);
-    const navigate = useNavigate();
+    SetNavigationHandler(useNavigate());
 
     useEffect(() => {
         const page = searchParams.get('View');
@@ -38,14 +36,6 @@ export const HomeComponent = ({headerHeight}) => {
             SetStatusNesting(nesting);
 
     }, [searchParams])
-
-    useEffect(() => {
-        if (NavigationRequest === LastNavigated || !NavigationRequest)
-            return;
-        SetLastNavigated(NavigationRequest);
-        navigate(NavigationRequest);
-
-    }, [NavigationRequest, LastNavigated])
 
     useEffect(() => {
         let titles = ['Home'];

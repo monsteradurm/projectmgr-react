@@ -1,10 +1,70 @@
 .pm-noticeboard {
     padding: 30px;
 }
+
+#pm-notice-dlg {
+    height: 100%;
+    .p-dialog-header {
+        padding: 0px;
+    }
+    .pm-dialogHeader {
+        padding: 8px;
+    }
+
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+    
+    /* Track */
+    ::-webkit-scrollbar-track {
+        background: transparent;
+        
+    }
+    
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+        background: #555;
+        border-radius:5px;
+    }
+    
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+}
 .pm-notice {
     border-bottom: solid 1px #ccc;
 }
+.ql-toolip, .ql-editing {
+    margin-left: 50px;
+    margin-right: 50px;
+}
+.pm-no-display {
+    display: none !important;
+}
+.ql-editor {
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+    
+    /* Track */
+    ::-webkit-scrollbar-track {
+        background: transparent;
+        
+    }
+    
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+        background: #555;
+        border-radius:5px;
+    }
+    
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
 
+}
 .pm-notice-context {
     background: transparent;
     /* width */

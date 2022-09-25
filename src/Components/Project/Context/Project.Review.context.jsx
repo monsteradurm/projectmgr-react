@@ -158,10 +158,8 @@ const [useReviewDepartment, ReviewDepartment$] = bind(
         map(item => {
             if (item === SUSPENSE)
                 return SUSPENSE;
-            if (item === null)
-                return null;
-            if (!item['Feedback Department'])
-                return null;
+            if (item === null || !item['Feedback Department'])
+                return 'Internal';
 
             return item['Feedback Department'].text;
         })

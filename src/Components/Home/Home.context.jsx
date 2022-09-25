@@ -10,6 +10,7 @@ import { Badge } from 'primereact/badge';
 import { MondayService } from "../../Services/Monday.service";
 import { ReadyOrSuspend$ } from "../../Helpers/Context.helper";
 import { SyncsketchService } from "../../Services/Syncsketch.service";
+import { SetCurrentRoute } from "../../Application.context";
 
 const NoticesURL = "/Home?View=Notices";
 export const [ItemsByStatus, ItemsByStatus$] = bind(
@@ -104,8 +105,7 @@ const BuildStatusDropdownMenu = (item, url) => {
             StoreStatusItemsByURL(itemsURL, item[title].items);
             return <Dropdown.Item key={item[title].key} onClick={
                 (e) => {
-                    console.log(itemsURL);
-                    SetHomeNavigation(itemsURL)
+                    SetCurrentRoute(itemsURL)
             }}>
                 {title}<Badge value={count} style={{marginLeft: 10, background: color}}></Badge>
             </Dropdown.Item>
@@ -186,12 +186,11 @@ export const [useStatusItemURLs, ] = bind(
     StatusItemURLs$, SUSPENSE
 )
 
-StatusItemURLs$.subscribe((res) => { console.log("URLS", res) })  // pre-fetch
+StatusItemURLs$.subscribe((res) => { })  // pre-fetch
 
 const StatusItemMap$ = combineKeys(StatusItemURLs$, StatusItemsByURL);
 export const [useAllStatusItemIds, AllStatusItemIds$] = bind(
     StatusItemMap$.pipe(
-        tap(console.log),
         map(m => Array.from(m.entries())),
         map(entries => entries.map(e => e[1])),
         map(values => _.flatten(values)),
@@ -249,7 +248,6 @@ export const [useStatusReviewThumbnail, StatusReviewThumbnail$] = bind(
                 return of(null);
 
             const id = ItemIdFromSyncLink(link);
-            console.log("THuMBNAIL ID", id);
             return SyncsketchService.ThumbnailFromId$(id)
         }),
     ), SUSPENSE
@@ -322,7 +320,7 @@ export const [useHomeMenu, HomeMenu$] = bind(
         [   
             review, feedback, progress, assistance,
             <Dropdown.Divider key="HomeMenu_Divider"/>,
-            <Dropdown.Item key={NoticesURL} onClick={() => SetHomeNavigation(NoticesURL)}>Notices</Dropdown.Item>
+            <Dropdown.Item key={NoticesURL} onClick={() => SetCurrentRoute(NoticesURL)}>Notices</Dropdown.Item>
         ]),
     ), InitialHomeMenu
 )

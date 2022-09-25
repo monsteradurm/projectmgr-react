@@ -383,7 +383,10 @@ export const [useChartOptions, ChartOptions$] = bind(
                 maintainAspectRatio: true,
                 aspectRatio: 2.5,
                 plugins: {
-                    legend: { display: isStacked },
+                    legend: { 
+                        display: isStacked, 
+
+                    },
                     title: {
                         display: false,
                     }

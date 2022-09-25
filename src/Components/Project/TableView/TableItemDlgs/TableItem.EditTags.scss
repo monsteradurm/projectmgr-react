@@ -1,0 +1,61 @@
+#pm-edit-tags {
+    height: 100%;
+    .p-dialog-header {
+        padding: 0px;
+    }
+    .pm-dialogHeader {
+        padding: 8px;
+    }
+
+    .p-chips .p-chips-multiple-container .p-chips-token {
+        padding: 0;
+        margin: 0;
+        border: none;
+    }
+
+    .p-chips .p-chips-multiple-container:not(.p-disabled) {
+        border: none;
+        border-bottom: solid 1px #ccc;
+        border-radius: 0px;
+        box-shadow: none !important;
+        width: 100%;
+    }
+
+    .p-chips {
+        width: 100%;
+    }
+    .p-chips-token.p-highlight{
+        margin-right: 10px !important;
+    }
+    .p-chips-input-token {
+        padding-left: 10px;
+    }
+    .p-chips .p-chips-multiple-container:not(.p-disabled):hover {
+        border-color: black;
+        border-bottom-width: 1.5px;
+    }
+    
+    .p-chips-token-icon {
+        display: none;
+    }
+
+    .p-chips-token-label > div{
+        padding: 3px 10px;
+        border-radius: 5px;
+    }
+
+    .p-chips-token-label > div > span {
+        opacity: 0.7;
+        margin-left: 10px;
+        cursor: pointer;
+    }
+
+    .p-chips-token-label > div > span:hover {
+        opacity: 1;
+    }
+
+    .p-float-label input:focus ~ label, .p-float-label input.p-filled ~ label, .p-float-label textarea:focus ~ label, .p-float-label textarea.p-filled ~ label, .p-float-label .p-inputwrapper-focus ~ label, .p-float-label .p-inputwrapper-filled ~ label {
+        top: -0.75px;
+        color: black;
+    }
+}
