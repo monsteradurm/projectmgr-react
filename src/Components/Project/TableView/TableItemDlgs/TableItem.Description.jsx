@@ -79,9 +79,9 @@ export const TableItemEditDescription = ({}) => {
                 onClose={() => ShowEditDescriptionDialog(null)} />
         }  closable={false}
         className="pm-dialog" ref={dialogRef} onHide={() => ShowEditDescriptionDialog(null)}>
-            <Stack direction="vertical" style={{height: 'calc(100% - 60px)', width: qWidth}} ref={containerRef}>
+            <Stack direction="vertical" style={{height: 'calc(100% - 60px)', width: '100%'}} ref={containerRef}>
             <ReactQuill theme="snow" value={editorState} onChange={setEditorState} 
-                style={{height: 'calc(100% - 60px)', width: qWidth}}/>
+                style={{height: 'calc(100% - 60px)', width: '100%'}}/>
         </Stack>
         <Button label="Submit" onClick={() => SubmitDescription(BoardItemId, 'Description:' + editorState) }
         style={{width: 100, position: 'absolute', bottom: 20, right: 20}}/>
