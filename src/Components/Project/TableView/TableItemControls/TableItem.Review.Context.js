@@ -2,7 +2,7 @@ import { bind, SUSPENSE } from "@react-rxjs/core";
 import { createSignal } from "@react-rxjs/utils";
 import { combineLatest, map, of, pairwise, startWith, switchMap, take, tap } from "rxjs";
 import _ from "underscore";
-import { SendToastError, SendToastSuccess } from "../../../../App.Toasts.context";
+import { SendToastError, SendToastSuccess, SendToastWarning } from "../../../../App.Toasts.context";
 import { AllUsers$ } from "../../../../App.Users.context";
 import { MondayService } from "../../../../Services/Monday.service";
 import { DeleteMultipleSyncsketchItems, DeleteMultipleSyncsketchItems$, DeleteSyncsketchItem } from "../../Context/Project.Syncsketch.context";
@@ -37,7 +37,7 @@ export const [useReviewContextMenu, ReviewContextMenu$] = bind(
             const today = moment().format('YYYY-MM-DD');
 
             const main = [
-                { label: 'Add Item To Review' },
+                { label: 'Add Item To Review', command: () => SendToastWarning("not Yet Implemented..") },
                 { separator: true},
                 ...reviews,
                 { separator: true},
@@ -55,7 +55,7 @@ export const [useReviewContextMenu, ReviewContextMenu$] = bind(
 
                 ]},
                 { separator: true},
-                { label: 'Copy To...'}
+                { label: 'Copy To...', command: () => SendToastWarning("not Yet Implemented..")}
             ];
             
             return main;

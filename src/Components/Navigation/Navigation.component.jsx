@@ -15,6 +15,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useMyWorkspaces } from '../../App.Users.context';
 import { SUSPENSE } from '@react-rxjs/core';
 import { useHomeMenu } from '../Home/Home.context';
+import { SendToastWarning } from '../../App.Toasts.context';
 
 export const NavigationComponent = ({User, Initializing}) => {
     const PrimaryColor = usePrimaryColor();
@@ -74,8 +75,8 @@ export const NavigationComponent = ({User, Initializing}) => {
                                                         return (<NestedDropdown key={project.name} title={project.nesting.join('_')}>
                                                             <ProjectDropdown projectId={project.name} />
                                                             <Dropdown.Divider />
-                                                            <Dropdown.Item>Confluence</Dropdown.Item>
-                                                            <Dropdown.Item>Reference</Dropdown.Item>
+                                                            <Dropdown.Item onClick={() => SendToastWarning("not Yet Implemented..")}>Confluence</Dropdown.Item>
+                                                            <Dropdown.Item onClick={() => SendToastWarning("not Yet Implemented..")}>Reference</Dropdown.Item>
                                                         </NestedDropdown>)
                                                         }
                                                     )
@@ -92,29 +93,29 @@ export const NavigationComponent = ({User, Initializing}) => {
                         <Dropdown autoClose="outside">
                             <Dropdown.Toggle style={{fontSize:'20px'}}><FontAwesomeIcon icon={faUsers} /></Dropdown.Toggle>
                             <Dropdown.Menu variant="dark">
-                                <Dropdown.Item key="users">Users</Dropdown.Item>
-                                <Dropdown.Item key="teams">Teams</Dropdown.Item>
+                                <Dropdown.Item key="users" onClick={() => SendToastWarning("not Yet Implemented..")}>Users</Dropdown.Item>
+                                <Dropdown.Item key="teams" onClick={() => SendToastWarning("not Yet Implemented..")}>Teams</Dropdown.Item>
                                 <Dropdown.Divider />
-                                <Dropdown.Item key="teams">Applications</Dropdown.Item>
+                                <Dropdown.Item key="teams" onClick={() => SendToastWarning("not Yet Implemented..")}>Applications</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
 
                         <Dropdown autoClose="outside">
                             <Dropdown.Toggle style={{fontSize:'20px'}}><FontAwesomeIcon icon={faFilm} /></Dropdown.Toggle>
                             <Dropdown.Menu variant="dark">
-                                <Dropdown.Item key="placeholder">Placeholder</Dropdown.Item>
+                                <Dropdown.Item key="placeholder"  onClick={() => SendToastWarning("not Yet Implemented..")}>NYI</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
                         <Dropdown autoClose="outside">
                                 <Dropdown.Toggle style={{fontSize:'20px'}}><FontAwesomeIcon icon={faTruckMedical} /></Dropdown.Toggle>
                                 <Dropdown.Menu variant="dark">
-                                    <Dropdown.Item key="placeholder">Placeholder</Dropdown.Item>
+                                    <Dropdown.Item key="placeholder"  onClick={() => SendToastWarning("not Yet Implemented..")}>NYI</Dropdown.Item>
                                 </Dropdown.Menu>
                         </Dropdown>    
                         <Dropdown autoClose="outside">
                                 <Dropdown.Toggle style={{fontSize:'20px'}}><FontAwesomeIcon icon={faCogs} /></Dropdown.Toggle>
                                 <Dropdown.Menu variant="dark">
-                                    <Dropdown.Item key="placeholder">Placeholder</Dropdown.Item>
+                                    <Dropdown.Item key="placeholder"  onClick={() => SendToastWarning("not Yet Implemented..")}>NYI</Dropdown.Item>
                                 </Dropdown.Menu>
                         </Dropdown>        
                     </> : null
