@@ -6,11 +6,11 @@ import { useBoardItemDepartment, useBoardItemName, useBoardItemStatus } from "..
 import { DialogHeader } from "../../../General/DialogHeader";
 import { SUSPENSE } from "@react-rxjs/core";
 import "./TableItem.UploadReview.scss"
-import { useSyncsketchGroup, useSyncsketchProject, useSyncsketchReviewDepartments, useSyncsketchReviewsFromElement } from "../../Context/Project.Syncsketch.context";
+import { KEY_CREATE_SS_REVIEW, useSyncsketchGroup, useSyncsketchProject, useSyncsketchReviewDepartments, useSyncsketchReviewsFromElement } from "../../Context/Project.Syncsketch.context";
 import { AddQueueMessage, RemoveQueueMessage, useBusyMessage, useMessageQueue } from "../../../../App.MessageQueue.context";
 import { Stack } from "react-bootstrap";
 import { BreedingRhombusSpinner } from "react-epic-spinners";
-import { useSyncsketchReviewName, useUploadReviewDlg, ShowUploadReviewDialog, useCurrentUploadStepIndex, useUploadSyncsketchReview, SetUploadSyncsketchReview, useUploadEvent } from "./TableItem.Upload.context";
+import { useSyncsketchReviewName, useUploadReviewDlg, ShowUploadReviewDialog, useCurrentUploadStepIndex, useUploadSyncsketchReview, SetUploadSyncsketchReview, useUploadEvent, useFilesForUpload } from "./TableItem.Upload.context";
 import { TableItemReviewGroup } from "./TableItemDlg.Controls/TableItem.ReviewGroup";
 import { useGroup } from "../../Context/Project.Objects.context";
 import * as _ from 'underscore';
@@ -21,7 +21,7 @@ import { TableItemReviewName } from "./TableItemDlg.Controls/TableItem.ReviewNam
 import { TableItemManageFiles } from "./TableItemDlg.Controls/TableItem.ManageFiles";
 import { TableItemUploadProgress } from "./TableItemDlg.Controls/TableItem.UploadProgress";
 
-const UPLOAD_QID = '/TableUploadReview'
+export const UPLOAD_QID = '/TableUploadReview'
 
 export const TableItemUploadReview = ({}) => {
     const BusyMessage = useBusyMessage(UPLOAD_QID);
@@ -40,6 +40,7 @@ export const TableItemUploadReview = ({}) => {
     const thisReview = useUploadSyncsketchReview();
     const contentRef = useRef();
     const uploadEvent = useUploadEvent(); //maintain subscription
+    const files = useFilesForUpload();
 
     useEffect(() => {
         if (!ssReviews || ssReviews === SUSPENSE || ssReviewName === SUSPENSE) {
@@ -47,15 +48,22 @@ export const TableItemUploadReview = ({}) => {
                 SetUploadSyncsketchReview(null);
             return;
         }
+
         const review = _.find(ssReviews, s => s.name === ssReviewName);
+        
         if (!review) {
             SetUploadSyncsketchReview(null);
             return;
         }
-
         SetUploadSyncsketchReview(review);
     }, [ssReviews, ssReviewName])
  
+    useEffect(() => {
+        if (thisReview) {
+            RemoveQueueMessage(UPLOAD_QID ,KEY_CREATE_SS_REVIEW)
+        }
+    }, [thisReview])
+
     useLayoutEffect(() => {
         if ([ssReviews, ssProjectGroup, ssProject, Element].indexOf(SUSPENSE) < 0)
             return;
@@ -108,7 +116,7 @@ export const TableItemUploadReview = ({}) => {
                                         selectedReview={thisReview}/>,
                               1 : <TableItemReviewName selectedReview={thisReview} BoardItemId={BoardItemId}/>,
                               2 : <TableItemManageFiles reviewId={thisReview?.id}/>,
-                              3 : <TableItemUploadProgress primary={Status?.color} />
+                              3 : <TableItemUploadProgress primary={Status?.color} files={files}/>
                             }[stepIndex] || null 
                         }
                         </div>

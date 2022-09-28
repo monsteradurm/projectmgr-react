@@ -8,11 +8,11 @@ import { Loading } from "../../../../General/Loading";
 import { CancelUploading, RemoveFileCompleted, SetCurrentUploadStep, ShowUploadReviewDialog, useFilesForUpload, useUploadProgressEvents } from "../TableItem.Upload.context"
 
 const PROG_ID = "/UploadProgres"
-export const TableItemUploadProgress = ({primary}) => {
-    
+export const TableItemUploadProgress = ({primary, files}) => {
     const state = useUploadProgressEvents();
     const [currentUpload, setCurrentUpload] = useState(null);
-    const files = useFilesForUpload();
+
+    console.log(state, files);
     useEffect(() => {
         if (!state)
             return;

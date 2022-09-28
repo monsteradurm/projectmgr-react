@@ -11,8 +11,8 @@ import { TableItemSummary } from "./TableItemPanes/TableItem.Pane.Summary";
 export const TableItemPane = ({}) => {
     const { BoardItemId, CurrentReviewId } = useContext(BoardItemContext);
     const { ActiveTab} = useContext(TableItemContext);
-    const displayReference = ActiveTab.indexOf('Reference') > -1;
-    const displayReviews = ActiveTab.indexOf('Reviews') > -1;
+    const displayReference = ActiveTab?.indexOf('Reference') > -1;
+    const displayReviews = ActiveTab?.indexOf('Reviews') > -1;
     const displaySummary = ActiveTab === 'Summary';
     const ReviewsMenu = useReviewsMenu(BoardItemId);
     const ReferenceMenu = useReferenceMenu(BoardItemId);

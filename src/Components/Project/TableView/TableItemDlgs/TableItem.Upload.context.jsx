@@ -8,7 +8,28 @@ import { Department$, Group$ } from "../../Context/Project.Objects.context";
 import { SendToastError, SendToastInfo, SendToastSuccess, SendToastWarning } from "../../../../App.Toasts.context";
 import { LoggedInUser$ } from "../../../../App.Users.context";
 import { SyncsketchService } from "../../../../Services/Syncsketch.service";
+import { ReviewItemName } from "../../../../Helpers/ProjectItem.helper";
 
+const _AddToUploadMap = (BoardItemId, CurrentReviewId, ReviewItems) => 
+    ({BoardItemId, CurrentReviewId, ReviewItems});
+
+    const defaultAddToUploadState = {
+        BoardItemId: null, CurrentReviewId: null, ReviewItems: null
+    }
+export const [showAddToReviewDlgEvent$, ShowAddtoReviewDialog] = createSignal(_AddToUploadMap);
+export const [resetAddToReviewDlgEvent$] = createSignal({reset: true});
+export const [useAddToReviewDlg, UploadingAdditionalBoardItemId$] = bind(
+    merge(showAddToReviewDlgEvent$, resetAddToReviewDlgEvent$).pipe(
+        switchMap((params) => {
+            if (params.reset)
+                return of(defaultAddToUploadState)
+            if (!params.BoardItemId || !params.CurrentReviewId)
+                return of(defaultAddToUploadState)
+            return of(params)
+        }),
+        tap(() =>  ClearFilesFromUpload())
+    ), defaultAddToUploadState
+)
 
 export const [showUploadReviewDlgEvent$, ShowUploadReviewDialog] = createSignal((id) => ({id}));
 export const [useUploadReviewDlg, UploadingBoardItemId$] = bind(
@@ -100,7 +121,9 @@ export const [CurrentUploadStepChanged$, SetCurrentUploadStep] = createSignal(n 
 export const [UploadSyncsketchReviewChanged$, SetUploadSyncsketchReview] = createSignal((review) => review);
 
 export const [useUploadSyncsketchReview, UploadSyncsketchReview$] = bind(
-    UploadSyncsketchReviewChanged$, null
+    UploadSyncsketchReviewChanged$.pipe(
+        tap(t => console.log("THIS REVIEW CHANGED: ", t))
+    ), null
 )
 
 export const[useUploadedSyncsketchItems, UploadedSyncsketchItems$] = bind(
@@ -111,7 +134,9 @@ export const[useUploadedSyncsketchItems, UploadedSyncsketchItems$] = bind(
 
             return of(review.uuid);
         }),
-        switchMap(reviewId => SyncksetchItems$(reviewId))
+
+        switchMap(reviewId => SyncsketchItems$(reviewId)),
+        tap(t => console.log("Uploaded Syncsketch ITems", t))
     )
 )
 
@@ -122,7 +147,8 @@ export const [useSyncsketchDepartment, SyncsketchDepartment$] = bind(
                 return of(null);
             
             return BoardItemDepartment$(id);
-        })
+        }),
+        tap(t => console.log("BOARD ITEM DEPARTMENT", t))
     ), SUSPENSE
 )
 
@@ -132,21 +158,22 @@ const padToTwo = (n) => n <= 99 ? `0${n}`.slice(-2) : n;
 
 export const [useSyncsketchNextItemIndex, SyncsketchNextItemIndex$] = bind(
     combineLatest([UploadedSyncsketchItems$, SyncsketchDepartment$]).pipe(
-        map(([items, department]) => _.filter(items, i => i.name.indexOf(department) >= 0)),
-        map(items => _.pluck(items, 'name')),
-        map(names => _.filter(names, n => n.indexOf(' ') >= 0)),
-        map(names => _.map(names, n => n.split(' ')[1])),
-        map(indices => _.reduce(indices, (acc, i) => {
-            try { acc.push(parseInt(i)); }
-            catch { return acc; }
-            return acc;
-        }, [])),
+        map(([itemMap, department]) => Object.keys(itemMap)
+            .filter(k => k.startsWith(department))
+            .filter(k => k?.indexOf('_') >= 0)
+        ),
+        map(keys =>  
+            keys.map(k => k.split('_')[1])
+            .map(i => parseInt(i))
+        ),
         map(indices => _.max(indices)),
-        map(index => index + 1),
+        map(index => index ? index + 1 : 1),
         map(index => padToThree(index)),
         catchError(err => of('001')),
+        tap(t => console.log("Next Item Index to Upload: ", t))
     ), SUSPENSE
 )
+
 export const [useUploadItemName, UploadItemName$] = bind(
     combineLatest([UploadInputItemName$, SyncsketchNextItemIndex$, SyncsketchDepartment$]).pipe(
         map(([name, index, department]) => {
@@ -157,11 +184,13 @@ export const [useUploadItemName, UploadItemName$] = bind(
         })
     ), null
 )
+export const [useAddUploadItemName, AddUploadItemName$] = bind(
+    of(null), null
+)
 
 
 //set the index back to 0
 export const [ResetUploadStepEvent$, ResetUploadSteps] = createSignal();
-
 export const [useCurrentUploadStepIndex, CurrentUploadStepIndex$] = bind(
     merge(
         CurrentUploadStepChanged$.pipe(map(i => ({value: i, type: 'set'}))), 
@@ -170,6 +199,7 @@ export const [useCurrentUploadStepIndex, CurrentUploadStepIndex$] = bind(
                 SetReviewGroupSelection('Internal'),
                 SetNewDepartmentName('');
                 SetUploadInputItemName('');
+                ClearFilesFromUpload();
             }),
             map(() => ({value: 0, type: 'reset'})))
     ).pipe(
@@ -251,7 +281,6 @@ const handleFileThumbnail = (f) => {
 
 export const [useFilesForUpload, FilesForUpload$] = bind(
     merge(AddFileEvent$, RemoveFileEvent$, RemoveFileCompleted$, ModifyFileEvent$, ClearFileEvent$).pipe(
-        tap(console.log),
         scan((acc, {action, file, type}) => {
             switch(action) {
                 case 'Add':
@@ -263,6 +292,8 @@ export const [useFilesForUpload, FilesForUpload$] = bind(
                         const result = [...acc.filter(f => f.file.name !== file)]
                         if (result.length < 1) {
                             ShowUploadReviewDialog(null);
+                            ShowAddtoReviewDialog(null, null, null);
+                            CompletedUploading();
                             SendToastSuccess("All Files Uploaded Successfully");
                         }
                         return result;
@@ -312,9 +343,14 @@ export const [useUploadStepsReady, UploadStepsReady$] = bind(
 
 export const [StartUploadEvent$, StartUploading] = createSignal((reviewId) => reviewId);
 export const [CancelUploadEvent$, CancelUploading] = createSignal(() => ({type: 'cancel'}));
+export const [CompletedUploadEvent$, CompletedUploading] = createSignal(() => ({type: 'complete'}));
+
 
 export const [useUploadEvent, OnUploadEvent$] = bind(
     StartUploadEvent$.pipe(
+        withLatestFrom(showUploadReviewDlgEvent$),
+        // dont emit if the uploadreview dlg is not showing (is null)
+        switchMap(([event, uploadDlg]) => uploadDlg ? of(event) : EMPTY),
         withLatestFrom(FilesForUpload$, UploadItemName$, LoggedInUser$),
         switchMap(([reviewId, files, itemName, user]) => {
             const { displayName: artist} = user;
@@ -364,6 +400,68 @@ export const [useUploadEvent, OnUploadEvent$] = bind(
         })
     ), null
 )
+
+export const [useIsAddFilesUploading, IsAddFilesploading$] = bind(
+    merge(StartUploadEvent$, CancelUploadEvent$, CompletedUploadEvent$).pipe(
+        map(event => {
+            if (event.type === 'cancel') {
+                SendToastWarning('Uploading was cancelled')
+                return false;
+            } else if (event.type === 'complete') {
+                SendToastSuccess('Uploads were completed successfully');
+                return false;
+            }
+            return true;
+        })
+    ), false
+)
+
+export const [useAddFileUploadEvent, onAddUploadEvent$] = bind(
+    (ReviewId, Department, ReviewName, ItemCount, index) =>
+    StartUploadEvent$.pipe(
+        withLatestFrom(UploadingAdditionalBoardItemId$),
+        // dont continue if adduploadDlg is not showing (boarditemid param is null)
+        switchMap(([event, addUploadDlg]) => addUploadDlg?.BoardItemId ? of(event) : EMPTY),
+        withLatestFrom(FilesForUpload$, LoggedInUser$),
+        tap(t => console.log("Add File Upload Event", t)),
+        switchMap(([, files, user]) => {
+            const { displayName: artist} = user;
+            if (files.length < 1) {                
+                SendToastError('No files have been Added for Upload');
+                throw 'No Files Added for Upload...'
+            }
+            const toUpload = files.map((f, i) => {
+                const ext =  _.last(f.file.name.split('.'));
+                const params = {
+                    filename:
+                        `${Department} ${index}.${padToTwo(i + ItemCount)} ${ReviewName}.${ext}`,
+                    artist
+                };
+                
+                console.log("HERE FILES TO UPLOAD: ", params, ItemCount, index, name)
+                return {file: f.file, ReviewId, params, index: i, type: f.type}
+            });
+
+            console.log("Uploading.. ", toUpload);
+            return from(toUpload).pipe(
+                concatMap(u => SyncsketchService.UploadItem$(u.ReviewId, u.file, u.params, u.index, 
+                    files.length, u.type).pipe(
+                        tap(evt => SendUploadProgress(evt)),
+                        takeUntil(CancelUploadEvent$),
+                        tap(console.log),
+                    )
+                )
+            )
+            
+        }),
+        catchError((err) => {
+            console.log("Error Context: /OnUploadEvent", err);
+            SendToastError("There was an error before Upload started...");
+            return of(null)
+        })
+    ), null
+)
+
 //reviewId, file, param
 const _uploadFileMap = (file, params) => ({file, params}); 
 export const [UploadFileEvent$, UploadFile] = createSignal(_uploadFileMap);

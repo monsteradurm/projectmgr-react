@@ -15,7 +15,7 @@ import { SendToastError, SendToastSuccess, SendToastWarning } from "../../../App
 import { ShowEditTagsDialog } from "./TableItemDlgs/TableItem.EditTags.context";
 import { ShowEditDescriptionDialog } from "./TableItemDlgs/TableItem.EditDescription.context";
 import { ShowEditTimelineDialog } from "./TableItemDlgs/TableItem.EditTimeline.context";
-import { AutoCloseReviewItemContext } from "./TableItemControls/TableItem.Review.Context";
+import { AutoCloseReviewItemContext, ShowReviewContextMenu } from "./TableItemControls/TableItem.Review.Context";
 import { BoardId$ } from "../Context/Project.Params.context";
 import { MondayService } from "../../../Services/Monday.service";
 
@@ -38,15 +38,15 @@ const [useReviewMenuOptions, ReviewMenuOptions$] = bind(
     , SUSPENSE
 )
 
-const BuildTabMenuItems = (options, activeTab, type, id) => {
+const BuildTabMenuItems = (menuOptions, activeTab, type, id) => {
+    let options = menuOptions;
     if (options === SUSPENSE || activeTab === SUSPENSE)
-        return SUSPENSE
+        options = []
 
-    if (options === null || activeTab === null)
-        return null;
+    else if (options === null || activeTab === null)
+        options = [];
 
-    
-    const isSelected = activeTab.indexOf(type) > -1;
+    const isSelected = (activeTab?.indexOf(type) || -1) > -1;
     return {
         label: isSelected ? activeTab : type,
         className: isSelected ? 'pm-item-tab-active' :'',
@@ -297,11 +297,15 @@ const [AutoCloseBoardItemContext,] = bind(
         startWith(null),
         pairwise(),
         tap(([prev, cur]) => {
+            if (cur?.ref?.current) {
+                ShowReviewContextMenu(null, null, null);
+            }
+
             if (prev?.ref?.current)
                 prev.ref.current.hide(prev.evt);
 
-            
-            cur.ref.current.show(cur.evt);
+            if (cur?.ref?.current)
+                cur.ref.current.show(cur.evt);
             return cur;
         })
     ), SUSPENSE
@@ -315,7 +319,7 @@ const [useReviewsMenu,] = bind(
     ).pipe(
         map(([options, activeTab]) =>
             BuildTabMenuItems(options, activeTab, 'Reviews', BoardItemId) 
-        )
+        ),
     ), SUSPENSE
 )
 

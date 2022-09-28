@@ -110,8 +110,9 @@ export class MondayService {
     
 
     static StoreUpdate$ = (id, content) => {
-      return MondayService.Execute$(MondayGraphQL.Mutate_Update(id, content)).pipe(
-      )
+      const mutation = MondayGraphQL.Mutate_Update(id, JSON.stringify(content).slice(1, -1));
+      console.log(mutation)
+      return MondayService.Execute$(mutation);
     }
 
     static MutateDate = (boardId, itemId, columnId, date) => {

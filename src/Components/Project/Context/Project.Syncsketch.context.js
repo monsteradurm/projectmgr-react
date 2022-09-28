@@ -14,6 +14,7 @@ import { AttrOrSuspend, AttrOrSuspend$ } from "../../../Helpers/Context.helper";
 import { AddQueueMessage, RemoveQueueMessage } from "../../../App.MessageQueue.context";
 import { compareByFieldSpec } from "@fullcalendar/react";
 import { FirebaseService } from "../../../Services/Firebase.service";
+import { UPLOAD_QID } from "../TableView/TableItemDlgs/TableItem.UploadReview";
 
 
 
@@ -84,10 +85,11 @@ const syncReviewParams$ = combineLatest([SyncsketchProject$, Group$, SyncsketchG
     //tap(() => AddQueueMessage(PROJ_QID, 'get-sync-reviews', 'Retrieving Syncsketch Reviews...'))
 );
 
-//(project_id, group_Id, itemId, review_name, department)
+export const KEY_CREATE_SS_REVIEW = 'create-ss-review';
 const [CreateSyncsketchReviewEvent$, CreateSyncsketchReview] = createSignal(
     (review_name, department, itemId) => {
         combineLatest([SyncsketchProjectId$, SyncsketchGroupId$]).pipe(
+            tap(t => AddQueueMessage(UPLOAD_QID, 'create-ss-review', 'Creating Syncsketch Review...')),
             switchMap(([project_id, group_id]) => 
                 SyncsketchService.CreateReview$(project_id, group_id, itemId, review_name, department).pipe(
                     take(1)
@@ -137,12 +139,20 @@ const [SyncsketchReviewsByElement, SyncReviewElements$] = partitionByKey(
 )
 
 const [useSyncsketchReviewsFromElement,] = bind(
-    element => SyncsketchReviewsByElement(element).pipe(
-        map(reviews => {
-            if (reviews === SUSPENSE)
-                return SUSPENSE;
-            return reviews;
-        }),
+    element => 
+    SyncReviewElements$.pipe(
+        switchMap(elements => elements === SUSPENSE ? EMPTY : of(elements)),
+        map(elements => _.filter(elements, e => !!e && e != SUSPENSE)),
+        tap(T => console.log("ELEMENTS", T)),
+        switchMap(elements => elements?.indexOf(element) >= 0 ? 
+            SyncsketchReviewsByElement(element).pipe(
+                map(reviews => {
+                    if (reviews === SUSPENSE)
+                        return SUSPENSE;
+                    return reviews;
+                }),
+            ) : of(null)
+        )
     ), SUSPENSE
 )
 

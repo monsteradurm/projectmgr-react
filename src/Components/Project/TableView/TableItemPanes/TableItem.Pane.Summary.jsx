@@ -36,7 +36,7 @@ export const TableItemSummary = ({visible}) => {
             </Stack>
             <div style={{fontSize: 14, marginTop: Description ? 5 : 0}}>
                 {
-                    Description ? parse(Description) : 
+                    Description ? parse(Description.replace('Description:', '')) : 
                     <div style={{fontStyle: 'italic'}}>No Description provided</div>
                 }
             </div>

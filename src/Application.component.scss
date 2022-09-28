@@ -115,10 +115,15 @@
   color: black;
 }
 
+.pm-dialog {
+  background: white !important;
+}
 .App-link {
   color: #61dafb;
 }
-
+.ql-tooltip, .ql-editing {
+  transform: translateX(70px) !important;
+}
 .pm .p-scrollpanel-wrapper {
   border-right: 3px solid #f4f4f4 !important;
 }

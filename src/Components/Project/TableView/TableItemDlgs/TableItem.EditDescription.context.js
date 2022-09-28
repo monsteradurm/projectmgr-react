@@ -15,6 +15,7 @@ export const [useEditDescriptionDlg, ] = bind(
 )
 
 export const SubmitDescription = (id, content) => {
+    console.log(content);
     MondayService.StoreUpdate$(id, content).pipe(
         take(1)
     ).subscribe((res) => {

@@ -10,6 +10,8 @@ import { ReviewItem$ } from "../../Context/Project.Review.context";
 import { ShowEditTagsDialog } from "../TableItemDlgs/TableItem.EditTags.context";
 import { ShowEditDeliveredDateDialog, ShowEditTimelineDialog } from "../TableItemDlgs/TableItem.EditTimeline.context";
 import moment from 'moment';
+import { ShowAddtoReviewDialog } from "../TableItemDlgs/TableItem.Upload.context";
+import { ShowContextMenu } from "../TableItem.context";
 
 //evt, CurrentReviewId, ReviewItems, Delivered, CurrentItemIndex, RowContextMenuRef
 const _showContextMap = (evt, id, ref) => ({evt, id, ref});
@@ -20,7 +22,7 @@ export const [useReviewContextMenu, ReviewContextMenu$] = bind(
     AllUsers$.pipe(
         map((allUsers) => {
             let reviews = [{label: 'Delete Review', command: () => OnDeleteReview(CurrentReviewId, ReviewItems)}];
-            if (ReviewItems.length > 1)
+            if (ReviewItems?.length > 1)
                 reviews = [{label: 'Delete Item', command: () => DeleteSyncsketchItem(ReviewItems[CurrentItemIndex])
                              }, ...reviews]
 
@@ -37,7 +39,9 @@ export const [useReviewContextMenu, ReviewContextMenu$] = bind(
             const today = moment().format('YYYY-MM-DD');
 
             const main = [
-                { label: 'Add Item To Review', command: () => SendToastWarning("not Yet Implemented..") },
+                { label: 'Add To Review...', command: () => ShowAddtoReviewDialog(
+                    BoardItemId, CurrentReviewId, ReviewItems
+                )},
                 { separator: true},
                 ...reviews,
                 { separator: true},
@@ -67,6 +71,10 @@ export const [AutoCloseReviewItemContext,] = bind(
         startWith(null),
         pairwise(),
         tap(([prev, cur]) => {
+            if (cur?.ref?.current) {
+                ShowContextMenu(null, null, null);
+            }
+
             if (prev?.ref?.current)
                 prev.ref.current.hide(prev.evt);
 
