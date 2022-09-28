@@ -72,7 +72,8 @@ const ReviewThumbnail = ({Thumbnail, URL}) => {
             Thumbnail && Thumbnail !== SUSPENSE ?
             <img src={Thumbnail} className="pm-thumbnail-link"
             onClick={(e) => ClickHandler(e, URL)}
-            style={{width: 160, height:90, cursor: 'pointer', objectFit: 'cover', borderRadius:5}} /> 
+            style={{width: 160, height:90, cursor: 'pointer', objectFit: 'cover', borderRadius:5,
+            border: 'solid 2px black'}} /> 
             : <Skeleton width={160} height={90}/>
         }
         </div>)

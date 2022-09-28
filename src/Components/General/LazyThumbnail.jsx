@@ -5,7 +5,7 @@ import { Skeleton } from "primereact/skeleton";
 import { NavigationService } from "../../Services/Navigation.service";
 import { SUSPENSE } from "@react-rxjs/core";
 
-export const LazyThumbnail = ({thumbnail$, width, height, url, borderRadius, border}) => {
+export const LazyThumbnail = ({thumbnail$, width, height, url, borderRadius, border, style}) => {
     const [thumbnail, setThumbnail] = useState(null);
     const [visible, setVisible] = useState(false);
     
@@ -43,7 +43,7 @@ export const LazyThumbnail = ({thumbnail$, width, height, url, borderRadius, bor
                 <Suspense fallback={fallback}>
                     <img src={thumbnail} className={url ? "pm-thumbnail-link" : null}
                     style={{width: width, height:height, cursor: url ? 'pointer' : null, objectFit: 'cover',
-                        borderRadius: borderRadius ? borderRadius : null, border: border ? border : null}} 
+                        borderRadius: borderRadius ? borderRadius : null, border: border ? border : null, ...style}} 
                         onClick={onClickHandler} />  
                 </Suspense>  : fallback
             }

@@ -14,7 +14,9 @@ export const TableItemThumbnail = () => {
 
     return (
         <div className="pm-task-thumb-container">
-            <LazyThumbnail width={100} height={60} thumbnail$={thumbnail$} url={reviewLink}/>
+            <LazyThumbnail width={100} height={60} thumbnail$={thumbnail$} 
+            style={{borderRight: 'solid 1px black'}}
+            url={reviewLink}/>
         </div>
     )
 }
