@@ -27,7 +27,6 @@ const [useSyncsketchProject, SyncsketchProject$] = bind(
             const name = project.name;
             const key = "Syncsketch/Project/" + name;
             const stored = sessionStorage.getItem(key);
-
             if (stored) {
                 try {
                     const data = JSON.parse(stored);
@@ -50,6 +49,7 @@ const SyncsketchProjectId$ = AttrOrSuspend$(SyncsketchProject$, 'id');
 
 const [useSyncsketchGroups, SyncsketchGroups$] = bind(
     SyncsketchProject$.pipe(
+        tap(t => console.log("SyncsketchProject$", t)),
         map(project => {
             if (project === SUSPENSE)
                 return SUSPENSE;
