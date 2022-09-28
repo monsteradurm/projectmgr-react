@@ -127,6 +127,7 @@ export class SyncsketchService {
     )
 
     static FindProject$ = (name) => SyncsketchService.AllProjects$.pipe(
+        map(projects => _.filter(projects, p => p.name.indexOf(', ') < 0)),
         tap(T => console.log("All Projects", T)),
         map(projects => _.find(projects, p => p.name === name)),
         map(project => project ? project : SyncsketchService.MissingSyncsketchProject)
