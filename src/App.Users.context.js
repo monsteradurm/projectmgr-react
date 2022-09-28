@@ -250,7 +250,7 @@ const [useMyBoards, MyBoards$] = bind(
             return FirebaseService.MyBoards$(user.id).pipe(take(1));
         }),
         tap(t => RemoveQueueMessage(APP_QID, M_GET_BOARD_SUBSCRIPTIONS[0])),
-        take(1)
+        take(1),
     ), []
 )
 
@@ -286,7 +286,7 @@ const [useMyWorkspaces, ] = bind(
             const myWS_Ids = _.pluck(myWS, 'id');
             return _.filter(allWS, ws => 
                 !!_.find(ws.nesting, n => myWS_Ids.indexOf(n) >= 0))
-        })
+        }),
     ), SUSPENSE
 )
 

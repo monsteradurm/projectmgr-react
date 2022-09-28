@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Dropdown } from "react-bootstrap";
 import { take } from "rxjs";
 import { useMyBoardIds } from "../../App.Users.context";
-import { SetCurrentRoute } from "../../Application.context";
+import { SetCurrentRoute, useMyBoards } from "../../Application.context";
 import { FirebaseService } from "../../Services/Firebase.service";
 import { NestedDropdown } from "../General/NestedDropDown.component";
+import * as _ from 'underscore';
 
 const loadingProjectHTML = <Dropdown.Item>Loading Project...</Dropdown.Item>
 const emptyProjectHTML = <Dropdown.Item>Empty Project...</Dropdown.Item>
@@ -93,26 +94,23 @@ function NestedHierarchyToMenu(items, projectId, boardIds) {
 
 export function ProjectDropdown({projectId, children}) {
     const MyBoardIds = useMyBoardIds(projectId);
+    const MyBoards = useMyBoards();
     const [show, setShow] = useState(false);
     const [boards, setBoards] = useState(null);
     const [displayHTML, setDisplayHTML] = useState(loadingProjectHTML);
 
     const showDropdown = (e)=>{
         if (!projectId) setBoards(null);
+        const boards = _.filter(MyBoards, b => b.projectId === projectId).map(b => b.data);
 
-        FirebaseService.BoardOptions$(projectId)
-        .pipe(take(1))
-        .subscribe((boards) => {
-            let result = {};
+        let result = {};
+        boards.forEach(b => {
+            result = NestHierarchyFromName(b, result);
+        });
 
-            boards.filter(b => b.state === 'active' && MyBoardIds.indexOf(b.id) > -1)
-            .forEach(b => {
-                result = NestHierarchyFromName(b, result);
-            });
+        const html = NestedHierarchyToMenu(Object.entries(result), projectId);
+        setDisplayHTML(html);
 
-            const html = NestedHierarchyToMenu(Object.entries(result), projectId);
-            setDisplayHTML(html);
-        })
         setShow(!show);
     }
 

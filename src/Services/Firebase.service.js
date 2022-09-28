@@ -21,7 +21,7 @@ export class FirebaseService {
         return collection(collectionRef);
     }
 
-    static AllDocsFromCollection$(name) {
+    static AllDocsFromCollection$(name) {   
         return FirebaseService.Collection$(name)
             .pipe(
                 map((docs) => _.map(docs, (d) => {
@@ -48,12 +48,7 @@ export class FirebaseService {
         )
     }
 
-    static async MyReviews$(MyProjects, MyBoards, ) {
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-        // doc.data() is never undefined for query doc snapshots
-        });
-    }
+
     static DeleteSyncsketchItem(item) {
         const docRef = fsDoc(FirebaseService.db, 
             `SyncsketchItems/${item.project}/groups/${item.group}/reviews/${item.sketchId}/items/${item.id}`);
@@ -99,7 +94,7 @@ export class FirebaseService {
                     take(1),
                     map(boards => _.filter(boards, 
                         b => b.state === 'active' && b.subscribers.indexOf(mondayId) > -1)),
-                    map(boards => _.map(boards, b => ({projectId: ws_id, boardId: b.id})))
+                    map(boards => _.map(boards, b => ({projectId: ws_id, boardId: b.id, data: b})))
                     ),
                 ),
                 take(docs.length),
@@ -117,7 +112,10 @@ export class FirebaseService {
     }
 
     static BoardOptions$(projectId) {
-        return FirebaseService.AllDocsFromCollection$(`ProjectManager/${projectId}/Boards`);
+        console.log("Docs from Colection", projectId)
+        return FirebaseService.AllDocsFromCollection$(`ProjectManager/${projectId}/Boards`).pipe(
+            tap(console.log)
+        );
     }
 
     static GroupOptions$(projectId, boardId) {

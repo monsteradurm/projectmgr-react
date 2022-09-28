@@ -78,7 +78,6 @@ const ReviewThumbnail = ({Thumbnail, URL}) => {
         </div>)
 }
 const ReviewTitle = ({Title, Uploads}) => {
-    console.log(Title);
     if (Title)
         return (
         <Stack direction="horizontal" gap={2}>
@@ -160,7 +159,6 @@ export const TableItemReview = ({ReviewId, ActiveDepartment, primary}) => {
         }
 
     },[Status, CurrentReviewId, ReviewId, ReviewDepartment]);
-
 
     useEffect(() => {
         if (ReviewItems === SUSPENSE && CurrentReview !== SUSPENSE) {
