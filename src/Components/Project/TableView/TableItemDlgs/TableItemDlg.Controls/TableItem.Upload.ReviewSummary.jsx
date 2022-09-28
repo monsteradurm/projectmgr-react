@@ -63,7 +63,8 @@ const SSReviewInvalid = ({primary, name, style, department, boardItemId}) => {
 }
 
 const SSReviewItemNameValid = ({primary, style, reviewName, url, uploadName}) => {
-
+    
+    console.log("HERE", uploadName);
     const id = useId();
     const itemNameDescription = [
         {text: 'Content will be named ', id: id + '2'},

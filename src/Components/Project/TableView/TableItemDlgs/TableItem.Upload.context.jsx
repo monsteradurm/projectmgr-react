@@ -47,7 +47,9 @@ export const [useReviewGroupSelection, ReviewGroupSelection$] = bind(
 
 export const [UploadInputItemNameChanged$, SetUploadInputItemName] = createSignal(_mapFilter);
 export const [useUploadInputItemName, UploadInputItemName$] = bind(
-    UploadInputItemNameChanged$, ''
+    UploadInputItemNameChanged$.pipe(
+        tap( t => console.log("Upload Item NAme Changed", t))
+    ), ''
 )
 
 
@@ -128,13 +130,14 @@ export const [useUploadSyncsketchReview, UploadSyncsketchReview$] = bind(
 
 export const[useUploadedSyncsketchItems, UploadedSyncsketchItems$] = bind(
     UploadSyncsketchReview$.pipe(
+        tap(T => console.log("UPLOAD SYNCSKETCH ITEMS START: ", T)),
         switchMap((review) => {
             if (!review?.uuid || review === SUSPENSE)
                 return EMPTY
 
             return of(review.uuid);
         }),
-
+        tap(T => console.log("UPLOAD SYNCSKETCH ITEMS MID: ", T)),
         switchMap(reviewId => SyncsketchItems$(reviewId)),
         tap(t => console.log("Uploaded Syncsketch ITems", t))
     )
@@ -158,13 +161,15 @@ const padToTwo = (n) => n <= 99 ? `0${n}`.slice(-2) : n;
 
 export const [useSyncsketchNextItemIndex, SyncsketchNextItemIndex$] = bind(
     combineLatest([UploadedSyncsketchItems$, SyncsketchDepartment$]).pipe(
-        map(([itemMap, department]) => Object.keys(itemMap)
-            .filter(k => k.startsWith(department))
-            .filter(k => k?.indexOf('_') >= 0)
-        ),
-        map(keys =>  
-            keys.map(k => k.split('_')[1])
-            .map(i => parseInt(i))
+        tap(t => console.log("Next Item Index (PARAMS):", t)),
+        map(([itemMap, department]) => 
+            Object.keys(itemMap).length < 1 ? 
+            [0] : 
+                Object.keys(itemMap)
+                .filter(k => k.startsWith(department))
+                .filter(k => k?.indexOf('_') >= 0)
+                .map(k => k.split('_')[1])
+                .map(i => parseInt(i))
         ),
         map(indices => _.max(indices)),
         map(index => index ? index + 1 : 1),
@@ -176,11 +181,12 @@ export const [useSyncsketchNextItemIndex, SyncsketchNextItemIndex$] = bind(
 
 export const [useUploadItemName, UploadItemName$] = bind(
     combineLatest([UploadInputItemName$, SyncsketchNextItemIndex$, SyncsketchDepartment$]).pipe(
-        map(([name, index, department]) => {
+        switchMap(([name, index, department]) => {
+            console.log(name, index, department);
             if ([name, index, department].indexOf(SUSPENSE) >= 0)
                 return EMPTY
             
-            return `${department} ${index} ${name}`
+            return of(`${department} ${index} ${name}`);
         })
     ), null
 )

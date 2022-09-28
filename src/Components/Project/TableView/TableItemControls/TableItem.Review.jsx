@@ -78,6 +78,7 @@ const ReviewThumbnail = ({Thumbnail, URL}) => {
         </div>)
 }
 const ReviewTitle = ({Title, Uploads}) => {
+    console.log(Title);
     if (Title)
         return (
         <Stack direction="horizontal" gap={2}>

@@ -134,22 +134,27 @@ export class SyncsketchService {
     static ItemChangesByReview$ = (projectid, groupId, reviewId) => {
         if (!projectid) return of([]);
 
+        const doc = `SyncsketchItems/${projectid}/groups/${groupId}/reviews/${reviewId}`;
+        const collection =  doc + `/items`;
+        return FirebaseService.Collection$(collection).pipe(
+            switchMap(c => c.length < 1 ? of([]) :
+                FirebaseService.SubscribeToCollection$(collection)
+                .pipe(
+                    tap(T => console.log("Subscribing to collection: ", T)),
+                    concatMap(itemArr => from(itemArr).pipe(
+                        concatMap(change => {
+                            if (change.type === 'removed')
+                                return of({action: 'removed', id: change.doc.id});
         
-        const collection = `SyncsketchItems/${projectid}/groups/${groupId}/reviews/${reviewId}/items`;
-        return FirebaseService.SubscribeToCollection$(collection)
-        .pipe(
-            concatMap(itemArr => from(itemArr).pipe(
-                concatMap(change => {
-                    if (change.type === 'removed')
-                        return of({action: 'removed', id: change.doc.id});
-
-                    return FirebaseService.GetDocument$(collection, change.doc.id)
-                        .pipe(
-                            map(doc => doc.data()),
-                            map(item => ({...item, action: change.type, id: change.doc.id}))
-                        )
-                }),
-            )),
+                            return FirebaseService.GetDocument$(collection, change.doc.id)
+                                .pipe(
+                                    map(doc => doc.data()),
+                                    map(item => ({...item, action: change.type, id: change.doc.id}))
+                                )
+                        }),
+                    )),
+                )
+            )
         )
     }
 
