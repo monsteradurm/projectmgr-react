@@ -30,7 +30,6 @@ export const TableItemEditDeliveredDate = ({}) => {
         if (delivered === SUSPENSE)
             return;
 
-        console.log("DELIVERED ?", delivered)
         if(!delivered?.text) {
             setDateInput(null);
         }

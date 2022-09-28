@@ -29,11 +29,11 @@ export const LazyThumbnail = ({thumbnail$, width, height, url, borderRadius, bor
 
         return () => sub.unsubscribe();
     }, [thumbnail$, visible])
-
+    /*
     useEffect(() => {
         console.log("THUMBNAIL CHANGED", thumbnail);
     }, [thumbnail])
-
+*/
     const fallback = <Skeleton width={width} height={height}/>;
     return(
         <>

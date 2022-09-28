@@ -219,6 +219,7 @@ const [useSyncsketchItem, SyncksetchItem$] = bind(
 const [, SyncsketchItems$] = bind(
     reviewId =>
     combineLatest([SyncsketchProjectId$, SyncsketchGroupId$]).pipe(
+        tap(t => console.log("SyncsketchItems$", t)),
         switchMap(params => {
             if (params.indexOf(SUSPENSE) > -1)
                 return of(SUSPENSE);

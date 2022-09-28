@@ -1,4 +1,5 @@
 Setting proxy --> /syncsketch/*
+Setting proxy --> /reverseProxy/*
 Setting proxy --> /syncsketch-v2/*
 Setting proxy --> /syncsketch-upload/*
 Setting proxy --> /typeform/*
@@ -6,22 +7,36 @@ Setting proxy --> /confluence/*
 Setting proxy --> /admin-atlassian/*
 Setting proxy --> /box/*
 Setting proxy --> /box-account/*
-Setting proxy --> /box-rest/*
 Setting proxy --> /pm-socket/*
 Setting proxy --> /cloud-functions/*
 Setting proxy --> /item-data-cdn-syncsketch-com/*
 Setting proxy --> /media-cdn-syncsketch-com/*
 Setting proxy --> /lareposync/*
+Setting proxy --> /liquidanimation-box/*
 projectmgr-react --> listening at: 3000
+{
+  host: 'localhost:3000',
+  connection: 'Upgrade',
+  pragma: 'no-cache',
+  'cache-control': 'no-cache',
+  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
+  upgrade: 'websocket',
+  origin: 'http://localhost:3000',
+  'sec-websocket-version': '13',
+  'accept-encoding': 'gzip, deflate, br',
+  'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
+  'sec-websocket-key': 'nyktiNRB8VBCYjuJwSOBsA==',
+  'sec-websocket-extensions': 'permessage-deflate; client_max_window_bits'
+}
 {
   host: 'localhost:3000',
   connection: 'keep-alive',
   'cache-control': 'max-age=0',
-  'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+  'sec-ch-ua': '"Google Chrome";v="105", "Not)A;Brand";v="8", "Chromium";v="105"',
   'sec-ch-ua-mobile': '?0',
   'sec-ch-ua-platform': '"Windows"',
   'upgrade-insecure-requests': '1',
-  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
   accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
   'sec-fetch-site': 'none',
   'sec-fetch-mode': 'navigate',
@@ -29,15 +44,14 @@ projectmgr-react --> listening at: 3000
   'sec-fetch-dest': 'document',
   'accept-encoding': 'gzip, deflate, br',
   'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
-  'if-none-match': 'W/"54c-1821a902189"',
-  'if-modified-since': 'Wed, 20 Jul 2022 07:43:49 GMT'
+  'if-none-match': 'W/"707-HyBcgrjKpgdzlEbMzNvLreB6NNs"'
 }
 {
   host: 'localhost:3000',
   connection: 'keep-alive',
-  'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+  'sec-ch-ua': '"Google Chrome";v="105", "Not)A;Brand";v="8", "Chromium";v="105"',
   'sec-ch-ua-mobile': '?0',
-  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
   'sec-ch-ua-platform': '"Windows"',
   accept: 'text/css,*/*;q=0.1',
   'sec-fetch-site': 'same-origin',
@@ -45,16 +59,14 @@ projectmgr-react --> listening at: 3000
   'sec-fetch-dest': 'style',
   referer: 'http://localhost:3000/Projects?ProjectId=LADUS6666_TempProjA&BoardId=2871802719&GroupId=topics',
   'accept-encoding': 'gzip, deflate, br',
-  'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
-  'if-none-match': 'W/"79e70-1821a9021a9"',
-  'if-modified-since': 'Wed, 20 Jul 2022 07:43:49 GMT'
+  'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8'
 }
 {
   host: 'localhost:3000',
   connection: 'keep-alive',
-  'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+  'sec-ch-ua': '"Google Chrome";v="105", "Not)A;Brand";v="8", "Chromium";v="105"',
   'sec-ch-ua-mobile': '?0',
-  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
   'sec-ch-ua-platform': '"Windows"',
   accept: '*/*',
   'sec-fetch-site': 'same-origin',
@@ -67,9 +79,9 @@ projectmgr-react --> listening at: 3000
 {
   host: 'localhost:3000',
   connection: 'keep-alive',
-  'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+  'sec-ch-ua': '"Google Chrome";v="105", "Not)A;Brand";v="8", "Chromium";v="105"',
   'sec-ch-ua-mobile': '?0',
-  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
   'sec-ch-ua-platform': '"Windows"',
   accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
   'sec-fetch-site': 'same-origin',
@@ -84,9 +96,9 @@ projectmgr-react --> listening at: 3000
 {
   host: 'localhost:3000',
   connection: 'keep-alive',
-  'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+  'sec-ch-ua': '"Google Chrome";v="105", "Not)A;Brand";v="8", "Chromium";v="105"',
   'sec-ch-ua-mobile': '?0',
-  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
   'sec-ch-ua-platform': '"Windows"',
   accept: '*/*',
   'sec-fetch-site': 'same-origin',
@@ -101,9 +113,9 @@ projectmgr-react --> listening at: 3000
 {
   host: 'localhost:3000',
   connection: 'keep-alive',
-  'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+  'sec-ch-ua': '"Google Chrome";v="105", "Not)A;Brand";v="8", "Chromium";v="105"',
   'sec-ch-ua-mobile': '?0',
-  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
   'sec-ch-ua-platform': '"Windows"',
   accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
   'sec-fetch-site': 'same-origin',
@@ -115,23 +127,17 @@ projectmgr-react --> listening at: 3000
   'if-none-match': 'W/"14e3-181a84cb6ed"',
   'if-modified-since': 'Tue, 28 Jun 2022 03:13:28 GMT'
 }
-{
-  host: 'localhost:3000',
-  connection: 'keep-alive',
-  'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
-  origin: 'http://localhost:3000',
-  'if-none-match': 'W/"10454-1821a9021a8"',
-  'if-modified-since': 'Wed, 20 Jul 2022 07:43:49 GMT',
-  'sec-ch-ua-mobile': '?0',
-  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
-  'sec-ch-ua-platform': '"Windows"',
-  accept: '*/*',
-  'sec-fetch-site': 'same-origin',
-  'sec-fetch-mode': 'cors',
-  'sec-fetch-dest': 'font',
-  referer: 'http://localhost:3000/static/css/main.d5e1e0fe.css',
-  'accept-encoding': 'gzip, deflate, br',
-  'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8'
-}
-/1979876/?noConvertFlag=0
-https://syncsketch.com/items/uploadToReview
+/item/12947485/?fields=id,thumbnail_url,name
+https://syncsketch.com/api/v1
+/item/12947485/?fields=id,thumbnail_url,name
+https://syncsketch.com/api/v1
+/item/12947485/?fields=id,thumbnail_url,name
+https://syncsketch.com/api/v1
+/item/12947485/?fields=id,thumbnail_url,name
+https://syncsketch.com/api/v1
+/frame/?item__id=12947485
+https://syncsketch.com/api/v1
+/item/12947485/?fields=id,thumbnail_url,name
+https://syncsketch.com/api/v1
+/item/12947485/?fields=id,thumbnail_url,name
+https://syncsketch.com/api/v1
