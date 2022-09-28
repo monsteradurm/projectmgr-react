@@ -2,17 +2,26 @@ import { SUSPENSE } from "@react-rxjs/core";
 import { Skeleton } from "primereact/skeleton";
 import { Stack } from "react-bootstrap"
 import { of } from "rxjs";
+import { NavigationService } from "../../Services/Navigation.service";
 import { LazyThumbnail } from "../General/LazyThumbnail";
 import { Loading } from "../General/Loading";
 import { useStatusReviewThumbnail, useStatusAssignedArtists, useStatusItem, useStatusReview, useStatusReviewComments, useStatusReviewLink, useStatusReviewName } from "./Home.context";
 import "./Home.StatusItem.scss";
 
+const onClickHandler = (e, url) => {
+    if (!url)
+        return;
+    
+    NavigationService.OpenNewTab(url, e);
+}
+
 const StatusThumbnail = ({Thumbnail, URL}) => {
+
     return (<div style={{height: 100}}>
         {
             Thumbnail && Thumbnail !== SUSPENSE ?
             <img src={Thumbnail} className="pm-thumbnail-link"
-            onClick={(e) => ClickHandler(e, URL)}
+            onClick={(e) => onClickHandler(e, URL)}
             style={{width: 160, height:120, cursor: 'pointer', objectFit: 'cover', borderRadius:5}} /> 
             : <Skeleton width={160} height={120}/>
         }
@@ -74,7 +83,7 @@ export const HomeStatusItem = ({statusItem}) => {
                     }
                 </Stack> : null
             }
-            
+
             <div className="my-auto"></div>
             <Stack direction="horizontal" gap={2} style={{padding: '0px 30px 10px 30px'}}>
                 <div className="mx-auto"></div>
