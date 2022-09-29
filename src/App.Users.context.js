@@ -58,8 +58,10 @@ const FetchAllUsers$ = AuthToken$.pipe(
     switchMap(token => token? of(token) : EMPTY),
     switchMap(token => UserService.FetchAllUsers$(token).pipe(take(1))),
     map(users => _.filter(users, u => !!u.givenName && !!u.surname && !!u.mail)),
+    tap(console.log),
     map(users => _.filter(users,
-        u => u.mail.indexOf('liquidanimation.com') > 0)),
+        u => u.mail.indexOf('liquidanimation.com') > 0 || 
+        u.mail.indexOf('liquidanimationcom.onmicrosoft.com') > 0)),
     map(users => users.map(u => ({...u, 
         mail: u.mail.toLowerCase()
     }))),
@@ -84,7 +86,7 @@ const [useAllUsers, AllUsers$] = bind(
     of('AllUsers').pipe(
         switchMap(key => {
             console.log("Retrieving Cached User List...")
-            const stored = sessionStorage.getItem(key);
+            const stored = null//sessionStorage.getItem(key);
             if (stored) {
                 try {
                     const data = JSON.parse(stored);
