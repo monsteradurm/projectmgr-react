@@ -46,7 +46,7 @@ function NestHierarchyFromName(board, nested) {
 
 function NestedHierarchyToMenu(items, projectId, boardIds) {
     let result = [];
-    items.forEach( entry => {
+    _.sortBy(items, i => i[0]).forEach( entry => {
 
         let [title, val] = entry;
         let {boards, children} = val;
@@ -59,17 +59,20 @@ function NestedHierarchyToMenu(items, projectId, boardIds) {
                 </NestedDropdown>
             )
         }
+        
+        const board_name = (name) => name.indexOf('/') >= 0 ? name.split('/').pop() : name;
+
         if (boards && boards.length > 0) {
-            
-            boards.forEach(b => {
-                const name = b.name.split('/').pop();
+            _.sortBy(boards, b => board_name(b.name)).forEach(b => {
+                const name = board_name(b.name);
+                
                 result.push(
                     b.groups.length > 1 ?
                         <NestedDropdown key={b.id} title={name}>
                             {
                                 b.groups ?
                                     b.groups.length > 0 ?
-                                        b.groups.map(g => 
+                                        _.sortBy(b.groups, g => g.title).map(g => 
                                             <Dropdown.Item key={g.id} 
                                             onClick={
                                                 (e) =>
