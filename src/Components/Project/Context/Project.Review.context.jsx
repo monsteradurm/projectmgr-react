@@ -3,7 +3,7 @@ import { ReadyOrSuspend$ } from "@Helpers/Context.helper";
 import { RawBoardItems$, TagOptions$ } from "./Project.Objects.context";
 import * as _ from 'underscore';
 import { concatMap, map, from, tap, of, combineLatest, withLatestFrom, switchMap, mergeMap, EMPTY } from "rxjs";
-import { partitionByKey } from "@react-rxjs/utils";
+import { combineKeys, partitionByKey } from "@react-rxjs/utils";
 import { BoardItem$, BoardItemMap$, BoardItemName$, GetItemTags, GetPersonValues } from "./Project.Item.context";
 import { syncsketchReviewDepartments$ } from "./Project.Syncsketch.context";
 import moment from 'moment';
@@ -77,6 +77,16 @@ const [ReviewById, ReviewIds$] = partitionByKey(
     ReviewMap$,
     x => x.id,
 )
+/*
+const ReviewByIdsChanged$ = combineKeys(ReviewIds$, ReviewByIdFn);
+
+const [, ReviewById] = bind(
+    id => 
+    ReviewByIdsChanged$.pipe(
+        map(x => Array.from(x.values()).filter(val => !Array.isArray(val))),
+        map(reviews => !!id ? _.find(reviews, r => r.id === id) : null),
+    )
+)*/
 
 const [useReviewIds, ] = bind( 
     (boardItemId) =>
@@ -203,7 +213,7 @@ const [useReviewLink, ReviewLink$] = bind(
     (reviewId) => {
     return ReadyOrSuspend$(reviewId, ReviewById).pipe(
         map(item => item === SUSPENSE ? null : item?.Link?.text)
-    )
+        )
     }, SUSPENSE
 )
 const [useReviewTags, ReviewTags$] = bind(

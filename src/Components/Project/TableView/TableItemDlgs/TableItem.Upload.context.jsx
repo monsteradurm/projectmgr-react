@@ -145,22 +145,18 @@ export const [UploadSyncsketchReviewChanged$, SetUploadSyncsketchReview] = creat
 
 export const [useUploadSyncsketchReview, UploadSyncsketchReview$] = bind(
     UploadSyncsketchReviewChanged$.pipe(
-        tap(t => console.log("THIS REVIEW CHANGED: ", t))
     ), null
 )
 
 export const[useUploadedSyncsketchItems, UploadedSyncsketchItems$] = bind(
     UploadSyncsketchReview$.pipe(
-        tap(T => console.log("UPLOAD SYNCSKETCH ITEMS START: ", T)),
         switchMap((review) => {
             if (!review?.uuid || review === SUSPENSE)
                 return EMPTY
 
             return of(review.uuid);
         }),
-        tap(T => console.log("UPLOAD SYNCSKETCH ITEMS MID: ", T)),
         switchMap(reviewId => SyncsketchItems$(reviewId)),
-        tap(t => console.log("Uploaded Syncsketch ITems", t))
     )
 )
 
@@ -172,7 +168,6 @@ export const [useSyncsketchDepartment, SyncsketchDepartment$] = bind(
             
             return BoardItemDepartment$(id);
         }),
-        tap(t => console.log("BOARD ITEM DEPARTMENT", t))
     ), SUSPENSE
 )
 
@@ -182,7 +177,6 @@ const padToTwo = (n) => n <= 99 ? `0${n}`.slice(-2) : n;
 
 export const [useSyncsketchNextItemIndex, SyncsketchNextItemIndex$] = bind(
     combineLatest([UploadedSyncsketchItems$, SyncsketchDepartment$]).pipe(
-        tap(t => console.log("Next Item Index (PARAMS):", t)),
         map(([itemMap, department]) => 
             Object.keys(itemMap).length < 1 ? 
             [0] : 
@@ -196,14 +190,12 @@ export const [useSyncsketchNextItemIndex, SyncsketchNextItemIndex$] = bind(
         map(index => index ? index + 1 : 1),
         map(index => padToThree(index)),
         catchError(err => of('001')),
-        tap(t => console.log("Next Item Index to Upload: ", t))
     ), SUSPENSE
 )
 
 export const [useUploadItemName, UploadItemName$] = bind(
     combineLatest([UploadInputItemName$, SyncsketchNextItemIndex$, SyncsketchDepartment$]).pipe(
         switchMap(([name, index, department]) => {
-            console.log(name, index, department);
             if ([name, index, department].indexOf(SUSPENSE) >= 0)
                 return EMPTY
             
@@ -336,7 +328,6 @@ export const [useFilesForUpload, FilesForUpload$] = bind(
                 }
             }
         }, []),
-        tap(console.log)
     ), [],
 )
 
@@ -465,7 +456,6 @@ export const [useAddFileUploadEvent, onAddUploadEvent$] = bind(
                     artist
                 };
                 
-                console.log("HERE FILES TO UPLOAD: ", params, ItemCount, index, name)
                 return {file: f.file, ReviewId, params, index: i, type: f.type}
             });
 

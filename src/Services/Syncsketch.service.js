@@ -265,13 +265,12 @@ export class SyncsketchService {
     static ThumbnailFromId$ = (id) => {
         if (id === SUSPENSE) return of(SUSPENSE);
         if (!id) return of(null);
-
         return SyncsketchService.Query$(SyncsketchQueries.ThumbnailById(id)).pipe(
             map(item => {
                 if (!item?.thumbnail_url) return null;
                 
-                return ReverseProxy + item.thumbnail_url.replace('https://', '')
-            })
+                return item.thumbnail_url
+            }),
         );
     }
 

@@ -5,8 +5,8 @@ import { Skeleton } from "primereact/skeleton";
 import { NavigationService } from "../../Services/Navigation.service";
 import { SUSPENSE } from "@react-rxjs/core";
 
-export const LazyThumbnail = ({thumbnail$, width, height, url, borderRadius, border, style}) => {
-    const [thumbnail, setThumbnail] = useState(null);
+export const LazyThumbnail = ({thumbnail$, width, height, url, borderRadius, border, style, thumbnail}) => {
+    const [observedThumbnail, setObservedThumbnail] = useState(null);
     const [visible, setVisible] = useState(false);
     
     const onClickHandler = (e) => {
@@ -23,7 +23,8 @@ export const LazyThumbnail = ({thumbnail$, width, height, url, borderRadius, bor
         const sub = thumbnail$.subscribe((thumb) => {
             if (thumb && thumb !== SUSPENSE) {
                 console.log("SETTING THUMBNAIL: " + thumb)
-                setThumbnail(thumb);
+                setObservedThumbnail(thumb);
+                setVisible(true);
             }
         });
 
@@ -35,22 +36,17 @@ export const LazyThumbnail = ({thumbnail$, width, height, url, borderRadius, bor
     }, [thumbnail])
 */
     const fallback = <Skeleton width={width} height={height}/>;
+
+    if (thumbnail && thumbnail !== SUSPENSE && !visible)
+        setVisible(true);
+
+    if (!visible)
+        return fallback;
+
     return(
-        <>
-            <DeferredContent onLoad={() => setVisible(true)}>
-            {
-                thumbnail ?
-                <Suspense fallback={fallback}>
-                    <img src={thumbnail} className={url ? "pm-thumbnail-link" : null}
-                    style={{width: width, height:height, cursor: url ? 'pointer' : null, objectFit: 'cover',
-                        borderRadius: borderRadius ? borderRadius : null, border: border ? border : null, ...style}} 
-                        onClick={onClickHandler} />  
-                </Suspense>  : fallback
-            }
-            </DeferredContent>
-            {
-                !visible ? fallback : null
-            }
-        </>
+        <img src={thumbnail ? thumbnail : observedThumbnail} className={url ? "pm-thumbnail-link" : null}
+        style={{width: width, height:height, cursor: url ? 'pointer' : null, objectFit: 'cover',
+        borderRadius: borderRadius ? borderRadius : null, border: border ? border : null, ...style}} 
+        onClick={onClickHandler} />
     )
 }

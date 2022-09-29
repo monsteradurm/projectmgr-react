@@ -143,7 +143,6 @@ const [useSyncsketchReviewsFromElement, SyncsketchReviewsByElement$] = bind(
     SyncReviewElements$.pipe(
         switchMap(elements => elements === SUSPENSE ? EMPTY : of(elements)),
         map(elements => _.filter(elements, e => !!e && e != SUSPENSE)),
-        tap(T => console.log("ELEMENTS", T)),
         switchMap(elements => elements?.indexOf(element) >= 0 ? 
             SyncsketchReviewsByElement(element).pipe(
                 map(reviews => {
@@ -300,11 +299,12 @@ const [useLatestThumbnail, LatestThumbnail$] = bind(
         switchMap(link => {
             if (link === SUSPENSE) return of(SUSPENSE);
             else if (!link) return of(null);
-
+            
             const id = ItemIdFromSyncLink(link);
             return SyncsketchService.ThumbnailFromId$(id);
         }),
-    )
+        
+    ), SUSPENSE
 )
 
 const HandleDelete = (res) => {
