@@ -184,6 +184,16 @@ export const TableItemReview = ({ReviewId, ActiveDepartment, primary}) => {
         }
     }, [ReviewItems, CurrentItemIndex])
 
+    if (!ReviewItems !== SUSPENSE && ReviewItems?.length < 1)
+        return (<Stack direction="vertical" gap={1} style={{...reviewContainerStyle, maxHeight: 150}}
+        className="pm-review-container"
+        onContextMenu={(evt) => ShowReviewContextMenu(evt,CurrentReviewId, ReviewContextMenuRef)}>
+            <CenteredSummaryContainer>
+                <div style={{fontWeight: 600, width: '100%', textAlign: 'center'}}>
+                    This Review Item has had no associated Syncsketch Item uploaded.</div>
+            </CenteredSummaryContainer>
+        </Stack>)
+
     return (
         <Stack direction="vertical" gap={1} style={reviewContainerStyle} className="pm-review-container"
         onContextMenu={(evt) => ShowReviewContextMenu(evt,CurrentReviewId, ReviewContextMenuRef)}>
@@ -198,7 +208,9 @@ export const TableItemReview = ({ReviewId, ActiveDepartment, primary}) => {
                     style={{color: primary}}/> : null
             }
             <Stack direction="horizontal" style={{padding: '5px 20px 0px 20px'}}>
-                <ReviewTitle Title={CurrentReview?.name} Uploads={ReviewItems?.length} primary={primary}/>
+                <ReviewTitle Title={CurrentReview?.name}
+                    Uploads={ReviewItems?.length} 
+                    primary={primary}/>
                 <div className="mx-auto"></div>
                 <ReviewTags Tags={Tags} />
             </Stack>
