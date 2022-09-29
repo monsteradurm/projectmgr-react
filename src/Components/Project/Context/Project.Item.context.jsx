@@ -90,7 +90,7 @@ const [useAssignedArtists, AssignedArtists$] = bind(
         map(([itemArtists, reviewArtists, item]) => {
             const reassigned = item.subitems?.filter(s => s.Artist?.value?.length).length > 0;
             return reassigned ? reviewArtists : itemArtists;
-        })
+        }),
     ), SUSPENSE
 )
 /*

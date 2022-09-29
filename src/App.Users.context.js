@@ -39,10 +39,12 @@ const standardizeName = (name) => {
         return name.toLowerCase();
     
     const nameArr = name
+        .replace(/'/g, '')
         .toLowerCase()
         .replace('(', '')
         .replace(')', '')
         .split(' ');
+
 
     const first = nameArr.shift();
     const last = nameArr.pop();
@@ -92,7 +94,8 @@ const [useAllUsers, AllUsers$] = bind(
                 } catch { }
             }
             return FetchAllUsers$;
-        })
+        }),
+        tap(console.log)
     )
     , SUSPENSE);
 
