@@ -2,7 +2,7 @@ import { SUSPENSE } from "@react-rxjs/core";
 import { useContext, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Stack } from "react-bootstrap";
 import { BoardItemContext, useBoardItemName, useBoardItemStatus } from "../../Context/Project.Item.context";
-import { useReviewArtists, useReviewDelivered, useReviewDepartment, useReviewIndex, useReviewItem, useReviewName, useReviewTags, useReviewTimeline } from "../../Context/Project.Review.context";
+import { useReviewArtists, useReviewDelivered, useReviewDepartment, useReviewDepartments, useReviewIndex, useReviewItem, useReviewName, useReviewTags, useReviewTimeline, useSiblingReviewDepartments } from "../../Context/Project.Review.context";
 import { LatestThumbnail$, useSyncsketchComments, useSyncsketchItems, useSyncsketchReview, useSyncsketchThumbnail } from "../../Context/Project.Syncsketch.context";
 import { CenteredSummaryContainer } from "./TableItem.SummaryContainer";
 import { SummaryText } from "./TableItem.SummaryText";
@@ -136,6 +136,8 @@ const ReviewDelivered = ({Delivered, primary}) => {
 export const TableItemReview = ({ReviewId, ActiveDepartment, primary}) => {
     const { BoardItemId, CurrentReviewId, Status, Element, Task, Department } = useContext(BoardItemContext);
     const ReviewDepartment = useReviewDepartment(ReviewId);
+    const SiblingDepartments = useSiblingReviewDepartments(Element, ReviewDepartment);
+
     const SyncsketchReview = useSyncsketchReview(Element, ReviewDepartment);
     const Name = useReviewName(ReviewId);
     const Index = useReviewIndex(ReviewId);
@@ -186,7 +188,7 @@ export const TableItemReview = ({ReviewId, ActiveDepartment, primary}) => {
         <Stack direction="vertical" gap={1} style={reviewContainerStyle} className="pm-review-container"
         onContextMenu={(evt) => ShowReviewContextMenu(evt,CurrentReviewId, ReviewContextMenuRef)}>
             <TableItemReviewContextMenu CurrentReviewId={ReviewId} ReviewItems={ReviewItems} 
-                Artists={Artists} BoardItemId={BoardItemId}
+                Artists={Artists} BoardItemId={BoardItemId} SiblingDepartments={SiblingDepartments}
                 Delivered={Delivered} CurrentItemIndex={CurrentItemIndex} ContextMenuRef={ReviewContextMenuRef}/>
              {
                 // arrow for previous item, if index > 0

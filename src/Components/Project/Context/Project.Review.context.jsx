@@ -59,6 +59,19 @@ const [useReviews, Reviews$] = bind(id =>
     ), SUSPENSE
 )
 
+const [useSiblingReviewDepartments, SiblingReviewDepartments$] = bind(
+    (element, department) => 
+    syncsketchReviewDepartments$(element).pipe(
+       switchMap(departments => {
+           if (departments === SUSPENSE)
+                return EMPTY;
+           if (!departments)
+                return [];
+            return of(_.filter(departments, d => d !== department));
+       })
+    ), SUSPENSE
+)
+
 // map review items based on id
 const [ReviewById, ReviewIds$] = partitionByKey(
     ReviewMap$,
@@ -228,6 +241,7 @@ export {
     ReviewById,
     useReviewName,
     useReviewDepartments,
+    useSiblingReviewDepartments,
     useReviewDepartment,
     useReviewTimeline,
     useCurrentReviewId,

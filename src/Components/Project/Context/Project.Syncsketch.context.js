@@ -138,7 +138,7 @@ const [SyncsketchReviewsByElement, SyncReviewElements$] = partitionByKey(
     $ => $.pipe(map(x => x[1]))
 )
 
-const [useSyncsketchReviewsFromElement,] = bind(
+const [useSyncsketchReviewsFromElement, SyncsketchReviewsByElement$] = bind(
     element => 
     SyncReviewElements$.pipe(
         switchMap(elements => elements === SUSPENSE ? EMPTY : of(elements)),
@@ -159,7 +159,7 @@ const [useSyncsketchReviewsFromElement,] = bind(
 const [useSyncsketchReviewDepartments, syncsketchReviewDepartments$] = bind(
     element => SyncsketchReviewsByElement(element).pipe(
         map(reviews => reviews && reviews !== SUSPENSE ? 
-            _.uniq(_.pluck(reviews, 'department')) : [])
+            _.uniq(_.pluck(reviews, 'department')) : []),
     ), SUSPENSE
 )
 
@@ -352,6 +352,7 @@ export {
     useSyncsketchItems,
     CreateSyncsketchReview,
     syncsketchReviewDepartments$,
+    SyncsketchReviewsByElement$,
     SyncsketchProject$,
     SyncsketchGroup$,
     SyncsketchThumbnail$,

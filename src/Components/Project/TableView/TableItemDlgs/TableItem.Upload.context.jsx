@@ -13,11 +13,32 @@ import { ReviewItemName } from "../../../../Helpers/ProjectItem.helper";
 const _AddToUploadMap = (BoardItemId, CurrentReviewId, ReviewItems) => 
     ({BoardItemId, CurrentReviewId, ReviewItems});
 
-    const defaultAddToUploadState = {
-        BoardItemId: null, CurrentReviewId: null, ReviewItems: null
-    }
+const defaultAddToUploadState = {
+    BoardItemId: null, CurrentReviewId: null, ReviewItems: null
+}
+
+const defaultCopyToReviewState = {
+    BoardItemId: null, CurrentReviewId: null, FeedbackDepartment: null, ReviewItems: null
+}
+
+const _CopyToMap = (BoardItemId, CurrentReviewId, FeedbackDepartment, ReviewItems) =>
+    ({BoardItemId, CurrentReviewId, FeedbackDepartment, ReviewItems})
+export const [showCopyToReviewDlgEvent$, ShowCopytoReviewDialog] = createSignal(_CopyToMap);
+
+export const [useCopyToReviewDlg,] = bind(
+    showCopyToReviewDlgEvent$.pipe(
+        tap(T => console.log("Copy To: Event", T)),
+        switchMap((params) => {
+            if (!params?.BoardItemId || !params?.CurrentReviewId)
+                return of(defaultCopyToReviewState)
+            return of(params)
+        }),
+    ), defaultCopyToReviewState
+)
+
 export const [showAddToReviewDlgEvent$, ShowAddtoReviewDialog] = createSignal(_AddToUploadMap);
 export const [resetAddToReviewDlgEvent$] = createSignal({reset: true});
+
 export const [useAddToReviewDlg, UploadingAdditionalBoardItemId$] = bind(
     merge(showAddToReviewDlgEvent$, resetAddToReviewDlgEvent$).pipe(
         switchMap((params) => {

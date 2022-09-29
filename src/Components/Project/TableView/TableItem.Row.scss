@@ -1,5 +1,10 @@
+.pm-row-context .p-submenu-list {
+    box-shadow: none !important;
+}
+
 .pm-row-context {
     background: transparent;
+    
     /* width */
     ::-webkit-scrollbar {
         width: 10px;

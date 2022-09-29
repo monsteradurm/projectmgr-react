@@ -18,7 +18,7 @@ export const TableItemTask = () => {
         {
             Grouping != 'Element' ?
             <span style={{fontWeight:600, marginRight: '10px', 
-                position: 'absolute', left: '10px'}}>
+                position: 'absolute', left: '110px'}}>
                 {Element}
             </span> : null
         }

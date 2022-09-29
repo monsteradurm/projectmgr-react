@@ -10,7 +10,7 @@ import { ReviewItem$ } from "../../Context/Project.Review.context";
 import { ShowEditTagsDialog } from "../TableItemDlgs/TableItem.EditTags.context";
 import { ShowEditDeliveredDateDialog, ShowEditTimelineDialog } from "../TableItemDlgs/TableItem.EditTimeline.context";
 import moment from 'moment';
-import { ShowAddtoReviewDialog } from "../TableItemDlgs/TableItem.Upload.context";
+import { ShowAddtoReviewDialog, ShowCopytoReviewDialog } from "../TableItemDlgs/TableItem.Upload.context";
 import { ShowContextMenu } from "../TableItem.context";
 
 //evt, CurrentReviewId, ReviewItems, Delivered, CurrentItemIndex, RowContextMenuRef
@@ -18,13 +18,20 @@ const _showContextMap = (evt, id, ref) => ({evt, id, ref});
 export const [ReviewVisibleContextMenusChanged$, ShowReviewContextMenu] = createSignal(_showContextMap)
 
 export const [useReviewContextMenu, ReviewContextMenu$] = bind(
-    (BoardItemId, CurrentReviewId, ReviewItems, CurrentItemIndex, Delivered, Artists) =>
+    (BoardItemId, CurrentReviewId, ReviewItems, CurrentItemIndex, Delivered, Artists, FeedbackDepartments) =>
     AllUsers$.pipe(
         map((allUsers) => {
             let reviews = [{label: 'Delete Review', command: () => OnDeleteReview(CurrentReviewId, ReviewItems)}];
             if (ReviewItems?.length > 1)
                 reviews = [{label: 'Delete Item', command: () => DeleteSyncsketchItem(ReviewItems[CurrentItemIndex])
-                             }, ...reviews]
+                             }, ...reviews];
+
+            const copyMenu = !FeedbackDepartments < FeedbackDepartments.length < 1 ?
+                             [{label: 'No Additional Review Departments have ben created...'}] :
+
+                             FeedbackDepartments.map(d => ({label: d,
+                                command: () => 
+                                ShowCopytoReviewDialog(BoardItemId, CurrentReviewId, d, ReviewItems)}));
 
             const removeArtistMenu = Artists !== SUSPENSE && Artists?.length > 0? 
                 Artists.sort().map(a => ({label: a, command: () => 
@@ -59,7 +66,7 @@ export const [useReviewContextMenu, ReviewContextMenu$] = bind(
 
                 ]},
                 { separator: true},
-                { label: 'Copy To...', command: () => SendToastWarning("not Yet Implemented..")}
+                { label: 'Copy To...', items: copyMenu}
             ];
             
             return main;
