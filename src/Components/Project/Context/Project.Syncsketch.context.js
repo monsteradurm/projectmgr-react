@@ -168,11 +168,13 @@ const [useSyncsketchReview, SyncsketchReview$] = bind(
         map(reviews => {
             if(reviews === SUSPENSE)
                 return SUSPENSE;
+
             if (reviews === null || reviews === undefined)
                 return null;
+
             return reviews.filter(r => r.department === feedbackDepartment)
         }),
-        map(reviews => reviews.length > 0 ? reviews[0] : null)
+        map(reviews => reviews.length > 0 ? reviews[0] : null),
     ), SUSPENSE
 )
 
@@ -268,6 +270,7 @@ const [, SyncsketchItems$] = bind(
 const [useSyncsketchItems,] = bind(
     (reviewId, department, index) => ReadyOrSuspend$(reviewId, SyncsketchItems$).pipe(
         switchMap(items => {
+            console.log(items);
             if ([items, department, index].indexOf(SUSPENSE) >= 0)
                 return EMPTY;
 
