@@ -82,7 +82,7 @@ const FetchAllUsers$ = AuthToken$.pipe(
     tap(() => RemoveQueueMessage(APP_QID,_M_GetAllUsers[0])),
 )
 
-const [RecacheUsersEvent$, refreshUsersCache] = createSignal();
+const [RecachedUsersEvent$, refreshUsersCache] = createSignal();
 
 const [, OnCacheRefresh$] = bind(
     RecachedUsersEvent$.pipe(
@@ -92,7 +92,7 @@ const [, OnCacheRefresh$] = bind(
 )
 
 const [useAllUsers, AllUsers$] = bind(
-    merge(of('AllUsers'), RecachedUsersEvent$).pipe(
+    merge(of('AllUsers'), OnCacheRefresh$).pipe(
         switchMap(key => {
             console.log("Retrieving Cached User List...")
             const stored = sessionStorage.getItem(key);
