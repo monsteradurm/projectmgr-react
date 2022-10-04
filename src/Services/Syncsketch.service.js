@@ -169,7 +169,7 @@ export class SyncsketchService {
         return FirebaseService.SubscribeToCollection$(collection)
         .pipe(
             concatMap(reviewArr => from(reviewArr).pipe(
-                tap(change => console.log("CHANGE", change)),
+               // tap(change => console.log("CHANGE", change)),
                 concatMap(change => {
                     if (change.type === 'removed')
                         return of({action: 'removed', uuid: change.doc.id});
@@ -181,7 +181,7 @@ export class SyncsketchService {
                         )
                 }),
             )),
-            tap(t => console.log("Review Changes", t))
+            //tap(t => console.log("Review Changes", t))
         )
     }
 

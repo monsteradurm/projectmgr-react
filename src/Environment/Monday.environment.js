@@ -79,6 +79,15 @@ export const MondayGraphQL = {
       }
     }`,
 
+    ManagementTeam: `query{ teams (ids:434736) {
+      id
+      name
+      users {
+        id
+        name
+      }
+    }}`,
+
     Mutate_DateColumn: (boardId, itemId, columnId, date) => {
       const value = date ? {date} : { }
        return `mutation {

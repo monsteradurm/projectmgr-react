@@ -1,5 +1,5 @@
 import { bind, SUSPENSE } from "@react-rxjs/core";
-import { BehaviorSubject, combineLatest, of, EMPTY, catchError, distinctUntilChanged, from, scan, merge, combineLatestWith, debounceTime } from "rxjs";
+import { BehaviorSubject, combineLatest, of, EMPTY, catchError, distinctUntilChanged, from, scan, merge, combineLatestWith, debounceTime, withLatestFrom } from "rxjs";
 import { switchMap, take, map, tap, concatMap } from "rxjs";
 import { MondayService } from "@Services/Monday.service";
 import { FirebaseService } from "@Services/Firebase.service";
@@ -52,6 +52,7 @@ const standardizeName = (name) => {
 
 }
 
+
 // --- All Users in Account ---
 const FetchAllUsers$ = AuthToken$.pipe(
     tap(() => AddQueueMessage(APP_QID, ..._M_GetAllUsers)),
@@ -81,8 +82,17 @@ const FetchAllUsers$ = AuthToken$.pipe(
     tap(() => RemoveQueueMessage(APP_QID,_M_GetAllUsers[0])),
 )
 
+const [RecacheUsersEvent$, refreshUsersCache] = createSignal();
+
+const [, OnCacheRefresh$] = bind(
+    RecachedUsersEvent$.pipe(
+        tap(() => sessionStorage.removeItem('AllUsers')),
+        map(() => 'AllUsers')
+    )
+)
+
 const [useAllUsers, AllUsers$] = bind(
-    of('AllUsers').pipe(
+    merge(of('AllUsers'), RecachedUsersEvent$).pipe(
         switchMap(key => {
             console.log("Retrieving Cached User List...")
             const stored = sessionStorage.getItem(key);
@@ -134,9 +144,8 @@ const [useUserPhotoByName, UserPhotoByName$] = bind(
                 })
             )
         }),
-        
         switchMap(id => {
-            if (!id) return null;
+            if (!id) return of(null);
             if (id === SUSPENSE) return of(SUSPENSE);
             return _allAvatars$.pipe(
                 switchMap(allAvatars => {
@@ -229,18 +238,62 @@ const [useMyAvatar, MyAvatar$] = bind(
     ), null
 );
 
+const [simulatedUserEvent$, SimulateUser] = createSignal(name => 
+    name ? name.toLowerCase() : null);
+
+const [useSimulatedUser, SimulatedUser$] = bind(
+    combineLatest([simulatedUserEvent$, AllUsers$]).pipe(
+        map(([su, allUsers]) => su && allUsers[su] ? allUsers[su] : null),
+        tap(t => console.log("Simulated User: ", t))
+    ), null
+)
+
+
 // --- Logged in User's respective Monday Account details ---
 const [useMondayUser, MondayUser$] = bind(
-    combineLatest([LoggedInUser$,AllUsers$]).pipe(
-        switchMap(([user, allUsers]) => {
+    combineLatest([LoggedInUser$, AllUsers$, SimulatedUser$]).pipe(
+        switchMap(([user, allUsers, simUser]) => {
             if (!user || !allUsers) return EMPTY;
-            const result = allUsers[user.displayName.toLowerCase()];
-            if (!result || !result.monday) return EMPTY;
 
+            let result = allUsers[user.displayName.toLowerCase()];
+            if (simUser?.monday?.name && allUsers[simUser.monday.name.toLowerCase()]) {
+                result = allUsers[simUser.monday.name.toLowerCase()];
+            }
+            if (!result || !result.monday) return EMPTY;
             return of(result.monday);
+        }),
+    ), null
+)
+
+
+const [useManagers, Managers$] = bind(
+    MondayService.ManagementTeam$, []
+)
+
+const [useIsAdmin,] = bind(
+    combineLatest([LoggedInUser$, Managers$]).pipe(
+        map(([user, managers]) => {
+            if (!user || !managers)
+                return false;
+
+            const u = user.displayName;
+            const mgt = _.pluck(managers, 'name');
+            return mgt.indexOf(u) >= 0
+        }),
+    ), false
+)
+
+const [, userIsAdmin$] = bind(
+    user => Managers$.pipe(
+        map(managers => {
+            if (!user || !managers)
+                return false;
+            const mgt = _.pluck(managers, 'name');
+            return mgt.indexOf(user) >= 0
         }),
     )
 )
+
 
 // --- Monday Boards that Logged in User is subsribed to ---
 const M_GET_BOARD_SUBSCRIPTIONS = ['get-board-subsriptions', 'Retrieving Your Monday Boards...']
@@ -250,13 +303,16 @@ const [useMyBoards, MyBoards$] = bind(
             if (!user) return EMPTY;
             
             AddQueueMessage(APP_QID, ...M_GET_BOARD_SUBSCRIPTIONS);
-            return FirebaseService.MyBoards$(user.id).pipe(take(1));
+            return userIsAdmin$(user.name).pipe(
+                switchMap(isAdmin => isAdmin ? FirebaseService.AllBoards$().pipe(take(1)) : 
+                    FirebaseService.MyBoards$(user.id)
+                )
+            );
         }),
         tap(t => RemoveQueueMessage(APP_QID, M_GET_BOARD_SUBSCRIPTIONS[0])),
-        take(1),
     ), []
 )
-
+/*
 const [useMyBoardsByWorkspace, MyWorkspaceIds$] = partitionByKey(
     MyBoards$.pipe(
         map(itemArr => _.groupBy(itemArr, i => i.projectId)),
@@ -268,9 +324,9 @@ const [useMyBoardsByWorkspace, MyWorkspaceIds$] = partitionByKey(
         concatMap(itemArray => from(itemArray)),
     ),
     w => w.id
-)
+)*/
 const [useAllWorkspaces, AllWorkspaces$] = bind(
-    FirebaseService.AllWorkspaces$, EMPTY
+    FirebaseService.AllWorkspaces$, []
 ) 
 
 const [useMyBoardIds, MyBoardIds$] = bind(
@@ -280,15 +336,35 @@ const [useMyBoardIds, MyBoardIds$] = bind(
     ), []
 )
 
-const MyWorkspaces$ = combineKeys(MyWorkspaceIds$, useMyBoardsByWorkspace);
-const [useMyWorkspaces, ] = bind(
-    MyWorkspaces$.pipe(
-        map(itemArr => Array.from(itemArr.values())),
-        combineLatestWith(AllWorkspaces$),
-        map(([myWS, allWS]) => {
-            const myWS_Ids = _.pluck(myWS, 'id');
+//const MyWorkspaces$ = combineKeys(MyWorkspaceIds$, useMyBoardsByWorkspace);
+const [useMyWorkspaces, MyWorkspaces$] = bind(
+    combineLatest([MyBoards$, AllWorkspaces$]).pipe(
+        map(([myBoards, allWS]) => {
+            const myWS = _.uniq(_.pluck(myBoards, 'projectId'));
             return _.filter(allWS, ws => 
-                !!_.find(ws.nesting, n => myWS_Ids.indexOf(n) >= 0))
+                !!_.find(ws.nesting, n => myWS.indexOf(n) >= 0))
+        }),
+    ), SUSPENSE
+)
+
+const [useGroupedUsers, GroupedUsers$] = bind(
+    AllUsers$.pipe(
+        map(allUsers => {
+            const users = Object.keys(allUsers);
+            const keys = [['a', 'b', 'c', 'd'],
+                    ['e', 'f', 'g', 'h'],
+                    ['i', 'j', 'k', 'l'],
+                    ['m', 'n', 'o', 'p'],
+                    ['q', 'r', 's', 't'],
+                    ['u', 'v', 'w', 'x', 'y', 'z']]
+            const result = []
+            
+            keys.forEach(k => {
+                const label = (k[0] + ' - ' + k[1]).toUpperCase();
+                const group = users.filter(u => k.indexOf(u[0]) >= 0).sort().map(u => allUsers[u]);
+                result.push({label, users: group}) 
+            })
+            return result;
         }),
     ), SUSPENSE
 )
@@ -303,6 +379,7 @@ export {
     MyBoards$,
     useMyBoards,
     useAllUsers,
+    useGroupedUsers,
     useMondayUser,
     useLoggedInUser,
     useMyAvatar,
@@ -310,5 +387,10 @@ export {
     useUserPhotoByName,
     useMyWorkspaces,
     useMyBoardIds,
-    SetAuthentication
+    SetAuthentication,
+    SimulateUser,
+    useSimulatedUser,
+    useIsAdmin,
+    useManagers,
+    refreshUsersCache
 }

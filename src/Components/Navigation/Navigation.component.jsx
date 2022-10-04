@@ -9,15 +9,16 @@ import './Navigation.component.scss';
 import * as _ from 'underscore';
 import { ApplicationContext } from '../../Application.component';
 import { Avatar } from 'primereact/avatar';
-import { useMyAvatar, useMyBoards, usePrimaryColor, useTitles } from '../../Application.context';
+import { useAllUsers, useMyAvatar, useMyBoards, usePrimaryColor, useTitles } from '../../Application.context';
 import { DelayBy } from '../General/DelayBy';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useMyWorkspaces } from '../../App.Users.context';
+import { refreshUsersCache, SimulateUser, useGroupedUsers, useIsAdmin, useManagers, useMyWorkspaces, useUserPhotoByName } from '../../App.Users.context';
 import { SUSPENSE } from '@react-rxjs/core';
 import { useHomeMenu } from '../Home/Home.context';
 import { SendToastWarning } from '../../App.Toasts.context';
+import { UserAvatar } from '../General/UserAvatar';
 
-export const NavigationComponent = ({User, Initializing}) => {
+export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
     const PrimaryColor = usePrimaryColor();
     const [workspaces, setWorkspaces] = useState([]);
     const navRef = useRef();
@@ -25,16 +26,21 @@ export const NavigationComponent = ({User, Initializing}) => {
     const MyAvatar = useMyAvatar();
     const MyWorkspaces = useMyWorkspaces();
     const HomeMenuOptions = useHomeMenu();
+    const GroupedUsers = useGroupedUsers();
+    const SimulatedAvatar = useUserPhotoByName(SimulatedUser?.monday?.name)
     const Titles = useTitles();
-
+    const Photo = useMyAvatar();
+    const isAdmin = useIsAdmin();
+    const Managers = useManagers();
     useEffect(() => {
-        if (MyWorkspaces === SUSPENSE || !MyWorkspaces || MyWorkspaces.length < 1)
+        if (MyWorkspaces === SUSPENSE || !MyWorkspaces)
             return;
          
+        console.log("UPDATING WORKSPACE", MyWorkspaces)
         setWorkspaces(_.groupBy(
             MyWorkspaces, (w) => {
                 if (w.nesting.length > 1)
-                    return w.nesting.shift();
+                    return w.nesting[w.nesting.length - 1];
                 return 'Other';
             })
         )
@@ -65,7 +71,7 @@ export const NavigationComponent = ({User, Initializing}) => {
 
                             <Dropdown.Menu variant="dark">
                                 {
-                                    workspaces ? Object.keys(workspaces).map((w) => {
+                                    workspaces && Object.keys(workspaces).length > 0 ? Object.keys(workspaces).map((w) => {
                                         const workspace = workspaces[w];
                                         return (
                                             <NestedDropdown key={w} title={w}>
@@ -73,7 +79,7 @@ export const NavigationComponent = ({User, Initializing}) => {
                                                     workspace.map(project => 
                                                         {
                                                         return (<NestedDropdown key={project.name} title={project.nesting.join('_')}>
-                                                            <ProjectDropdown projectId={project.name} />
+                                                            <ProjectDropdown projectId={project.name} MyBoards={MyBoards}/>
                                                             <Dropdown.Divider />
                                                             <Dropdown.Item onClick={() => SendToastWarning("not Yet Implemented..")}>Confluence</Dropdown.Item>
                                                             <Dropdown.Item onClick={() => SendToastWarning("not Yet Implemented..")}>Reference</Dropdown.Item>
@@ -83,7 +89,7 @@ export const NavigationComponent = ({User, Initializing}) => {
                                                 }
                                             </NestedDropdown>
                                         )
-                                    }) : null
+                                    }) : <Dropdown.Item style={{fontStyle: 'italic'}}>No Projects Assigned</Dropdown.Item>
                                 }
                                 <Dropdown.Divider />
                                 <Dropdown.Item onClick={onStudioPipeline}>Studio Pipeline</Dropdown.Item>
@@ -115,26 +121,63 @@ export const NavigationComponent = ({User, Initializing}) => {
                         <Dropdown autoClose="outside">
                                 <Dropdown.Toggle style={{fontSize:'20px'}}><FontAwesomeIcon icon={faCogs} /></Dropdown.Toggle>
                                 <Dropdown.Menu variant="dark">
-                                    <Dropdown.Item key="placeholder"  onClick={() => SendToastWarning("not Yet Implemented..")}>NYI</Dropdown.Item>
-                                </Dropdown.Menu>
+                                    <NestedDropdown title="Cache">
+                                            <Dropdown.Item key="Users_Cache"  onClick={() => refreshUsersCache()}>Clear Users</Dropdown.Item>
+                                    </NestedDropdown>
+                                    <Dropdown.Divider />
+                                    {
+                                        isAdmin && 
+                                            <NestedDropdown title="Simulate User">
+                                            {
+                                                GroupedUsers && GroupedUsers !== SUSPENSE ?
+                                                GroupedUsers.map(u => 
+                                                    <NestedDropdown title={u.label} key={u.label}>
+                                                        {
+                                                            u.users.length > 0 ?
+                                                            u .users.map(
+                                                                user => 
+                                                                <Dropdown.Item key={"sim_" + user.monday.name}  
+                                                                onClick={() => SimulateUser(user.monday.name)}>{user.monday.name}</Dropdown.Item>
+                                                            ) :
+                                                            <Dropdown.Item key={"sim_" + u.label + "_NO_USERS"}></Dropdown.Item>
+                                                        }
+                                                    </NestedDropdown> 
+                                                ) : null
+                                            }
+                                            <Dropdown.Divider />
+                                                        <Dropdown.Item key={"sim_CLEAR"}
+                                                            onClick={() => SimulateUser(null)}>Clear</Dropdown.Item>
+                                        </NestedDropdown>
+                                    
+                                    }
+                            </Dropdown.Menu>
                         </Dropdown>        
                     </> : null
                 }  
                 {
                     <Stack direction="horizontal" gap={1} style={{width: '100%'}}>
                         {   
-                            User ?
+                            User && User !== SUSPENSE?
                             <>
                             <Navbar.Brand  style={{color:"white", textAlign:"right", 
                                 fontWeight: 300, fontSize: 18}}>
-                                {User ? User.displayName : ''}
+                                {
+                                SimulatedUser ? 
+                                    SimulatedUser.monday.name + ' (Simulated)': 
+                                        User ? User.displayName : ''}
                             </Navbar.Brand>
                             {
-                                MyAvatar ? 
-                                <img src={MyAvatar} className="pm-avatar-image" /> :
-                                <DelayBy ms={100}>
-                                    <Avatar label="NA" shape="circle" size="large" />
-                                </DelayBy>
+                                SimulatedUser && SimulateUser !== SUSPENSE? 
+                                    (
+                                        SimulatedAvatar && SimulatedAvatar !== SUSPENSE?
+                                        <img src={SimulatedAvatar} className="pm-avatar-image" /> :
+                                        <Avatar label="NA" shape="circle" size="large" />
+
+                                    ) :
+                                        Photo && Photo !== SUSPENSE? 
+                                            <img src={Photo} className="pm-avatar-image" /> :
+                                            <Avatar 
+                                                label={User?.displayName?.split(' ')?.map(u => u[0])?.join('')} shape="circle" size="large" />
                             } 
                             </> : null
                         }

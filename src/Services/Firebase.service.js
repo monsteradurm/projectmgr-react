@@ -82,12 +82,34 @@ export class FirebaseService {
     }
 
    static get AllWorkspaces$() {
-        return FirebaseService.AllDocsFromCollection$('ProjectManager');
+        return FirebaseService.AllDocsFromCollection$('ProjectManager').pipe(
+            tap(t => console.log("RETRIEVE WORKSPACES", t))
+        );
+   }
+
+   static AllBoards$() {
+        return FirebaseService.Collection$('ProjectManager').pipe(
+            take(1),
+            switchMap(docs => from(_.pluck(docs, 'id')).pipe(
+                concatMap(ws_id => 
+                    FirebaseService.AllDocsFromCollection$(`ProjectManager/${ws_id}/Boards`).pipe(
+                        take(1),
+                        map(boards => _.filter(boards, b => b.state === 'active' )),
+                        map(boards => _.map(boards, b => ({projectId: ws_id, boardId: b.id, data: b})))
+                        ),
+                    ),
+                    take(docs.length),
+                    toArray(),
+                    map(ws_boards => _.flatten(ws_boards))
+                ),
+            ),  
+            take(1),
+        )
    }
 
    static MyBoards$(mondayId) {
        return FirebaseService.Collection$('ProjectManager').pipe(
-
+        take(1),
         switchMap(docs => from(_.pluck(docs, 'id')).pipe(
             concatMap(ws_id => 
                 FirebaseService.AllDocsFromCollection$(`ProjectManager/${ws_id}/Boards`).pipe(

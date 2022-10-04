@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Dropdown } from "react-bootstrap";
 import { take } from "rxjs";
-import { useMyBoardIds } from "../../App.Users.context";
+import { useIsAdmin, useMyBoardIds, useSimulatedUser } from "../../App.Users.context";
 import { SetCurrentRoute, useMyBoards } from "../../Application.context";
 import { FirebaseService } from "../../Services/Firebase.service";
 import { NestedDropdown } from "../General/NestedDropDown.component";
@@ -95,12 +95,15 @@ function NestedHierarchyToMenu(items, projectId, boardIds) {
     return result.length > 0 ? result : null;
 }
 
-export function ProjectDropdown({projectId, children}) {
-    const MyBoardIds = useMyBoardIds(projectId);
-    const MyBoards = useMyBoards();
+export function ProjectDropdown({projectId, MyBoards, children}) {
+    console.log("HERE MY BOARDS", MyBoards);
+    //const AllBoards = useAllBoards();
+
     const [show, setShow] = useState(false);
     const [boards, setBoards] = useState(null);
     const [displayHTML, setDisplayHTML] = useState(loadingProjectHTML);
+    const isAdmin = useIsAdmin();
+    const SimulatedUser = useSimulatedUser();
 
     const showDropdown = (e)=>{
         if (!projectId) setBoards(null);

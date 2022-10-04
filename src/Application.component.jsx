@@ -11,7 +11,7 @@ import { AtomSpinner, BreedingRhombusSpinner, SemipolarSpinner } from 'react-epi
 import { Stack } from 'react-bootstrap';
 import { Project } from './Components/Project/Project.component';
 import { RefreshTags, RefreshBadges } from "./Components/Project/Context/Project.Objects.context";
-import { useAllUsers } from './App.Users.context';
+import { useAllUsers, useSimulatedUser } from './App.Users.context';
 import { HomeComponent } from './Components/Home/Home.component';
 import { useToaster } from './App.Toasts.context';
 import { AddQueueMessage, CreateMessageQueue, RemoveQueueMessage, useBusyMessage } from './App.MessageQueue.context';
@@ -43,6 +43,7 @@ function App() {
   const isAuthenticated = useIsAuthenticated();
   const BusyMessage = useBusyMessage(APP_QID)
   const User = useLoggedInUser();
+  const SimulatedUser = useSimulatedUser();
   const AllUsers = useAllUsers() // pre-fetch observable for sharing;
   const { instance, accounts, inProgress } = useMsal();
   const [accessToken, setAccessToken] = useState(null);
@@ -109,7 +110,7 @@ function App() {
       <div className="App" onContextMenu={preventMouseProps}>
         <BrowserRouter>
         <header className="App-header" ref={appHeaderRef}>
-            <NavigationComponent User={User}
+            <NavigationComponent User={User} SimulatedUser={SimulatedUser}
               Initializing={BusyMessage?.key === 'init'}/>
         </header>
           {

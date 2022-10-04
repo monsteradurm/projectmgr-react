@@ -31,7 +31,6 @@ const AvatarTemplate = ({tooltip, image, label, onClick, style}) => {
 export const UserAvatar = ({uid, color, affectFilters}) => {
     const [searchParams, setSearchParams] = useSearchParams();
 
-    if (!uid) return null;
 
     const key = useId();
     const Photo = useUserPhotoByName(uid);
@@ -41,6 +40,8 @@ export const UserAvatar = ({uid, color, affectFilters}) => {
         .filter(u => !!u && u.length > 0)
         .map(u => u[0])
         .join("");
+
+        if (!uid) return null;
 
     // try receive the photo before bothering with the initials based avatar
     if (Photo === SUSPENSE)
