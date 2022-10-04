@@ -5,12 +5,12 @@ import React, { useEffect, useState } from "react";
 import { combineLatest, EMPTY, forkJoin, map, merge, of, pairwise, scan, startWith, switchMap, take, tap, withLatestFrom } from "rxjs";
 import { ItemBadgeIcon } from "../../../Helpers/ProjectItem.helper";
 import { AddBoardItemBadge, AssignedArtists$, BoardItemBadges$, RemoveBoardItemBadge, 
-    SetBoardItemStatus, BoardItem$, GetPersonValues, BoardItemRescheduled$ } from "../Context/Project.Item.context";
-import { BadgeOptions$, DepartmentOptions$, StatusOptions$ } from "../Context/Project.Objects.context";
+    SetBoardItemStatus, BoardItem$, GetPersonValues, BoardItemRescheduled$, BoardItemStatus$ } from "../Context/Project.Item.context";
+import { BadgeOptions$, Board$, DepartmentOptions$, StatusOptions$ } from "../Context/Project.Objects.context";
 import { ReviewDepartments$, ReviewItem$ } from "../Context/Project.Review.context";
 import * as _ from 'underscore';
 import { ShowUploadReviewDialog } from "./TableItemDlgs/TableItem.Upload.context";
-import { AllUsers$ } from "../../../App.Users.context";
+import { AllUsers$, IsAdmin$ } from "../../../App.Users.context";
 import { SendToastError, SendToastSuccess, SendToastWarning } from "../../../App.Toasts.context";
 import { ShowEditTagsDialog } from "./TableItemDlgs/TableItem.EditTags.context";
 import { ShowEditDescriptionDialog } from "./TableItemDlgs/TableItem.EditDescription.context";
@@ -18,6 +18,7 @@ import { ShowEditTimelineDialog } from "./TableItemDlgs/TableItem.EditTimeline.c
 import { AutoCloseReviewItemContext, ShowReviewContextMenu } from "./TableItemControls/TableItem.Review.Context";
 import { BoardId$ } from "../Context/Project.Params.context";
 import { MondayService } from "../../../Services/Monday.service";
+import { IntegrationsService } from "../../../Services/Integrations.service";
 
 // current tabs stored according to boarditem
 const _activeTabMap = (BoardItemId, ActiveTab) => ({BoardItemId, ActiveTab});
@@ -264,33 +265,72 @@ const [visibleContextMenusChanged$, ShowContextMenu] = createSignal(_showContext
 
 const [, TableItemDependencies$] = bind(
     (BoardItemId, CurrentReviewId) => 
-    combineLatest([StatusMenu$(BoardItemId), BadgeMenu$(BoardItemId), ArtistMenu$(BoardItemId, CurrentReviewId)]).pipe(
+    combineLatest([StatusMenu$(BoardItemId), BadgeMenu$(BoardItemId), ArtistMenu$(BoardItemId, CurrentReviewId), IsAdmin$]).pipe(
         switchMap(params => params.indexOf(SUSPENSE) >= 0 ? EMPTY : of(params)),
-        map(([Status, Badges, Artists]) => ({Status, Badges, Artists}))
+        map(([Status, Badges, Artists, isAdmin]) => ({Status, Badges, Artists, isAdmin}))
     ), SUSPENSE
 )
 
 const [useTableItemContextMenu, TableItemContextMenu] = bind(
     (BoardItemId, CurrentReviewId) =>
     TableItemDependencies$(BoardItemId, CurrentReviewId).pipe(
-        map(({Status, Badges, Artists}) => ([
-            {   label: 'Status',
-                items: Status
-            },
-            { separator: true},
-                ...Badges,
-            { separator: true},
-            ...Artists,
-            { separator: true},
-            {label: 'Description', command: () => ShowEditDescriptionDialog(BoardItemId)},
-            {label: 'Tags', command: () => ShowEditTagsDialog(BoardItemId, CurrentReviewId)},  
-            { label: 'Timeline', command: () => ShowEditTimelineDialog(BoardItemId, CurrentReviewId)},
-            { separator: true},
-            { label: 'Upload New Review', 
-              command: (evt) => ShowUploadReviewDialog(BoardItemId)
+        map(({Status, Badges, Artists, isAdmin}) => {
+            const menu = ([
+                {   label: 'Status',
+                    items: Status
+                },
+                { separator: true},
+                    ...Badges,
+                { separator: true},
+                ...Artists,
+                { separator: true},
+                {label: 'Description', command: () => ShowEditDescriptionDialog(BoardItemId)},
+                {label: 'Tags', command: () => ShowEditTagsDialog(BoardItemId, CurrentReviewId)},  
+                { label: 'Timeline', command: () => ShowEditTimelineDialog(BoardItemId, CurrentReviewId)},
+                { separator: true},
+                { label: 'Upload New Review', 
+                command: (evt) => ShowUploadReviewDialog(BoardItemId)
+                }
+            ]);
+
+            if (isAdmin) {
+                menu.push({ separator: true})
+                menu.push({ label: 'Admin', items: [
+                    {label: 'Force Status Update', command: () => ForceStatusUpdate(BoardItemId)}
+                ]})
             }
-        ]))
+            return menu;
+        })
     ), SUSPENSE)
+
+const ForceStatusUpdate = (id) => {
+    BoardId$.pipe(
+        withLatestFrom(StatusOptions$),
+        withLatestFrom(BoardItemStatus$(id)),
+        tap(t => console.log("ForcedUpdate", t)),
+        take(1)
+    ).subscribe(([[BoardId, Options], Status]) => {
+        const thisStatus = _.find(Options, o => o.label === Status.text);
+
+        if (!thisStatus)
+            return;
+        //const { text, index } = columnValue.label;
+        //const { color } = columnValue.label.style;
+        const status = {
+            label: {
+                text: Status.text,
+                index: parseInt(thisStatus.index),
+                style: {
+                    color: Status.color
+                }   
+            },
+            
+        }
+
+        IntegrationsService.BoardItem_ForceStatusUpdate(id, BoardId, status);
+    })
+}
+
 
 const [AutoCloseBoardItemContext,] = bind(
     visibleContextMenusChanged$.pipe(

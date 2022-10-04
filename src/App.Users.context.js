@@ -270,7 +270,7 @@ const [useManagers, Managers$] = bind(
     MondayService.ManagementTeam$, []
 )
 
-const [useIsAdmin,] = bind(
+const [useIsAdmin, IsAdmin$,] = bind(
     combineLatest([LoggedInUser$, Managers$]).pipe(
         map(([user, managers]) => {
             if (!user || !managers)
@@ -391,6 +391,7 @@ export {
     SimulateUser,
     useSimulatedUser,
     useIsAdmin,
+    IsAdmin$,
     useManagers,
     refreshUsersCache
 }

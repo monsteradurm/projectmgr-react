@@ -186,7 +186,8 @@ export const [useSyncsketchNextItemIndex, SyncsketchNextItemIndex$] = bind(
                 .map(k => k.split('_')[1])
                 .map(i => parseInt(i))
         ),
-        map(indices => _.max(indices)),
+        map(indices => indices.filter(i => !!i && !isNaN(i))),
+        map(indices => indices.length < 1  ? 0 : _.max(indices)),
         map(index => index ? index + 1 : 1),
         map(index => padToThree(index)),
         catchError(err => of('001')),

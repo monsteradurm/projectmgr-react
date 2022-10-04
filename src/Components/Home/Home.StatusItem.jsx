@@ -22,7 +22,8 @@ const StatusThumbnail = ({Thumbnail, URL}) => {
             Thumbnail && Thumbnail !== SUSPENSE ?
             <img src={Thumbnail} className="pm-thumbnail-link"
             onClick={(e) => onClickHandler(e, URL)}
-            style={{width: 160, height:120, cursor: 'pointer', objectFit: 'cover', borderRadius:5}} /> 
+            style={{width: 160, height:120, cursor: 'pointer', border: 'solid 1px black',
+            objectFit: 'cover', borderRadius:5}} /> 
             : <Skeleton width={160} height={120}/>
         }
         </div>)
@@ -33,15 +34,18 @@ export const HomeStatusItem = ({statusItem}) => {
     const ReviewName = useStatusReviewName(statusItem?.id);
     const Review = useStatusReview(statusItem?.id);
     const Link = useStatusReviewLink(statusItem?.id);
-    const Thumbnail = useStatusReviewThumbnail(statusItem?.id);
-    const Comments = useStatusReviewComments(statusItem?.id);
+    const Thumbnail = null //useStatusReviewThumbnail(statusItem?.id);
+    const Comments = []//useStatusReviewComments(statusItem?.id);
     const Artists = useStatusAssignedArtists(statusItem?.id);
 
+    console.log(BoardItem);
     return (
         <Stack direction="vertical" gap={2} className="pm-statusItem">
             {
                 BoardItem === SUSPENSE ?
-                <Loading text="Fetching Item..." /> :
+                <Stack direction="horizontal" style={{width: 500}}>
+                    <Loading text="Fetching Item..." /> 
+                </Stack>:
                 <>
                
                 <Stack direction="horizontal" gap={2} className="pm-statusItem-header" 

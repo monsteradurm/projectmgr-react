@@ -126,6 +126,15 @@
             "^/lareposync/*": ""
         }
     },
+    "/integrations/*": {
+        "target": "https://coral-app-la6hx.ondigitalocean.app/",
+        "secure": false,
+        "changeOrigin": true,
+        "loglevel": "debug",
+        "pathRewrite": {
+            "^/integrations/*": ""
+        }
+    },
     "/liquidanimation-box/*": {
         "target": "https://liquidanimation.live/box-rest/",
         "secure": false,

@@ -169,7 +169,7 @@ export class FirebaseService {
         const collection = `MondayStatus/${Status}/items`;
         return FirebaseService.SubscribeToCollection$(collection).pipe(
                 concatMap(reviewArr => from(reviewArr)),
-                switchMap(change => FirebaseService.GetDocument$(collection, change.doc.id).pipe(
+                concatMap(change => FirebaseService.GetDocument$(collection, change.doc.id).pipe(
                     map(doc => ({...doc.data(), change: change.type}))
                     )
                 ),
