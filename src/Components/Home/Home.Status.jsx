@@ -36,8 +36,8 @@ export const HomeStatus = ({Status}) => {
     if (groups === SUSPENSE || items.length < 1)
         return <div>SUSPENDED</div>;
 
-    const onScroll = (evt) => {
-        const index = Math.ceil((evt.target.scrollTop + 600) / 300);
+    const onScroll = (evt) => { 
+        const index = Math.ceil((evt.target.scrollTop + evt.target.clientHeight) / 300);
         if (range[1] < index)
             setRange([0, index]);
     }

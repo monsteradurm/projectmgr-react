@@ -220,16 +220,20 @@ export const [useBoardItemFromStatusItem, BoardItemFromStatusItem$] = bind(
             const {board, group, board_description} = item;
 
             let ws = board_description;
-            if (board_description.indexOf('/') >= 0)
-                ws = board_description.split('/')[1];
-            
+            try {
+                if (board_description.indexOf('/') >= 0)
+                    ws = board_description.split('/')[1];
+            } catch (err) {
+                console.log(err);
+                console.log(item, board_description);
+            }
             return FirebaseService.BoardItem$(ws, board, group, item.id)
         })
     ), SUSPENSE
 )
 
 export const [useStatusReview, StatusReview$] = bind(
-    id => StatusItem$(id).pipe(
+    boarditem => of(boarditem).pipe(
         switchMap(item => item === SUSPENSE ? EMPTY : of(item)),
         map(item => item.subitems?.length ? item.subitems : []),
         map(subitems => _.sortBy(subitems, s => s.Index?.text ? s.Index?.text : -1)),
@@ -238,14 +242,14 @@ export const [useStatusReview, StatusReview$] = bind(
 )
 
 export const [useStatusReviewName, StatusReviewName$] = bind(
-    id => StatusReview$(id).pipe(
+    review => of(review).pipe(
         switchMap(item => item === SUSPENSE ? EMPTY : of(item)),
         map(item => item?.name ?? null)
     ), SUSPENSE
 )
 
 export const [useStatusReviewLink, StatusReviewLink$] = bind(
-    id => StatusReview$(id).pipe(
+    review => of(review).pipe(
         switchMap(item => item === SUSPENSE ? EMPTY : of(item)),
         map(item => item?.Link?.text?.length ? item.Link.text : null),
     ), SUSPENSE
@@ -260,7 +264,7 @@ const ItemIdFromSyncLink = (link) => {
 }
 
 export const [useStatusReviewThumbnail, StatusReviewThumbnail$] = bind(
-    id => StatusReviewLink$(id).pipe(
+    review => StatusReviewLink$(review).pipe(
         switchMap(link => {
             if (link === SUSPENSE)
                 return EMPTY
@@ -273,7 +277,7 @@ export const [useStatusReviewThumbnail, StatusReviewThumbnail$] = bind(
     ), SUSPENSE
 )
 export const [useStatusReviewComments, StatusReviewComments] = bind(
-    id => StatusReviewLink$(id).pipe(
+    review => StatusReviewLink$(review).pipe(
         switchMap(link => {
             if (link === SUSPENSE)
                 return EMPTY
@@ -300,9 +304,9 @@ const GetPersonValues = (personCol) => {
 }
 
 export const [useStatusAssignedArtists, StatusAssignedArtists$] = bind(
-    id => combineLatest([
-        StatusItem$(id),
-        StatusReview$(id)
+    (boarditem, review) => combineLatest([
+       of(boarditem),
+       of(review)
     ]).pipe(
         switchMap(res => res.indexOf(SUSPENSE) >= 0 ? EMPTY : of(res)),
         map(([item, review]) => {

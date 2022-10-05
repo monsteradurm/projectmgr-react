@@ -29,8 +29,7 @@ const StatusThumbnail = ({Thumbnail, URL}) => {
         </div>)
 }
 
-export const HomeStatusItemSkeleton = ({statusItem}) => {
-    const BoardItem = useBoardItemFromStatusItem(statusItem);
+export const HomeStatusItemSkeleton = ({statusItem, BoardItem}) => {
     return (<Stack direction="vertical" gap={2} className="pm-statusItem">
         <Stack direction="horizontal" gap={2} className="pm-statusItem-header" 
             style={{background: statusItem?.color}}>
@@ -53,16 +52,14 @@ export const HomeStatusItemSkeleton = ({statusItem}) => {
         </Stack>
     </Stack>)
 }
-export const HomeStatusItemContent = ({statusItem}) => {
-    const BoardItem = useBoardItemFromStatusItem(statusItem);
+export const HomeStatusItemContent = ({statusItem, BoardItem}) => {
     //const BoardItem = useStatusItem(statusItem?.id);
-    const ReviewName = useStatusReviewName(statusItem?.id);
-    const Review = useStatusReview(statusItem?.id);
-    const Link = useStatusReviewLink(statusItem?.id);
-    const Thumbnail = useStatusReviewThumbnail(statusItem?.id);
-    const Comments = useStatusReviewComments(statusItem?.id);
-    const Artists = useStatusAssignedArtists(statusItem?.id);
-    
+    const Review = useStatusReview(BoardItem);
+    const ReviewName = useStatusReviewName(Review);
+    const Link = useStatusReviewLink(Review);
+    const Thumbnail = useStatusReviewThumbnail(Review);
+    const Comments = useStatusReviewComments(Review);
+    const Artists = useStatusAssignedArtists(BoardItem, Review);
     return (
         <Stack direction="vertical" gap={2} className="pm-statusItem">
             {
@@ -127,8 +124,10 @@ export const HomeStatusItemContent = ({statusItem}) => {
     )
 }
 export const HomeStatusItem = ({statusItem, maxIndex}) => {
+    const BoardItem = useBoardItemFromStatusItem(statusItem);
+    console.log(statusItem.index < maxIndex);
     if (statusItem.index < maxIndex)
-        return <HomeStatusItemContent statusItem={statusItem} />
+        return <HomeStatusItemContent statusItem={statusItem} BoardItem={BoardItem} />
 
-    return (<HomeStatusItemSkeleton statusItem={statusItem} />)
+    return (<HomeStatusItemSkeleton statusItem={statusItem} BoardItem={BoardItem}/>)
 }
