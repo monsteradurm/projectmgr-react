@@ -244,6 +244,12 @@ export class FirebaseService {
         return from(deleteDoc(docRef))
     }
 
+    static StoreSyncsketchUpload$ = (id, data) => {
+        const docRef = fsDoc(FirebaseService.db, 'SyncsketchUploads/' + id);
+        const result = from(    setDoc(docRef, data)  )
+        return result;
+    }
+
     static StoreNotice$ = (notice) => {
         const docRef = fsDoc(FirebaseService.db, 'Noticeboard/' + notice.id);
         const result = from(setDoc(docRef, 

@@ -100,7 +100,7 @@ const handleClear = (evt) => {
     ClearFilesFromUpload();
 }
 
-export const TableItemManageFiles = ({reviewId}) => {
+export const TableItemManageFiles = ({reviewId, pulse}) => {
     const inputRef = useRef(null);
     const files = useFilesForUpload();
 
@@ -123,7 +123,8 @@ export const TableItemManageFiles = ({reviewId}) => {
                 files.map(f => <FileItemTemplate item={f} key={f.file.name} />)
             }
             </div>
-          <input style={{display: 'none'}} ref={inputRef} type="file" multiple="multiple" onChange={HandleFilesAdded}
+          <input style={{display: 'none'}} ref={inputRef} type="file" multiple="multiple" onChange={
+              (evt) => HandleFilesAdded(evt, pulse)}
           />
         </div>
       );

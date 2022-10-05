@@ -115,7 +115,7 @@ export const TableItemUploadReview = ({}) => {
                             { 0 : <TableItemReviewGroup Group={Group} Element={Element} ssReviews={ssReviews}
                                         selectedReview={thisReview}/>,
                               1 : <TableItemReviewName selectedReview={thisReview} BoardItemId={BoardItemId}/>,
-                              2 : <TableItemManageFiles reviewId={thisReview?.id}/>,
+                              2 : <TableItemManageFiles reviewId={thisReview?.id } pulse={BoardItemId}/>,
                               3 : <TableItemUploadProgress primary={Status?.color} files={files}/>
                             }[stepIndex] || null 
                         }

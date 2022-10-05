@@ -84,7 +84,7 @@ export const TableItemAddToReview = ({}) => {
                             height: IsUploading ? '100%' : null}} ref={contentRef}>
                         {
                             !IsUploading ?
-                            <TableItemManageFiles reviewId={thisReview?.id}/>
+                            <TableItemManageFiles reviewId={thisReview?.id} pulse={BoardItemId} />
                             : <TableItemUploadProgress primary={Status?.color} files={files}/>
                         }
                         </div>

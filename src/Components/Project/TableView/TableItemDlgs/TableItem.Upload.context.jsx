@@ -266,17 +266,17 @@ export const [useCurrentUploadStepIndex, CurrentUploadStepIndex$] = bind(
     ), 0
 )
 
-export const [FilesAdded$, HandleFilesAdded] = createSignal((evt) => {
+export const [FilesAdded$, HandleFilesAdded] = createSignal((evt, pulse) => {
     if (!evt.target?.files)
         return;
 
     for(var i=0; i < evt.target.files.length; i++) {
-        AddFileToUpload(evt.target.files[i]);
+        AddFileToUpload(evt.target.files[i], null, pulse);
     }
 })
 
 export const [AddFileEvent$, AddFileToUpload] = createSignal(
-    (file, type) => ({action: 'Add', file, type: type || 'Standard'})
+    (file, type, pulse) => ({action: 'Add', file, type: type || 'Standard', pulse})
 );
 
 export const [RemoveFileEvent$, RemoveFileFromUpload] = createSignal(
@@ -301,10 +301,10 @@ const handleFileThumbnail = (f) => {
 
 export const [useFilesForUpload, FilesForUpload$] = bind(
     merge(AddFileEvent$, RemoveFileEvent$, RemoveFileCompleted$, ModifyFileEvent$, ClearFileEvent$).pipe(
-        scan((acc, {action, file, type}) => {
+        scan((acc, {action, file, type, pulse}) => {
             switch(action) {
                 case 'Add':
-                    return [...acc.filter(f => f.name !== file.name), {file, type: type || 'Standard', 
+                    return [...acc.filter(f => f.name !== file.name), {file, pulse, type: type || 'Standard', 
                         thumbnail: handleFileThumbnail(file)}]
                 case 'Remove':
                     return [...acc.filter(f => f.file.name !== file.name)]
@@ -385,6 +385,7 @@ export const [useUploadEvent, OnUploadEvent$] = bind(
             const toUpload = files.map((f, i) => {
                 const ext =  _.last(f.file.name.split('.'));
                 const params = {
+                    description: {pulse: f.pulse, department},
                     filename: files.length === 1 ? 
                         itemName + "." + ext : 
                         `${department} ${index}.${padToTwo(i)} ${name}.${ext}`,
@@ -452,6 +453,7 @@ export const [useAddFileUploadEvent, onAddUploadEvent$] = bind(
             const toUpload = files.map((f, i) => {
                 const ext =  _.last(f.file.name.split('.'));
                 const params = {
+                    description: {pulse: f.pulse, department: Department},
                     filename:
                         `${Department} ${index}.${padToTwo(i + ItemCount)} ${ReviewName}.${ext}`,
                     artist

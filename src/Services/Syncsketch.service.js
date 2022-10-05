@@ -64,14 +64,25 @@ export class SyncsketchService {
         )
     }
 
+    static PatchDescription$ = (itemId, description) => {
+        const data = JSON.stringify({
+            "description": description,
+        });
+
+        return ajax.patch(
+            `/syncsketch/item/${itemId}/`,
+            {data}, QueryHeaders
+        )
+    }
+
     static UploadItem$ = (reviewId, file, params, index, count, type) => {
-       
+        console.log("Upload Item$", {reviewId, file, params, index, count, type})
         const url = SyncsketchPosts.UploadFile(reviewId, type);
         console.log("UPLOADING...", url, type)
         const formdata = new FormData();
         formdata.append("reviewFile", file, params.filename);
         formdata.append("artist", params.artist);
-        formdata.append("description", params.description);
+
         return ajax({
             url,
             method: 'POST',
@@ -80,7 +91,16 @@ export class SyncsketchService {
             crossDomain: true,
             includeUploadProgress: true,
         }).pipe(
-            tap(console.log),
+            switchMap(evt => {
+                if (evt?.response?.id) {
+                    console.log("Patching Description", evt.response.id, params)
+                    return FirebaseService.StoreSyncsketchUpload$(evt.response.id, params.description).pipe(
+                        map((res) => evt)
+                    )
+                } else {
+                    return of(evt);
+                }
+            }),
             map(({loaded, total, type}) => {
                 return {
                     progress:       total === 0 ? 100 : Math.round(100 * loaded / total),
