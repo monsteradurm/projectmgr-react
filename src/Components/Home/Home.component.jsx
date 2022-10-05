@@ -52,11 +52,15 @@ export const HomeComponent = ({headerHeight}) => {
     if (View === SUSPENSE)
         return <div>View SUSPENDED</div>;
 
+
     return (
-    <ScrollingPage key="page_scroll" offsetY={offsetY}>
-        <div id="Home_Items" style={{height: '80%'}}>
+    
+        <div id="Home_Items" style={{height: '100%'}}>
             {
-                {   'Notices' : <HomeNotices  key="Home_Notices"/>,
+                {   'Notices' : 
+                        <ScrollingPage key="page_scroll" offsetY={offsetY}>
+                            <HomeNotices  key="Home_Notices"/>
+                        </ScrollingPage>,
                     'Reviews' : <HomeStatus Status="Review" key="Review_Status"/>,
                     'Assistance' : <HomeStatus Status="Assistance"  key="Assistance_Status"/>,
                     'Feedback' : <HomeStatus Status="Feedback"  key="Feedback_Status"/>,
@@ -67,6 +71,5 @@ export const HomeComponent = ({headerHeight}) => {
                     <ErrorLoading text={`View as "${View}" In Development`} />
                 </div>)
             } 
-        </div>
-    </ScrollingPage>);
+        </div>);
 }

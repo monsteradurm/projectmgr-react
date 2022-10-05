@@ -220,6 +220,13 @@ export class FirebaseService {
                 })
             )
     }
+    static BoardItem$(projectId, boardId, groupId, itemId) {
+        return FirebaseService.SubscribeToDocument$(
+            `ProjectManager/${projectId}/Boards/${boardId}/Groups/${groupId}/Items/${itemId}`
+        ).pipe(
+            map(snapshot => snapshot.data()),
+        );
+    }
     static Board$(projectId, boardId) {
         return FirebaseService
             .SubscribeToDocument$(

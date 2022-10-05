@@ -1,5 +1,5 @@
 import { bind, SUSPENSE } from "@react-rxjs/core";
-import { combineLatest, concatMap, EMPTY, from, map, of, scan, switchMap, tap } from "rxjs";
+import { combineLatest, concatMap, debounceTime, EMPTY, from, map, of, scan, switchMap, tap } from "rxjs";
 import { MyBoards$ } from "../../App.Users.context";
 import { FirebaseService } from "../../Services/Firebase.service";
 import * as _ from 'underscore';
@@ -208,6 +208,26 @@ const [StatusItemById, StatusItemIds$] = partitionByKey(
 export const [useStatusItem, StatusItem$] = bind(
     id => StatusItemById(id.toString()), SUSPENSE
 )
+
+export const [useBoardItemFromStatusItem, BoardItemFromStatusItem$] = bind(
+    item => of(item).pipe(
+        switchMap(item => {
+            if (item === SUSPENSE)
+                return of(SUSPENSE);
+            else if (!item)
+                return of(null);
+
+            const {board, group, board_description} = item;
+
+            let ws = board_description;
+            if (board_description.indexOf('/') >= 0)
+                ws = board_description.split('/')[1];
+            
+            return FirebaseService.BoardItem$(ws, board, group, item.id)
+        })
+    ), SUSPENSE
+)
+
 export const [useStatusReview, StatusReview$] = bind(
     id => StatusItem$(id).pipe(
         switchMap(item => item === SUSPENSE ? EMPTY : of(item)),
@@ -336,5 +356,6 @@ export const [useStatusItemGroups] = bind(
         switchMap(url => StatusItemsByURL(url)),
         map(items => _.groupBy(items, i => i.board_name + ", " + i.group_title)),
         map(groups => Object.entries(groups)),
+        debounceTime(100)
     ), SUSPENSE
 )

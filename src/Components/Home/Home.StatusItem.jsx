@@ -5,7 +5,7 @@ import { of } from "rxjs";
 import { NavigationService } from "../../Services/Navigation.service";
 import { LazyThumbnail } from "../General/LazyThumbnail";
 import { Loading } from "../General/Loading";
-import { useStatusReviewThumbnail, useStatusAssignedArtists, useStatusItem, useStatusReview, useStatusReviewComments, useStatusReviewLink, useStatusReviewName } from "./Home.context";
+import { useStatusReviewThumbnail, useStatusAssignedArtists, useStatusItem, useStatusReview, useStatusReviewComments, useStatusReviewLink, useStatusReviewName, useBoardItemFromStatusItem } from "./Home.context";
 import "./Home.StatusItem.scss";
 
 const onClickHandler = (e, url) => {
@@ -29,16 +29,40 @@ const StatusThumbnail = ({Thumbnail, URL}) => {
         </div>)
 }
 
-export const HomeStatusItem = ({statusItem}) => {
-    const BoardItem = useStatusItem(statusItem?.id);
+export const HomeStatusItemSkeleton = ({statusItem}) => {
+    const BoardItem = useBoardItemFromStatusItem(statusItem);
+    return (<Stack direction="vertical" gap={2} className="pm-statusItem">
+        <Stack direction="horizontal" gap={2} className="pm-statusItem-header" 
+            style={{background: statusItem?.color}}>
+            <div>{statusItem?.group_title},</div>
+            <div>{BoardItem?.name?.split('/').join(', ')}</div>
+            <div className="mx-auto"></div>
+            <div>{statusItem?.board_name?.split('/').join(', ')}</div>
+        </Stack>
+        <Stack direction="horizontal" gap={2}  className="pm-statusItem-reviewTitle" style={{paddingTop:10}}>
+            <Skeleton width="80%" height="30px" />
+        </Stack>
+        <Stack direction="horizontal" gap={2} style={{padding: '0px 30px'}}>
+            <Skeleton width={160} height={120}/>
+            <Stack direction="vertical" gap={2} style={{paddingLeft: 10}}>
+                <Skeleton width="100%" />
+                <Skeleton width="100%" />
+                <Skeleton width="100%" />
+                <Skeleton width="50%" />
+            </Stack>
+        </Stack>
+    </Stack>)
+}
+export const HomeStatusItemContent = ({statusItem}) => {
+    const BoardItem = useBoardItemFromStatusItem(statusItem);
+    //const BoardItem = useStatusItem(statusItem?.id);
     const ReviewName = useStatusReviewName(statusItem?.id);
     const Review = useStatusReview(statusItem?.id);
     const Link = useStatusReviewLink(statusItem?.id);
-    const Thumbnail = null //useStatusReviewThumbnail(statusItem?.id);
-    const Comments = []//useStatusReviewComments(statusItem?.id);
+    const Thumbnail = useStatusReviewThumbnail(statusItem?.id);
+    const Comments = useStatusReviewComments(statusItem?.id);
     const Artists = useStatusAssignedArtists(statusItem?.id);
-
-    console.log(BoardItem);
+    
     return (
         <Stack direction="vertical" gap={2} className="pm-statusItem">
             {
@@ -101,4 +125,10 @@ export const HomeStatusItem = ({statusItem}) => {
         }
         </Stack>
     )
+}
+export const HomeStatusItem = ({statusItem, maxIndex}) => {
+    if (statusItem.index < maxIndex)
+        return <HomeStatusItemContent statusItem={statusItem} />
+
+    return (<HomeStatusItemSkeleton statusItem={statusItem} />)
 }
