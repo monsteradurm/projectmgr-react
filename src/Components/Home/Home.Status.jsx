@@ -5,6 +5,7 @@ import { useProjectsByStatus, useStatusItemGroups } from "./Home.context";
 import { HomeStatusItem } from "./Home.StatusItem";
 import * as _ from 'underscore';
 import { useEffect, useRef, useState } from "react";
+import { ScrollingPage } from "../General/ScrollingPage.component";
 
 
 export const HomeStatus = ({Status}) => {
@@ -14,7 +15,7 @@ export const HomeStatus = ({Status}) => {
 
     const itemTemplate = (item) => {
         return <Stack direction="horizontal" style={{width: '100%', justifyContent: 'center', padding: 20}}>
-                <HomeStatusItem key={item.group_title + "_" + item.id} statusItem={item} visible={item.index <= range[1]}/>
+                <HomeStatusItem key={item.group_title + "_" + item.id} statusItem={item} maxIndex={range[1]}/>
             </Stack>
     }
 
@@ -29,24 +30,22 @@ export const HomeStatus = ({Status}) => {
             )
     }, [groups])
 
-    useEffect(() => {
-        console.log("StatusItem Range: ", range)
-    }, [range])
-
     if (groups === SUSPENSE || items.length < 1)
-        return <div>SUSPENDED</div>;
+        return <div></div>;
 
     const onScroll = (evt) => { 
         const index = Math.ceil((evt.target.scrollTop + evt.target.clientHeight) / 300);
+
+        console.log({index, maxIndex: range[1], visible: range[1] < index})
         if (range[1] < index)
             setRange([0, index]);
     }
 
     
 
-    return (
-        <VirtualScroller items={items} onScroll={onScroll}
-            itemTemplate={itemTemplate} itemSize={30} style={{width: '100%', height: '100%', padding:30}}/>
-    )
+    return items.map(item => <Stack direction="horizontal" style={{width: '100%', justifyContent: 'center', padding: 20}}>
+                <HomeStatusItem key={item.group_title + "_" + item.id} statusItem={item} maxIndex={range[1]}/>
+            </Stack>)
 }
- 
+ //<VirtualScroller items={items} onScroll={onScroll}
+ //itemTemplate={itemTemplate} itemSize={30} style={{width: '100%', height: '100%', padding:30}}/>

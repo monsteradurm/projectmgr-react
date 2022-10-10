@@ -1,6 +1,6 @@
 import { SUSPENSE } from "@react-rxjs/core";
 import { Skeleton } from "primereact/skeleton";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Stack } from "react-bootstrap"
 import { of } from "rxjs";
 import { NavigationService } from "../../Services/Navigation.service";
@@ -16,7 +16,7 @@ const onClickHandler = (e, url) => {
     NavigationService.OpenNewTab(url, e);
 }
 
-const StatusThumbnail = ({Thumbnail, URL}) => {
+const StatusThumbnail = React.memo(({Thumbnail, URL}) => {
 
     return (<div style={{height: 100}}>
         {
@@ -28,14 +28,14 @@ const StatusThumbnail = ({Thumbnail, URL}) => {
             : <Skeleton width={160} height={120}/>
         }
         </div>)
-}
+})
 
-export const HomeStatusItemSkeleton = ({statusItem, BoardItem}) => {
+export const HomeStatusItemSkeleton = React.memo(({statusItem, name}) => {
     return (<Stack direction="vertical" gap={2} className="pm-statusItem">
         <Stack direction="horizontal" gap={2} className="pm-statusItem-header" 
             style={{background: statusItem?.color}}>
             <div>{statusItem?.group_title},</div>
-            <div>{BoardItem?.name?.split('/').join(', ')}</div>
+            <div>{name?.split('/').join(', ')}</div>
             <div className="mx-auto"></div>
             <div>{statusItem?.board_name?.split('/').join(', ')}</div>
         </Stack>
@@ -52,8 +52,9 @@ export const HomeStatusItemSkeleton = ({statusItem, BoardItem}) => {
             </Stack>
         </Stack>
     </Stack>)
-}
-export const HomeStatusItemContent = ({statusItem, BoardItem}) => {
+})
+
+export const HomeStatusItemContent = React.memo(({statusItem, name, BoardItem}) => {
     //const BoardItem = useStatusItem(statusItem?.id);
     const Review = useStatusReview(BoardItem);
     const ReviewName = useStatusReviewName(Review);
@@ -73,7 +74,7 @@ export const HomeStatusItemContent = ({statusItem, BoardItem}) => {
                 <Stack direction="horizontal" gap={2} className="pm-statusItem-header" 
                     style={{background: statusItem.color}}>
                     <div>{statusItem.group_title},</div>
-                    <div>{BoardItem?.name.split('/').join(', ')}</div>
+                    <div>{name.split('/').join(', ')}</div>
                     {
                         statusItem?.department  &&
                         <span style={{marginLeft: 10}}>({statusItem.department})</span>
@@ -129,14 +130,23 @@ export const HomeStatusItemContent = ({statusItem, BoardItem}) => {
         }
         </Stack>
     )
-}
-export const HomeStatusItem = React.memo(({statusItem, visible}) => {
+})
+
+export const HomeStatusItem = React.memo(({statusItem, maxIndex}) => {
     const BoardItem = useBoardItemFromStatusItem(statusItem);
-    console.log(visible, statusItem.index);
+    const [visible, setVisible] = useState(false);
+
+    useEffect(() => {
+        if (statusItem.index < maxIndex && !visible)
+            setVisible(true);
+        
+    }, [maxIndex, statusItem])
+
+    console.log(statusItem?.index, visible)
 
     if (visible)
-        return <HomeStatusItemContent statusItem={statusItem} BoardItem={BoardItem} />
+        return <HomeStatusItemContent statusItem={statusItem} name={BoardItem?.name} BoardItem={BoardItem} />
 
         
-    return (<HomeStatusItemSkeleton statusItem={statusItem} BoardItem={BoardItem}/>)
+    return (<HomeStatusItemSkeleton statusItem={statusItem} name={BoardItem?.name}/>)
 });

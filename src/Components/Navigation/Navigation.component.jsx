@@ -38,11 +38,10 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
         if (MyWorkspaces === SUSPENSE || !MyWorkspaces)
             return;
          
-        console.log("UPDATING WORKSPACE", MyWorkspaces)
         setWorkspaces(_.groupBy(
             MyWorkspaces, (w) => {
                 if (w.nesting.length > 1)
-                    return w.nesting[w.nesting.length - 1];
+                    return w.nesting[0];
                 return 'Other';
             })
         )
@@ -80,12 +79,13 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                                                 {
                                                     workspace.map(project => 
                                                         {
-                                                        return (<NestedDropdown key={project.name} title={project.nesting.join('_')}>
-                                                            <ProjectDropdown projectId={project.name} MyBoards={MyBoards}/>
-                                                            <Dropdown.Divider />
-                                                            <Dropdown.Item onClick={() => SendToastWarning("not Yet Implemented..")}>Confluence</Dropdown.Item>
-                                                            <Dropdown.Item onClick={() => SendToastWarning("not Yet Implemented..")}>Reference</Dropdown.Item>
-                                                        </NestedDropdown>)
+                                                        return (
+                                                            <NestedDropdown key={project.name} title={project.name}>
+                                                                <ProjectDropdown projectId={project.name} MyBoards={MyBoards}/>
+                                                                <Dropdown.Divider />
+                                                                <Dropdown.Item onClick={() => SendToastWarning("not Yet Implemented..")}>Confluence</Dropdown.Item>
+                                                                <Dropdown.Item onClick={() => SendToastWarning("not Yet Implemented..")}>Reference</Dropdown.Item>
+                                                            </NestedDropdown>)
                                                         }
                                                     )
                                                 }

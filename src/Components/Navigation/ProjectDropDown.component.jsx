@@ -47,7 +47,6 @@ function NestHierarchyFromName(board, nested) {
 function NestedHierarchyToMenu(items, projectId, boardIds) {
     let result = [];
     _.sortBy(items, i => i[0]).forEach( entry => {
-
         let [title, val] = entry;
         let {boards, children} = val;
         if (children) {
@@ -96,7 +95,6 @@ function NestedHierarchyToMenu(items, projectId, boardIds) {
 }
 
 export function ProjectDropdown({projectId, MyBoards, children}) {
-    console.log("HERE MY BOARDS", MyBoards);
     //const AllBoards = useAllBoards();
 
     const [show, setShow] = useState(false);
