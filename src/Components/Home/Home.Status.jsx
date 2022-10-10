@@ -11,7 +11,7 @@ import { ScrollingPage } from "../General/ScrollingPage.component";
 export const HomeStatus = ({Status}) => {
     const groups = useStatusItemGroups()
     const [items, setItems] = useState([])
-    const [range, setRange] = useState([0, 2]);
+    const [range, setRange] = useState([0, 4]);
 
     const itemTemplate = (item) => {
         return <Stack direction="horizontal" style={{width: '100%', justifyContent: 'center', padding: 20}}>
@@ -36,16 +36,17 @@ export const HomeStatus = ({Status}) => {
     const onScroll = (evt) => { 
         const index = Math.ceil((evt.target.scrollTop + evt.target.clientHeight) / 300);
 
-        console.log({index, maxIndex: range[1], visible: range[1] < index})
         if (range[1] < index)
             setRange([0, index]);
     }
 
     
 
-    return items.map(item => <Stack direction="horizontal" style={{width: '100%', justifyContent: 'center', padding: 20}}>
-                <HomeStatusItem key={item.group_title + "_" + item.id} statusItem={item} maxIndex={range[1]}/>
-            </Stack>)
+    return (<div style={{height: 'calc(100vh - 95px)', overflowY: 'auto'}} onScroll={onScroll}>
+            {               
+                items.map(item => <Stack direction="horizontal" style={{width: '100%', justifyContent: 'center', padding: 20}}>
+                    <HomeStatusItem key={item.group_title + "_" + item.id} statusItem={item} maxIndex={range[1]}/>
+                </Stack>)
+            }
+            </div>)
 }
- //<VirtualScroller items={items} onScroll={onScroll}
- //itemTemplate={itemTemplate} itemSize={30} style={{width: '100%', height: '100%', padding:30}}/>
