@@ -1,0 +1,37 @@
+#Teams_Table {
+    .p-datatable .p-datatable-thead > tr > th {
+        padding-top: 0 !important;
+    }
+}
+#Users_Items {
+    
+    height: 100%;
+
+    tr:nth-child(even) {
+        background: #efefef;
+    }
+    tr:hover {
+        background: #ddd !important;
+    }
+    tr {
+        border-bottom: solid 1px #aaa !important;
+    }
+    .p-button {
+        position:relative ;
+    }
+    .p-button > img {
+        position:absolute;
+        left:0px;
+        top:0px;
+    }
+    .p-button > div {
+        position:absolute;
+        left:0px;
+        width: 40px;
+    }
+    .p-button, .p-button > img {
+        width: 40px !important;
+        height: 40px !important;
+        
+    }
+}

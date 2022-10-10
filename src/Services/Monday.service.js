@@ -189,6 +189,13 @@ export class MondayService {
       )
     } 
 
+    static get AllTeams$() { 
+      return MondayService.Execute$(MondayGraphQL.Query_AllTeams).pipe(
+        map(res => res?.teams ? res.teams : []),
+        take(1)
+      )
+    }
+
     static AllTags = () => MondayService.Execute$(
         MondayGraphQL.Query_AllTags()
     ).pipe(
@@ -231,6 +238,10 @@ export class MondayService {
       }
 
     
+    static CreateSupportItem = () => {
+
+    }
+
     static ParseSupportBoard = (board, label) => {
         let groups = board?.groups ? board.groups : [];
         const settings = board?.columns ? board.columns : [];

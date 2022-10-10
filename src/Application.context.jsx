@@ -12,6 +12,9 @@ const PrimaryColors = {
     'Projects' : '#008577',
     'Home' : '#009cc2',
     'Support' : '#86b64b',
+    'Users' : '#964cc9',
+    'Applications' : '#964cc9',
+    'Gallery' : '#FF9616',
     'default' : 'gray'
 }
 

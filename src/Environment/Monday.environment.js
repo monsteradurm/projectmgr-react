@@ -8,6 +8,12 @@ export const MondayConfig = {
 
 export const MondayGraphQL = {
 
+    Query_AllTeams: `query{teams{
+      id name users {
+        id name
+      }
+    }}`,
+
     Query_BoardId: (itemId) => `query {
       items (ids:${itemId}){
         board { id }
@@ -20,6 +26,7 @@ export const MondayGraphQL = {
         id
         name
         email
+        title
       }
     }`,
 

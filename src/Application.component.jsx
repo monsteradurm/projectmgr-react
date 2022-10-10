@@ -19,6 +19,9 @@ import moment from 'moment';
 import { SUSPENSE } from '@react-rxjs/core';
 import { SupportComponent } from './Components/Support/Support.component';
 import { NewTicketDialog } from './Components/Support/NewTicket.component';
+import { UsersComponent } from './Components/Users/Users.component';
+import { ApplicationsComponent } from './Components/Applications/Applications.component';
+import { GalleryComponent } from './Components/Gallery/Gallery.component';
 
 const preventMouseProps = (evt) => {
   evt.stopPropagation();
@@ -130,7 +133,10 @@ function App() {
               <Toast ref={toastRef} position="bottom-right"/>
               <Routes>
                 <Route path="/" element={<HomeComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
+                <Route path="/Applications" element={<ApplicationsComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
+                <Route path="/Gallery" element={<GalleryComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
                 <Route path="Home" element={<HomeComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
+                <Route path="Users" element={<UsersComponent  headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
                 <Route path="Support" element={<SupportComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
                 <Route path="Projects" element={<Project 
                   headerHeight={appHeaderRef.current?.clientHeight ?? 0} />} />

@@ -101,10 +101,13 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                         <Dropdown autoClose="outside">
                             <Dropdown.Toggle style={{fontSize:'20px'}}><FontAwesomeIcon icon={faUsers} /></Dropdown.Toggle>
                             <Dropdown.Menu variant="dark">
-                                <Dropdown.Item key="users" onClick={() => SendToastWarning("not Yet Implemented..")}>Users</Dropdown.Item>
-                                <Dropdown.Item key="teams" onClick={() => SendToastWarning("not Yet Implemented..")}>Teams</Dropdown.Item>
+                                <Dropdown.Item key="users" 
+                                    onClick={() => SetCurrentRoute('/Users?View=Users')}>Users</Dropdown.Item>
+                                <Dropdown.Item key="teams" 
+                                    onClick={() => SetCurrentRoute('/Users?View=Teams')}>Teams</Dropdown.Item>
                                 <Dropdown.Divider />
-                                <Dropdown.Item key="teams" onClick={() => SendToastWarning("not Yet Implemented..")}>Applications</Dropdown.Item>
+                                <Dropdown.Item key="applications" 
+                                    onClick={() => SetCurrentRoute('/Applications')}>Applications</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
 
