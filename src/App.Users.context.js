@@ -375,6 +375,7 @@ const [useGroupedUsers, GroupedUsers$] = bind(
 
 export {
     AllUsers$,
+    MondayUser$,
     LoggedInUser$,
     MyBoards$,
     useMyBoards,

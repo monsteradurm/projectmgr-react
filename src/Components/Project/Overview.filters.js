@@ -40,6 +40,28 @@ export const filterBadges = (filtered, badges) => {
         return _.intersection(i.Badges.value, BadgeArr).length > 0
     });
 }
+export const filterFeedbackDepartment = (filtered, depFilter) => {;
+    if (!depFilter || depFilter.length < 1) return filtered;
+
+    const arr = depFilter.split(',').filter(d => d.length > 0 && !!d);
+    return _.filter(filtered, (i) => {
+       /*
+        const status = i.Status?.text || '';    
+        if (status.indexOf('Review') < 0 && status.indexOf('Feedback') < 0 && status.indexOf('Approved') < 0)
+            return false;*/
+
+        let department = 'Internal'
+        if (i.subitems?.length > 0) {
+            const reviews = _.sortBy(i.subitems.filter(s => s.Index?.text?.length > 0), 
+                s => parseInt(s.Index?.text || -1)).reverse();
+            if (reviews.length > 0)
+                department = reviews[0]['Feedback Department'].text
+        }
+
+        return arr.indexOf(department) >= 0;
+    })
+}
+
 export const filterArtists = (filtered, artists) => {
     if (artists == null || artists.length < 1) return filtered;
 
@@ -100,7 +122,6 @@ export const sortFilteredItems = (filtered, params) => {
             i.Status && i.Status.text ? i.Status.text : 'Not Started'
         )
     }
-
     else if (params.Sorting === 'Director'){
         const unassigned = _.filter(sorted, (i) => i.Director.text.length < 1);
         const assigned = _.filter(sorted, (i) => i.Director.text.length > 0);
@@ -157,6 +178,7 @@ export const filterDepartments = (filtered, dep) => {
     }
     return filtered;
 }
+
 
 export const filterSearch = (filtered, Search) => {
     if (Search && Search.length > 0 && Search.trim().length > 0)

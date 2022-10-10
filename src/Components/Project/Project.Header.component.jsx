@@ -36,6 +36,7 @@ export const ProjectHeader = () => {
     const [artistFilters, setArtistFilters] = useState(null);
     const [tagFilters, setTagFilters] = useState(null);
     const [statusFilter, setStatusFilter] = useState(null);
+    const [feedbackDepartmentFilter, setFeedbackDepartmentFilter] = useState(null);
     const [badgeFilters, setBadgeFilters] = useState(null);
     const [searchFilter, setSearchFilter] = useState(null);
     const [searchParams, setSearchParams] = useSearchParams();
@@ -72,13 +73,18 @@ export const ProjectHeader = () => {
         SetFilter(BoardFilters.Artists, artistFilters, setArtistFilters, "Artist", searchParams, setSearchParams)
     , [BoardFilters.Artists])
 
+    useEffect(() => 
+        SetFilter(BoardFilters.FeedbackDepartment, feedbackDepartmentFilter, 
+            setFeedbackDepartmentFilter, "FeedbackDepartment", searchParams, setSearchParams)
+    , [BoardFilters.FeedbackDepartment])
+
     return (
     <Stack direction="horizontal" gap={3}>
         <div className="pm-tag-filter" style={{color: '#aaa', fontWeight: 400}}>
             {BoardItemCount} tasks...
         </div>
         {
-            [searchFilter, artistFilters, statusFilter, tagFilters, badgeFilters]
+            [searchFilter, artistFilters, statusFilter, feedbackDepartmentFilter, tagFilters, badgeFilters]
         }
     </Stack>)
 }

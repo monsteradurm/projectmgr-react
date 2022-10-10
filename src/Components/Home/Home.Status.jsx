@@ -14,7 +14,7 @@ export const HomeStatus = ({Status}) => {
 
     const itemTemplate = (item) => {
         return <Stack direction="horizontal" style={{width: '100%', justifyContent: 'center', padding: 20}}>
-                <HomeStatusItem key={item.group_title + "_" + item.id} statusItem={item} maxIndex={range[1]}/>
+                <HomeStatusItem key={item.group_title + "_" + item.id} statusItem={item} visible={item.index <= range[1]}/>
             </Stack>
     }
 

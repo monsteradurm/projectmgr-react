@@ -6,9 +6,9 @@ import { ProjectId$, BoardId$, GroupId$,BoardView$,
         SetBoardTagsFilter, SetBoardSearchFilter, SetBoardArtistFilter,
         SetBoardDirectorFilter, SetBoardSortBy,  
         SetBoardReverseSorting, SetBoardGrouping, SetBoardView,
-        SetBoardBadgeFilter, SetBoardStatusFilter,
+        SetBoardBadgeFilter, SetBoardStatusFilter, SetBoardFeedbackDepartmentFilter,
         BoardTagsFilter$, BoardSearchFilter$, BoardArtistFilter$, BoardDirectorFilter$,
-        BoardSortBy$, BoardReverseSorting$, BoardGrouping$, BoardStatusFilter$, BoardBadgeFilter$ } from "./Project.Params.context";
+        BoardSortBy$, BoardReverseSorting$, BoardGrouping$, BoardStatusFilter$, BoardBadgeFilter$, BoardFeedbackDepartmentFilter$ } from "./Project.Params.context";
         import { useBoard, useDepartment, Department$, SetDepartment, useGroupedBoardItems, useProject, useGroup, useProjectReference } from "./Project.Objects.context";
 import { useSyncsketchGroup, useSyncsketchProject } from "./Project.Syncsketch.context";
 import * as _ from 'underscore';
@@ -20,18 +20,21 @@ const [useBoardParams, BoardParams$] = bind(
     combineLatest([
         ProjectId$, BoardId$, GroupId$, Department$, BoardView$, BoardGrouping$,
         BoardSortBy$, BoardReverseSorting$, BoardTagsFilter$, BoardSearchFilter$,
-        BoardArtistFilter$, BoardDirectorFilter$, BoardStatusFilter$, BoardBadgeFilter$
+        BoardArtistFilter$, BoardDirectorFilter$, BoardStatusFilter$, BoardBadgeFilter$, 
+        BoardFeedbackDepartmentFilter$
     ]).pipe(
         // account for clustered emissions
         debounceTime(500),
         // restructure as object
         map(([ProjectId, BoardId, GroupId, Department, BoardView, BoardGrouping,
             BoardSortBy, BoardReverseSorting, BoardTagsFilter, BoardSearchFilter,
-            BoardArtistFilter, BoardDirectorFilter, BoardStatusFilter, BoardBadgeFilter]) => 
+            BoardArtistFilter, BoardDirectorFilter, BoardStatusFilter, BoardBadgeFilter,
+            BoardFeedbackDepartmentFilter]) => 
             ({
                 ProjectId, BoardId, GroupId, Department, BoardView, BoardGrouping,
                 BoardSortBy, BoardReverseSorting, BoardTagsFilter, BoardSearchFilter,
-                BoardArtistFilter, BoardDirectorFilter, BoardStatusFilter, BoardBadgeFilter
+                BoardArtistFilter, BoardDirectorFilter, BoardStatusFilter, BoardBadgeFilter,
+                BoardFeedbackDepartmentFilter
              })
         )
     ), {}
@@ -40,7 +43,8 @@ const [useBoardParams, BoardParams$] = bind(
 const AllBoardParamFunctions = {
     SetProjectId, SetBoardId, SetGroupId, SetDepartment, SetBoardView, SetBoardGrouping,
     SetBoardSortBy, SetBoardReverseSorting, SetBoardTagsFilter, SetBoardSearchFilter,
-    SetBoardArtistFilter, SetBoardDirectorFilter, SetBoardStatusFilter, SetBoardBadgeFilter
+    SetBoardArtistFilter, SetBoardDirectorFilter, SetBoardStatusFilter, SetBoardBadgeFilter,
+    SetBoardFeedbackDepartmentFilter
 }
 
 const SetBoardParam = (key, val) => {

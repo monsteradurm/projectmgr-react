@@ -533,13 +533,13 @@
     }
     
 
-    .pm-status.pm-status-hover {
+    .pm-status >.pm-status-hover {
         //background: #aaa !important;
         font-weight: 600;
         cursor: pointer !important;
     }
 
-    .pm-status.pm-status-hover::before {
+    .pm-status > .pm-status-hover::before {
         content: '#'
     }
 

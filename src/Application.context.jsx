@@ -11,6 +11,7 @@ import { useMyBoards, useAllUsers, useMondayUser, SetAuthentication, useMyAvatar
 const PrimaryColors = {
     'Projects' : '#008577',
     'Home' : '#009cc2',
+    'Support' : '#86b64b',
     'default' : 'gray'
 }
 

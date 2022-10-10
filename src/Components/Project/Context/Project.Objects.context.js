@@ -3,7 +3,7 @@ import { BehaviorSubject, combineLatest, EMPTY, map, tap, of, switchMap, take, d
     distinctUntilChanged, mergeMap, startWith, filter, delay, concatMap, from, distinct } from "rxjs";
 import { FirebaseService } from "../../../Services/Firebase.service";
 import { MondayService } from "../../../Services/Monday.service";
-import { filterArtists, filterBadges, filterDepartments, filterSearch, 
+import { filterArtists, filterBadges, filterDepartments, filterFeedbackDepartment, filterSearch, 
     filterStatus, filterTags, sortFilteredItems } from "../Overview.filters";
 import { ProjectId$, BoardId$, BoardFilters$, GroupId$, 
     BoardSorting$, BoardGrouping$ } from "./Project.Params.context";
@@ -143,6 +143,8 @@ const [useFilteredBoardItemIds, FilteredBoardItemIds$] = bind(
             let filtered = [...items];
             if (filters.Status)
                 filtered = filterStatus(filtered, filters.Status);
+            if (filters.FeedbackDepartment)
+                filtered = filterFeedbackDepartment(filtered, filters.FeedbackDepartment);
             if (filters.Artists)
                 filtered = filterArtists(filtered, filters.Artists);
             if (filters.Search)

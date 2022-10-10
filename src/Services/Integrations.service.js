@@ -18,6 +18,6 @@ export class IntegrationsService {
 
         ajax.post('/integrations/monday/StoreBoardItemStatus', {payload}).pipe(
             take(1),
-        ).subscribe(() => {})
+        ).subscribe((res) => {console.log("/integrations/monday/StoreBoardItemStatus => Result: ", res)})
     }
 }

@@ -230,6 +230,54 @@ export class MondayService {
         return parseInt(messageArr.splice(messageArr.length - 2, 1));
       }
 
+    
+    static ParseSupportBoard = (board, label) => {
+        let groups = board?.groups ? board.groups : [];
+        const settings = board?.columns ? board.columns : [];
+  
+        groups = _.sortBy(groups, g => g.title);
+        const other = _.find(groups, g => g.title === 'Other');
+  
+        if (other) 
+          groups = [...groups.filter(g => g.title !== 'Other'), other];
+  
+        return {label, id: board?.id, groups, settings}
+      }
+  
+
+    static get Support_ManagementGroups$() {
+      return MondayService.Execute$(
+          MondayGraphQL.Support_ManagementGroups
+        ).pipe(
+          map(response => response?.boards ? response.boards : null),
+          map(boards => boards && boards.length > 0 ? MondayService.ParseSupportBoard(boards[0], 'Management') : null)
+          )
+      }
+
+    static get Support_SoftwareGroups$() {
+      return MondayService.Execute$(
+          MondayGraphQL.Support_SoftwareGroups
+        ).pipe(
+          map(response => response?.boards ? response.boards : null),
+          map(boards => boards && boards.length > 0 ? MondayService.ParseSupportBoard(boards[0], 'Software') : null)
+        )
+    }
+
+    static get Support_TechnicalGroups$() {
+      return MondayService.Execute$(
+          MondayGraphQL.Support_TechnicalGroups
+        ).pipe(
+          map(response => response?.boards ? response.boards : null),
+          map(boards => boards && boards.length > 0 ? MondayService.ParseSupportBoard(boards[0], 'Technical') : null),
+        )
+    }
+
+    static Support_Tickets$ = (boardId, groupId) => {
+      return MondayService.Execute$(
+        MondayGraphQL.SupportTickets(boardId, groupId)
+      )
+    }
+
     static Execute$ = (cmd) => {
         return new Observable(observer => {
           monday.api(cmd).then((res) => {

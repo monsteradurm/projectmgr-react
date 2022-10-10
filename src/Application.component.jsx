@@ -17,6 +17,8 @@ import { useToaster } from './App.Toasts.context';
 import { AddQueueMessage, CreateMessageQueue, RemoveQueueMessage, useBusyMessage } from './App.MessageQueue.context';
 import moment from 'moment';
 import { SUSPENSE } from '@react-rxjs/core';
+import { SupportComponent } from './Components/Support/Support.component';
+import { NewTicketDialog } from './Components/Support/NewTicket.component';
 
 const preventMouseProps = (evt) => {
   evt.stopPropagation();
@@ -113,6 +115,7 @@ function App() {
             <NavigationComponent User={User} SimulatedUser={SimulatedUser}
               Initializing={BusyMessage?.key === 'init'}/>
         </header>
+          <NewTicketDialog />
           {
             BusyMessage ? 
               <Stack direction="vertical" className="mx-auto my-auto" 
@@ -125,13 +128,13 @@ function App() {
               User ? 
             <>
               <Toast ref={toastRef} position="bottom-right"/>
-                <Routes>
-                  <Route path="/" element={<HomeComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
-                  <Route path="Home" element={<HomeComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
-                  <Route path="Projects" element={<Project 
-                    headerHeight={appHeaderRef.current?.clientHeight ?? 0} />} />
-                </Routes>
-              
+              <Routes>
+                <Route path="/" element={<HomeComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
+                <Route path="Home" element={<HomeComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
+                <Route path="Support" element={<SupportComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
+                <Route path="Projects" element={<Project 
+                  headerHeight={appHeaderRef.current?.clientHeight ?? 0} />} />
+              </Routes>
             </> : null
           }
           </BrowserRouter>

@@ -1,6 +1,6 @@
 import { bind } from "@react-rxjs/core";
 import { createSignal } from "@react-rxjs/utils";
-import { combineLatest, debounceTime, map } from "rxjs";
+import { combineLatest, debounceTime, map, tap } from "rxjs";
 import * as _ from 'underscore';
 
 // --- Project Parameters ---
@@ -69,14 +69,19 @@ const [useBoardGrouping, BoardGrouping$] = bind(
     BoardGroupingChanged$, 'Element'
 )
 
+const [BoardFeedbackDepartmentChanged$, SetBoardFeedbackDepartmentFilter] = createSignal(_mapFilter);
+const [useBoardFeedbackDepartmentFilter, BoardFeedbackDepartmentFilter$] = bind(
+    BoardFeedbackDepartmentChanged$, ''
+)
+
 const [useBoardFilters, BoardFilters$] = bind(
     combineLatest(
         [BoardTagsFilter$, BoardSearchFilter$, BoardArtistFilter$, BoardDirectorFilter$,
-            BoardBadgeFilter$, BoardStatusFilter$]
+            BoardBadgeFilter$, BoardStatusFilter$, BoardFeedbackDepartmentFilter$]
     ).pipe(
         // restructure from Array -> Object
-        map(([Tags, Search, Artists, Directors, Badges, Status]) => (
-            { Tags, Search, Artists, Directors, Badges, Status }
+        map(([Tags, Search, Artists, Directors, Badges, Status, FeedbackDepartment]) => (
+            { Tags, Search, Artists, Directors, Badges, Status, FeedbackDepartment }
             )
         )
     ), {}
@@ -108,6 +113,7 @@ export {
     BoardDirectorFilter$,
     BoardStatusFilter$,
     BoardBadgeFilter$,
+    BoardFeedbackDepartmentFilter$,
 
     useBoardId,
     useGroupId,
@@ -118,7 +124,6 @@ export {
     useBoardGrouping,
     useBoardSearchFilter,
     useBoardFilters,
-
     SetBoardView,
     SetProjectId,
     SetBoardId,
@@ -129,6 +134,7 @@ export {
     SetBoardStatusFilter,
     SetBoardArtistFilter,
     SetBoardDirectorFilter,
+    SetBoardFeedbackDepartmentFilter,
     SetBoardBadgeFilter,
     SetBoardGrouping,
     SetBoardSortBy,

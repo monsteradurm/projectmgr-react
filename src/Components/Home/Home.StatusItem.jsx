@@ -1,5 +1,6 @@
 import { SUSPENSE } from "@react-rxjs/core";
 import { Skeleton } from "primereact/skeleton";
+import React from "react";
 import { Stack } from "react-bootstrap"
 import { of } from "rxjs";
 import { NavigationService } from "../../Services/Navigation.service";
@@ -64,7 +65,7 @@ export const HomeStatusItemContent = ({statusItem, BoardItem}) => {
         <Stack direction="vertical" gap={2} className="pm-statusItem">
             {
                 BoardItem === SUSPENSE ?
-                <Stack direction="horizontal" style={{width: 500}}>
+                <Stack direction="horizontal" style={{width: '100%', height: '100%', justifyContent: 'center'}}>
                     <Loading text="Fetching Item..." /> 
                 </Stack>:
                 <>
@@ -73,6 +74,10 @@ export const HomeStatusItemContent = ({statusItem, BoardItem}) => {
                     style={{background: statusItem.color}}>
                     <div>{statusItem.group_title},</div>
                     <div>{BoardItem?.name.split('/').join(', ')}</div>
+                    {
+                        statusItem?.department  &&
+                        <span style={{marginLeft: 10}}>({statusItem.department})</span>
+                    }
                     <div className="mx-auto"></div>
                     <div>{statusItem.board_name.split('/').join(', ')}</div>
                 </Stack>
@@ -86,11 +91,7 @@ export const HomeStatusItemContent = ({statusItem, BoardItem}) => {
             {
                 Link ? 
                 <Stack direction="horizontal" gap={2} style={{padding: '0px 30px'}}>
-                    {
-                    Thumbnail ?
-                        <StatusThumbnail Thumbnail={Thumbnail} URL={Link} />
-                        : <div>No Thumbnail</div>
-                    }
+                    <StatusThumbnail Thumbnail={Thumbnail} URL={Link} />
                     {
                         Comments !== SUSPENSE ? 
                             Comments?.length?
@@ -106,7 +107,13 @@ export const HomeStatusItemContent = ({statusItem, BoardItem}) => {
                                 <Skeleton width="50%" />
                             </Stack>
                     }
-                </Stack> : null
+                </Stack> : 
+                <Stack direction="horizontal" gap={2} style={{padding: '0px 30px'}}>
+                    <Skeleton width={160} height={120}/>
+                    <div style={{marginLeft: 20}}>There is no 
+                        <span style={{fontWeight: 600, marginLeft: 5, marginRight: 5, fontSize: 18}}>Syncsketch Item</span> 
+                        associated with this task</div>
+                </Stack>
             }
 
             <div className="my-auto"></div>
@@ -123,11 +130,13 @@ export const HomeStatusItemContent = ({statusItem, BoardItem}) => {
         </Stack>
     )
 }
-export const HomeStatusItem = ({statusItem, maxIndex}) => {
+export const HomeStatusItem = React.memo(({statusItem, visible}) => {
     const BoardItem = useBoardItemFromStatusItem(statusItem);
-    console.log(statusItem.index < maxIndex);
-    if (statusItem.index < maxIndex)
+    console.log(visible, statusItem.index);
+
+    if (visible)
         return <HomeStatusItemContent statusItem={statusItem} BoardItem={BoardItem} />
 
+        
     return (<HomeStatusItemSkeleton statusItem={statusItem} BoardItem={BoardItem}/>)
-}
+});

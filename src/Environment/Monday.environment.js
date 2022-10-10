@@ -79,6 +79,54 @@ export const MondayGraphQL = {
       }
     }`,
 
+    Support_ManagementGroups: `query { boards (ids:3335572476) {
+      id
+      groups{
+        id title
+      }
+      columns{
+        id title settings_str
+      }
+    }
+  }`, 
+
+    Support_TechnicalGroups: `query { boards (ids:3335860615) {
+        id
+        groups{
+          id title
+        }
+        columns{
+          id title settings_str
+        }
+      }
+    }`, 
+
+    Support_SoftwareGroups: `query { boards (ids:3336095486) {
+      id
+        groups{
+          id title
+        }
+        columns{
+          id title settings_str
+        }
+      }
+    }`, 
+
+    SupportTickets: (boardId, groupId) => `query { boards (ids: ${boardId}) {
+      groups(ids: ${groupId}) {
+          items {
+            updated_at
+            created_at
+            id
+            name
+            column_values {
+              id title text additional_info value
+            }
+          }
+        }
+      }
+    }`,
+
     ManagementTeam: `query{ teams (ids:434736) {
       id
       name

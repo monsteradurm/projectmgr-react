@@ -9,7 +9,7 @@ import './Navigation.component.scss';
 import * as _ from 'underscore';
 import { ApplicationContext } from '../../Application.component';
 import { Avatar } from 'primereact/avatar';
-import { useAllUsers, useMyAvatar, useMyBoards, usePrimaryColor, useTitles } from '../../Application.context';
+import { SetCurrentRoute, useAllUsers, useMyAvatar, useMyBoards, usePrimaryColor, useTitles } from '../../Application.context';
 import { DelayBy } from '../General/DelayBy';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { refreshUsersCache, SimulateUser, useGroupedUsers, useIsAdmin, useManagers, useMyWorkspaces, useUserPhotoByName } from '../../App.Users.context';
@@ -17,6 +17,7 @@ import { SUSPENSE } from '@react-rxjs/core';
 import { useHomeMenu } from '../Home/Home.context';
 import { SendToastWarning } from '../../App.Toasts.context';
 import { UserAvatar } from '../General/UserAvatar';
+import { ShowNewTicketDialog, useSupportOptions } from '../Support/Support.context';
 
 export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
     const PrimaryColor = usePrimaryColor();
@@ -32,6 +33,7 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
     const Photo = useMyAvatar();
     const isAdmin = useIsAdmin();
     const Managers = useManagers();
+    const SupportOptions = useSupportOptions();
     useEffect(() => {
         if (MyWorkspaces === SUSPENSE || !MyWorkspaces)
             return;
@@ -115,7 +117,24 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                         <Dropdown autoClose="outside">
                                 <Dropdown.Toggle style={{fontSize:'20px'}}><FontAwesomeIcon icon={faTruckMedical} /></Dropdown.Toggle>
                                 <Dropdown.Menu variant="dark">
-                                    <Dropdown.Item key="placeholder"  onClick={() => SendToastWarning("not Yet Implemented..")}>NYI</Dropdown.Item>
+                                    {
+                                        SupportOptions && SupportOptions !== SUSPENSE ?
+                                        SupportOptions.map(option => (
+                                            <NestedDropdown title={option.label} key={"Support_" + option.label}>
+                                            {
+                                                option.groups.map(g => (
+                                                    <Dropdown.Item key={"Support_" + option.label + "_" + g.title} 
+                                                        onClick={() => SetCurrentRoute(
+                                                            `/Support?Board=${option.label}&Group=${g.title}&View=Tickets`)
+                                                        }>{g.title}</Dropdown.Item>
+                                                ))
+                                            }
+                                            <Dropdown.Divider />
+                                                <Dropdown.Item key={"Support_" + option.label + "_NewTicket"} 
+                                                        onClick={() => ShowNewTicketDialog(option.label)}>New Ticket</Dropdown.Item>
+                                            </NestedDropdown>)
+                                        ) : null
+                                    }
                                 </Dropdown.Menu>
                         </Dropdown>    
                         <Dropdown autoClose="outside">
