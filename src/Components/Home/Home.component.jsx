@@ -9,13 +9,16 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { SetNavigationHandler, SetTitles } from "../../Application.context";
 import { HomeNotices } from "./Home.Notices";
 import { HomeStatus } from "./Home.Status";
-import { LastHomeNavigationEvent, useStatusNesting, SetStatusNesting, SetHomeView, useHomeView, useAllStatusItemIds, useStatusItemURLs } from "./Home.context";
+import { LastHomeNavigationEvent, useStatusNesting, SetStatusNesting, SetHomeView, useHomeView, useAllStatusItemIds, useStatusItemURLs, useHomeSearchFilter, SetHomeSearchFilter } from "./Home.context";
 import { ErrorLoading } from "../General/ErrorLoading";
+import { HomeFilterBar } from "./Home.FilterBar"
+import "./Home.component.scss";
 
 const HOME_QID = '/HomeComponent'
 export const HomeComponent = ({headerHeight}) => {
     const BusyMessage = useBusyMessage(HOME_QID)
     const [searchParams, setSearchParams] = useSearchParams();
+    const Search = useHomeSearchFilter();
     const View = useHomeView();
     const Nesting = useStatusNesting();
     const offsetY = headerHeight;
@@ -23,6 +26,7 @@ export const HomeComponent = ({headerHeight}) => {
 
     useEffect(() => {
         const page = searchParams.get('View');
+        
         if (!page)
             SetHomeView('Notices')
         else
@@ -35,6 +39,11 @@ export const HomeComponent = ({headerHeight}) => {
         else if (nesting && Nesting !== nesting)
             SetStatusNesting(nesting);
 
+        let search = searchParams.get('Search');
+        if (!search) search = '';
+        if (search !== Search) {
+            SetHomeSearchFilter(search);
+        }
     }, [searchParams])
 
     useEffect(() => {
@@ -54,22 +63,24 @@ export const HomeComponent = ({headerHeight}) => {
 
 
     return (
-    
-        <div id="Home_Items" style={{height: '100%'}}>
+        <>
+        <HomeFilterBar />
+        <div id="Home_Items" className="pm-home" style={{height: '100%'}}>
             {
                 {   'Notices' : 
                         <ScrollingPage key="page_scroll" offsetY={offsetY}>
                             <HomeNotices  key="Home_Notices"/>
                         </ScrollingPage>,
-                    'Reviews' : <HomeStatus Status="Review" key="Review_Status"/>,
-                    'Assistance' : <HomeStatus Status="Assistance"  key="Assistance_Status"/>,
-                    'Feedback' : <HomeStatus Status="Feedback"  key="Feedback_Status"/>,
-                    'In Progress' : <HomeStatus Status="In Progress"  key="Progress_Status"/>,
+                    'Reviews' : <HomeStatus Status="Review" key="Review_Status_Page"/>,
+                    'Assistance' : <HomeStatus Status="Assistance"  key="Assistance_Status_Page"/>,
+                    'Feedback' : <HomeStatus Status="Feedback"  key="Feedback_Status_Page"/>,
+                    'In Progress' : <HomeStatus Status="In Progress"  key="Progress_Status_Page"/>,
                 }[View] || 
 
                 (<div style={{width: '100%'}}>
                     <ErrorLoading text={`View as "${View}" In Development`} />
                 </div>)
             } 
-        </div>);
+        </div>
+    </>);
 }

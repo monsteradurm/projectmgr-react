@@ -1,12 +1,12 @@
 import { bind, SUSPENSE } from "@react-rxjs/core";
 import { createSignal, partitionByKey } from "@react-rxjs/utils";
-import { concatMap, from, map, merge, of, scan, switchMap, take, tap } from "rxjs";
+import { combineLatest, concatMap, from, map, merge, of, scan, switchMap, take, tap, withLatestFrom } from "rxjs";
 import _ from "underscore";
 import { FirebaseService } from "../../Services/Firebase.service";
+import { HomeSearchFilter$ } from "./Home.context";
 
 export const [useNoticeboard, Notices$] = bind(
-    FirebaseService.Notices$.pipe(
-        tap(console.log),
+    combineLatest([FirebaseService.Notices$.pipe(
         scan((acc, notice) => {
             if (!notice)
                 return acc;
@@ -17,6 +17,12 @@ export const [useNoticeboard, Notices$] = bind(
             return [...acc.filter(n => n.id !== notice.id), notice];
         }, []),
         map(notices => _.sortBy(notices, n => n.updated_at).reverse())
+    ), HomeSearchFilter$]).pipe(
+        map(([notices, search]) => {
+            if (!search || search.length < 1)
+                return notices;
+            return notices.filter(n => n.content.toLowerCase().indexOf(search) >= 0)
+        })
     ), SUSPENSE
 )
 

@@ -216,7 +216,7 @@ export const onTagClick = (evt, tag, searchParams, setSearchParams) => {
         evt.stopPropagation();
 }
 
-export const onArtistClick = (artist, searchParams, setSearchParams, affectFilters) => {
+export const onArtistClick = (artist, searchParams, setSearchParams, affectFilters, searchKey) => {
     if (!affectFilters) return;
     
     console.log(artist, artist.replace(/\s+/g, ''))
@@ -224,5 +224,5 @@ export const onArtistClick = (artist, searchParams, setSearchParams, affectFilte
         return;
 
     toggleArrFilter(artist.replace(/\s+/g, ''), 
-        'BoardArtistFilter', searchParams, setSearchParams);
+    searchKey ? searchKey : 'BoardArtistFilter', searchParams, setSearchParams);
 }

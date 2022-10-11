@@ -1,0 +1,52 @@
+#Home_Items, .pm-home {
+    .pm-tag-filter {
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 20px;
+        color: #888 !important;
+    }
+
+    .p-avatar.p-avatar-lg {
+        width: 60px !important;
+        height: 60px !important;
+        font-size: 15px;
+        color: white;
+        border:inset 1px black!important;
+    }
+
+    
+    .pm-badge {
+        max-width:60px;
+        min-width:60px;
+        width:60px;
+        height:60px;
+        min-height:60px;
+        max-height:60px;
+        color: white;
+        border-radius: 50%;
+        display:flex;
+        justify-content: center;
+        align-items: center;
+        vertical-align: middle;
+        cursor: pointer;
+        z-index:5;
+        border:inset 1px black !important;
+        box-shadow:none !important;
+    }
+    .pm-badge.suspended {
+        border: none !important;
+        opacity: 0.5;
+    }
+    .pm-badge:not(.suspended):hover {
+        background: #aaa !important;
+    }
+    .pm-badge:hover > img {
+        opacity: 0.6;
+    }
+    .pm-badge > svg {
+        text-align: center;
+        margin:auto !important;
+        font-size: 1.25rem !important;
+    }
+}
+

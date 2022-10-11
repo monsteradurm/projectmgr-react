@@ -1,5 +1,5 @@
 import { bind, SUSPENSE } from "@react-rxjs/core";
-import { combineLatest, concatMap, debounceTime, EMPTY, from, map, of, scan, switchMap, tap } from "rxjs";
+import { combineLatest, concatMap, debounceTime, EMPTY, from, map, of, scan, switchMap, take, tap, toArray, withLatestFrom } from "rxjs";
 import { MyBoards$ } from "../../App.Users.context";
 import { FirebaseService } from "../../Services/Firebase.service";
 import * as _ from 'underscore';
@@ -12,6 +12,26 @@ import { ReadyOrSuspend$ } from "../../Helpers/Context.helper";
 import { SyncsketchService } from "../../Services/Syncsketch.service";
 import { SetCurrentRoute } from "../../Application.context";
 
+const homeSearchMap = (val, searchParams, setSearchParams) => {
+    if (setSearchParams && searchParams) {
+        searchParams.set('Search', val);
+        setSearchParams(searchParams);
+    }
+    return val;
+}
+export const [HomeSearchFilterChanged$, SetHomeSearchFilter] = createSignal(homeSearchMap);
+export const [useHomeSearchFilter, HomeSearchFilter$] = bind(
+    HomeSearchFilterChanged$, ''
+)
+export const [HomeArtistFilterChanged$, SetHomeArtistFilter] = createSignal(homeSearchMap);
+export const [useHomeArtistFilter, HomeArtistFilter$] = bind(
+    HomeArtistFilterChanged$, ''
+)
+
+export const [HomeDirectorFilterChanged$, SetHomeDirectorFilter] = createSignal(homeSearchMap);
+export const [useHomeDirectorFilter, HomeDirectorFilter$] = bind(
+    HomeDirectorFilterChanged$, ''
+)
 const NoticesURL = "/Home?View=Notices";
 export const [ItemsByStatus, ItemsByStatus$] = bind(
     Status =>
@@ -180,7 +200,9 @@ const [StoredStatusItemsChanged$, StoreStatusItemsByURL] = createSignal((key, it
 const [StatusItemsByURL, StatusItemURLs$] = partitionByKey(
     StoredStatusItemsChanged$,
     x => x.key,
-    $ => $.pipe(map(x => _.uniq(x.items.reverse(), i => i.id).reverse()))
+    $ => $.pipe(
+        map(x => _.uniq(x.items.reverse(), i => i.id).reverse()),
+    )
 )
 export const [useStatusItemURLs, ] = bind(
     StatusItemURLs$, SUSPENSE

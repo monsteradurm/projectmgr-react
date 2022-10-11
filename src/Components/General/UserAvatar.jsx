@@ -28,7 +28,7 @@ const AvatarTemplate = ({tooltip, image, label, onClick, style}) => {
 
 // uid is the full name of the user, eg. "Nina Campbell"
 
-export const UserAvatar = ({uid, color, affectFilters}) => {
+export const UserAvatar = ({uid, color, affectFilters, searchKey}) => {
     const [searchParams, setSearchParams] = useSearchParams();
 
 
@@ -67,7 +67,7 @@ export const UserAvatar = ({uid, color, affectFilters}) => {
             template={AvatarTemplate}
             label={initials}
             image={Photo} key={key} size="large" shape="circle"
-            onClick={(evt) => onArtistClick(uid, searchParams, setSearchParams, affectFilters)}
+            onClick={(evt) => onArtistClick(uid, searchParams, setSearchParams, affectFilters, searchKey)}
         />
     )
 

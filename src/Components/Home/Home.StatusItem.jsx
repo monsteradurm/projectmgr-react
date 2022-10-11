@@ -6,7 +6,9 @@ import { of } from "rxjs";
 import { NavigationService } from "../../Services/Navigation.service";
 import { LazyThumbnail } from "../General/LazyThumbnail";
 import { Loading } from "../General/Loading";
-import { useStatusReviewThumbnail, useStatusAssignedArtists, useStatusItem, useStatusReview, useStatusReviewComments, useStatusReviewLink, useStatusReviewName, useBoardItemFromStatusItem } from "./Home.context";
+import { useStatusReviewThumbnail, useStatusAssignedArtists, useStatusItem, useHomeSearchFilter,
+    useStatusReview, useStatusReviewComments, useStatusReviewLink, useStatusReviewName, useBoardItemFromStatusItem } from "./Home.context";
+import { StatusItemArtists } from "./Home.StatusItem.Artists";
 import "./Home.StatusItem.scss";
 
 const onClickHandler = (e, url) => {
@@ -30,12 +32,14 @@ const StatusThumbnail = React.memo(({Thumbnail, URL}) => {
         </div>)
 })
 
-export const HomeStatusItemSkeleton = React.memo(({statusItem, name}) => {
+export const HomeStatusItemSkeleton = React.memo(({statusItem, BoardItem}) => {
+    const Review = useStatusReview(BoardItem)
+    const ReviewName = useStatusReviewName(statusItem?.Review);
     return (<Stack direction="vertical" gap={2} className="pm-statusItem">
         <Stack direction="horizontal" gap={2} className="pm-statusItem-header" 
             style={{background: statusItem?.color}}>
             <div>{statusItem?.group_title},</div>
-            <div>{name?.split('/').join(', ')}</div>
+            <div>{statusItem?.item_name?.split('/').join(', ')}</div>
             <div className="mx-auto"></div>
             <div>{statusItem?.board_name?.split('/').join(', ')}</div>
         </Stack>
@@ -54,18 +58,24 @@ export const HomeStatusItemSkeleton = React.memo(({statusItem, name}) => {
     </Stack>)
 })
 
-export const HomeStatusItemContent = React.memo(({statusItem, name, BoardItem}) => {
-    //const BoardItem = useStatusItem(statusItem?.id);
+export const HomeStatusItemContent = React.memo(({statusItem, BoardItem}) => {
     const Review = useStatusReview(BoardItem);
     const ReviewName = useStatusReviewName(Review);
     const Link = useStatusReviewLink(Review);
     const Thumbnail = useStatusReviewThumbnail(Review);
     const Comments = useStatusReviewComments(Review);
-    const Artists = useStatusAssignedArtists(BoardItem, Review);
     return (
+        <>
+        {
+            statusItem?.artists?.length > 0 ?
+            <StatusItemArtists artists={statusItem?.artists} statusId={statusItem?.id} searchKey="Users"
+            color={statusItem.color} align="left"/> :
+            <div style={{width: 300}} ></div>
+        }
+        
         <Stack direction="vertical" gap={2} className="pm-statusItem">
             {
-                BoardItem === SUSPENSE ?
+                statusItem?.BoardItem === SUSPENSE ?
                 <Stack direction="horizontal" style={{width: '100%', height: '100%', justifyContent: 'center'}}>
                     <Loading text="Fetching Item..." /> 
                 </Stack>:
@@ -74,7 +84,7 @@ export const HomeStatusItemContent = React.memo(({statusItem, name, BoardItem}) 
                 <Stack direction="horizontal" gap={2} className="pm-statusItem-header" 
                     style={{background: statusItem.color}}>
                     <div>{statusItem.group_title},</div>
-                    <div>{name.split('/').join(', ')}</div>
+                    <div>{statusItem?.item_name?.split('/').join(', ')}</div>
                     {
                         statusItem?.department  &&
                         <span style={{marginLeft: 10}}>({statusItem.department})</span>
@@ -96,11 +106,11 @@ export const HomeStatusItemContent = React.memo(({statusItem, name, BoardItem}) 
                     {
                         Comments !== SUSPENSE ? 
                             Comments?.length?
-                                <div style={{fontSize: '13px', paddingLeft: 10}}>{
-                                    Comments[0].text.length > 250 ? Comments[0].text.slice(0, 247) + '...' : Comments[0].text
+                                <div style={{fontSize: '16px', paddingLeft: 10, textAlign: 'left'}}>{
+                                    Comments[0].text.length > 550 ? Comments[0].text.slice(0, 547) + '...' : Comments[0].text
                                 }</div> : 
                                 <div style={{fontWeight: 300, paddingLeft: 10,
-                                    fontStyle: 'italic', fontSize: '14px'}}>No Comments...</div> :
+                                    fontStyle: 'italic', fontSize: '16px'}}>No Comments...</div> :
                             <Stack direction="vertical" gap={2} style={{paddingLeft: 10}}>
                                 <Skeleton width="100%" />
                                 <Skeleton width="100%" />
@@ -116,37 +126,32 @@ export const HomeStatusItemContent = React.memo(({statusItem, name, BoardItem}) 
                         associated with this task</div>
                 </Stack>
             }
-
-            <div className="my-auto"></div>
-            <Stack direction="horizontal" gap={2} style={{padding: '0px 30px 10px 30px'}}>
-                <div className="mx-auto"></div>
-                { 
-                Artists?.length ? 
-                    <div>{Artists.join(', ')}</div> 
-                :   <div style={{fontWeight: 300, fontStyle: 'italic'}}>No Artist Assigned</div> 
-                }
-            </Stack>
             </>
         }
         </Stack>
+        {
+            statusItem?.directors?.length > 0 ?
+            <StatusItemArtists artists={statusItem?.directors} align="right" searchKey="Users"
+            statusId={statusItem?.id + "_directors"} color={statusItem.color}/> :
+            <div style={{width: 300}}></div>
+        }
+        </>
     )
 })
 
 export const HomeStatusItem = React.memo(({statusItem, maxIndex}) => {
-    const BoardItem = useBoardItemFromStatusItem(statusItem);
     const [visible, setVisible] = useState(false);
-
+    const BoardItem = useBoardItemFromStatusItem(statusItem);
+    const Review = useStatusReview(BoardItem);
+    
     useEffect(() => {
         if (statusItem.index < maxIndex && !visible)
             setVisible(true);
         
-    }, [maxIndex, statusItem])
-
-    console.log(statusItem?.index, visible)
+    }, [maxIndex, statusItem]);
 
     if (visible)
-        return <HomeStatusItemContent statusItem={statusItem} name={BoardItem?.name} BoardItem={BoardItem} />
-
+        return <HomeStatusItemContent statusItem={statusItem} BoardItem={BoardItem}/>
         
-    return (<HomeStatusItemSkeleton statusItem={statusItem} name={BoardItem?.name}/>)
+    return (<HomeStatusItemSkeleton statusItem={statusItem} BoardItem={BoardItem} />)
 });
