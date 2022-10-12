@@ -1,13 +1,15 @@
 import { SUSPENSE } from "@react-rxjs/core";
 import { VirtualScroller } from "primereact/virtualscroller";
 import { Stack } from "react-bootstrap";
-import { SetHomeSearchFilter, useHomeSearchFilter, useProjectsByStatus, useStatusItemGroups } from "./Home.context";
+import { SetHomeSearchFilter, useHomeSearchFilter, useProjectsByStatus, useStatusContextMenu, useStatusItemGroups, useUpdatedStatusItems } from "./Home.context";
 import { HomeStatusItem } from "./Home.StatusItem";
 import * as _ from 'underscore';
 import { useEffect, useReducer, useRef, useState } from "react";
 import { ScrollingPage } from "../General/ScrollingPage.component";
 import { useSearchParams } from "react-router-dom";
 import { onArtistClick } from "../Project/Overview.filters";
+import { CenteredSummaryContainer } from "../Project/TableView/TableItemControls/TableItem.SummaryContainer";
+import { Loading } from "../General/Loading";
 
 const reducer = (state, action) => {
     switch(action.type) {
@@ -24,11 +26,13 @@ const reducer = (state, action) => {
 }
 export const HomeStatus = ({Status}) => {
     const groups = useStatusItemGroups()
+    const updatedStatus = useUpdatedStatusItems(Status);
     const [searchParams, setSearchParams] = useSearchParams();
     const Search = useHomeSearchFilter();
     const [FilteredUsers, setFilteredUsers] = useState(null);
     const [items, setItems] = useState([])
     const [range, setRange] = useState([0, 4]);
+
     const itemTemplate = (item) => {
         return <Stack direction="horizontal" style={{width: '100%', justifyContent: 'center', padding: 20}}>
                 <HomeStatusItem key={item.group_title + "_" + item.id} statusItem={item} maxIndex={range[1]}
@@ -37,6 +41,7 @@ export const HomeStatus = ({Status}) => {
     }
 
     useEffect(() => {
+        console.log("GROUPS", groups)
         const search = Search && Search.length > 0 ? Search.toLowerCase() : null;
         const UserFilter = searchParams.get('Users');    
         const Users = UserFilter ? UserFilter.indexOf(',') > 0 ? 
@@ -50,6 +55,7 @@ export const HomeStatus = ({Status}) => {
                     _.flatten(
                         groups.map(
                             ([group_title, group_items]) => group_items
+                            .filter(item => !updatedStatus || updatedStatus.length < 1 || !_.find(updatedStatus, s => s.id === item.id))
                             .filter(item => {
                                 if (!Search && !Users) return true;
 
@@ -85,10 +91,10 @@ export const HomeStatus = ({Status}) => {
                         )
                     ).map((i, index) => ({...i, index}))
             )
-    }, [groups, Search])
+    }, [groups, Search, updatedStatus])
 
-    if (groups === SUSPENSE || items.length < 1)
-        return <div></div>;
+    if (groups === SUSPENSE)
+        return <Loading text="Retrieving Status Items..." fontSize={20}/>;
 
     const onScroll = (evt) => { 
         const index = Math.ceil((evt.target.scrollTop + evt.target.clientHeight) / 300);
@@ -100,6 +106,7 @@ export const HomeStatus = ({Status}) => {
     
 
     return (<div style={{height: 'calc(100vh - 95px)', overflowY: 'auto', paddingTop: 20}} onScroll={onScroll}>
+            
              <Stack direction="horizontal" gap={3} style={{marginLeft: 20}}>
                 <div className="pm-tag-filter" style={{color: '#888', fontWeight: 400, fontSize: 20}}>
                     {items?.length} tasks...
@@ -118,11 +125,16 @@ export const HomeStatus = ({Status}) => {
                     : null
                 }
             </Stack>
-            {               
-                items.map(item => <Stack direction="horizontal" key={item.group_title + "_" + item.id} 
-                    style={{width: '100%', justifyContent: 'center', padding: 20, position: 'relative'}}>
-                    <HomeStatusItem  statusItem={item} maxIndex={range[1]}/>
-                </Stack>)
-            }
+            {           
+                items?.length > 0 ?     
+                    items.map(item => <Stack direction="horizontal" key={item.group_title + "_" + item.id} 
+                        style={{width: '100%', justifyContent: 'center', padding: 20, position: 'relative'}}>
+                        <HomeStatusItem  statusItem={item} maxIndex={range[1]}/>
+                    </Stack>) :
+
+                    <CenteredSummaryContainer style={{height: '100%', fontSize: 20}}>
+                        <div>There are no <span style={{fontWeight: 600}}>{Status}</span> Items to display for this project.</div>
+                    </CenteredSummaryContainer>
+                }
             </div>)
 }

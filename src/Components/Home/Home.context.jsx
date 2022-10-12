@@ -1,6 +1,6 @@
 import { bind, SUSPENSE } from "@react-rxjs/core";
-import { combineLatest, concatMap, debounceTime, EMPTY, from, map, of, scan, switchMap, take, tap, toArray, withLatestFrom } from "rxjs";
-import { MyBoards$ } from "../../App.Users.context";
+import { combineLatest, concatMap, debounceTime, distinctUntilChanged, EMPTY, from, map, merge, of, scan, switchMap, take, tap, timeout, toArray, withLatestFrom } from "rxjs";
+import { AllUsers$, MyBoards$ } from "../../App.Users.context";
 import { FirebaseService } from "../../Services/Firebase.service";
 import * as _ from 'underscore';
 import { NestedDropdown } from "../General/NestedDropDown.component";
@@ -11,6 +11,10 @@ import { MondayService } from "../../Services/Monday.service";
 import { ReadyOrSuspend$ } from "../../Helpers/Context.helper";
 import { SyncsketchService } from "../../Services/Syncsketch.service";
 import { SetCurrentRoute } from "../../Application.context";
+import { SendToastError, SendToastSuccess } from "../../App.Toasts.context";
+
+const _boardItemStatusMap = (boardItemId, text, color, index, column_id) => ({boardItemId, text, color, index, column_id});
+const [ItemStatusChanged$, SetItemStatus] = createSignal(_boardItemStatusMap)
 
 const homeSearchMap = (val, searchParams, setSearchParams) => {
     if (setSearchParams && searchParams) {
@@ -32,16 +36,30 @@ export const [HomeDirectorFilterChanged$, SetHomeDirectorFilter] = createSignal(
 export const [useHomeDirectorFilter, HomeDirectorFilter$] = bind(
     HomeDirectorFilterChanged$, ''
 )
+
+export const [UpdatedStatusItem$, UpdateStatusItem] = createSignal((statusItem, label, change) => ({...statusItem, change, label}));
+export const [useUpdatedStatusItems, ] = bind(
+    status =>
+    UpdatedStatusItem$.pipe(
+        switchMap(item => item?.label?.indexOf(status) < 0 ? of(item) : EMPTY),
+        scan((acc, item) => [...acc.filter(i => i != item.id), item], [])
+    ), null
+)
+
 const NoticesURL = "/Home?View=Notices";
+
 export const [ItemsByStatus, ItemsByStatus$] = bind(
     Status =>
-    FirebaseService.ItemsByStatus$(Status).pipe(
+    merge(FirebaseService.ItemsByStatus$(Status), UpdatedStatusItem$.pipe(
+        concatMap(() => FirebaseService.ItemsByStatus$(Status))
+    )).pipe(
         scan((acc, item) => {
             const result = [...acc.filter(i => i !== item.id)];
             if (item.change === 'removed')
                 return result;
             return [...result, item]
         }, []),
+        debounceTime(100)
     ), SUSPENSE
 )
 
@@ -62,6 +80,7 @@ export const [useProjectsByStatus, ProjectsByStatus$] = bind(
     Status =>
     MyStatusItems$(Status).pipe(
         switchMap(items => items === SUSPENSE ? EMPTY : of(items)),
+        map(items => _.uniq(items, item => item.id)),
         map(items => _.reduce(items, (acc, item) => {
             let pNesting = [item.board_description];
             let bNesting = item.board_name;
@@ -182,7 +201,7 @@ const [, ProgressMenu$] = bind(
             return (<NestedDropdown title="In Progress" key="Home/In Progress">
             { BuildStatusDropdownMenu(menu, '/Home?View=In Progress') }
             </NestedDropdown>)
-        })
+        }),
     ), InitialProgressMenu
 )
 const [, Assistance$] = bind(
@@ -193,7 +212,7 @@ const [, Assistance$] = bind(
             return (<NestedDropdown title="Assistance" key="Home/Assistance">
             { BuildStatusDropdownMenu(menu, '/Home?View=Assistance') }
             </NestedDropdown>)
-        })
+        }),
     ), InitialAssistanceMenu
 )
 const [StoredStatusItemsChanged$, StoreStatusItemsByURL] = createSignal((key, items) => ({key, items}));
@@ -204,6 +223,7 @@ const [StatusItemsByURL, StatusItemURLs$] = partitionByKey(
         map(x => _.uniq(x.items.reverse(), i => i.id).reverse()),
     )
 )
+
 export const [useStatusItemURLs, ] = bind(
     StatusItemURLs$, SUSPENSE
 )
@@ -379,9 +399,131 @@ export const [useStatusItemGroups] = bind(
     combineLatest([StatusNesting$, HomeView$]).pipe(
         switchMap(params => params.indexOf(null) >= 0 ? EMPTY : of(params)),
         map(([nesting, view]) => `/Home?View=${view}&Nesting=${nesting}`),
-        switchMap(url => StatusItemsByURL(url)),
+        switchMap(url => StatusItemsByURL(url).pipe(
+            timeout({
+                each: 5000,
+                with: () => of([])
+            }),
+            take(1)
+        )),
         map(items => _.groupBy(items, i => i.board_name + ", " + i.group_title)),
         map(groups => Object.entries(groups)),
-        debounceTime(100)
+        debounceTime(100),
     ), SUSPENSE
+)
+
+export const BoardSettings$ = (id) => {
+    const key = '/BoardSettings/' + id;
+    const stored = sessionStorage.getItem('key');
+
+    if (stored) {
+        try {
+            const data = JSON.parse(stored);
+            return of(data);
+        }
+        catch { }
+    } 
+
+    return MondayService.ColumnSettings(id).pipe(
+        take(1),
+        tap(t => sessionStorage.setItem(key, JSON.stringify(t)))
+    )
+}
+
+const OnSetStatus = (statusItem, selected) => {
+    console.log("Setting Item Status",
+        {board: statusItem.board, label: selected.label, item: statusItem.id, column: selected.column_id, index: selected.index});
+        UpdateStatusItem(statusItem, selected.label, 'removed');
+    MondayService.SetItemStatus(statusItem.board, statusItem.id, selected.column_id, selected.index).pipe(
+        take(1)
+    ).subscribe((res) => {
+        if (res?.change_simple_column_value?.id) {
+            SendToastSuccess("Status was successfully updated!")
+        } else {
+            SendToastErrorr('There was an error updating the status!')
+        }
+    })
+}
+
+export const [ ,StatusOptions$] = bind(
+    (statusItem) => BoardSettings$(statusItem.board).pipe(
+        map(res => res.Status),
+        map(res => Object.keys(res.labels).map(index => ({
+                    label: res.labels[index],
+                    color: res.labels_colors[index].color,
+                    index,
+                    column_id: res.id,
+                    className: "pm-statusOption",
+                    style: { background: res.labels_colors[index].color, color: 'white'}
+                })
+            )
+        ),
+        map(options => options.map(o => ({...o, command: () => OnSetStatus(statusItem, o)}))),
+        map(options => options.filter( o => o.label !== 'Not Started' || o.color === "#333333"))
+    )
+)
+
+export const [, AddArtistMenu$] = bind(
+    StatusItem =>
+    AllUsers$.pipe(
+        map(allUsers => {
+            let existing = [];
+            if (StatusItem?.artists?.indexOf(', ') >= 0)
+                existing = StatusItem.artists.split(', ');
+            else if (StatusItem?.artists?.length > 0)
+                existing = [StatusItem.artists]
+
+            const users = _.sortBy(Object.values(allUsers)
+                .filter(u => existing.indexOf(u.monday.name) < 0), a => a.monday.name);
+                
+            return users.map(user => ({
+                label: user.monday.name,
+                user
+            }))
+        })
+    )
+)
+
+
+export const [, RemoveArtistMenu$] = bind(
+    StatusItem =>
+    AllUsers$.pipe(
+        map(allUsers => {
+            let existing = [];
+            if (StatusItem?.artists?.indexOf(', ') >= 0)
+                existing = StatusItem.artists.split(', ');
+            else if (StatusItem?.artists?.length > 0)
+                existing = [StatusItem.artists]
+
+            const users = _.sortBy(Object.values(allUsers)
+                .filter(u => existing.indexOf(u.monday.name) >= 0), a => a.monday.name);
+            
+            if (existing.length > 0)
+                return users.map(user => ({
+                    label: user.monday.name,
+                    user
+                }))
+            return [{label: 'No Artists Assigned...', style: { fontStyle: 'italic', fontWeight: '300 !important' }}]
+        })
+    )
+)
+
+
+export const [useStatusContextMenu, StatusContextMenu$] = bind(
+    StatusItem => 
+    StatusOptions$(StatusItem).pipe(
+        map((options) => ([
+            {label: "Status", items: options},
+            { separator: true },
+            {label: "Switch to Overview", command: () => {
+                    let projectId = StatusItem.board_description;
+                    if (projectId.indexOf('/') > 0)
+                        projectId = _.last(projectId.split('/'));
+
+                    SetCurrentRoute(
+                        `Projects?ProjectId=${projectId}&BoardId=${StatusItem.board}&GroupId=${StatusItem.group}`
+                    )
+                }
+            }])),
+    ), [{label: 'Loading...'}]
 )

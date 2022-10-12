@@ -1,13 +1,14 @@
 import { SUSPENSE } from "@react-rxjs/core";
+import { ContextMenu } from "primereact";
 import { Skeleton } from "primereact/skeleton";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Stack } from "react-bootstrap"
 import { of } from "rxjs";
 import { NavigationService } from "../../Services/Navigation.service";
 import { LazyThumbnail } from "../General/LazyThumbnail";
 import { Loading } from "../General/Loading";
 import { useStatusReviewThumbnail, useStatusAssignedArtists, useStatusItem, useHomeSearchFilter,
-    useStatusReview, useStatusReviewComments, useStatusReviewLink, useStatusReviewName, useBoardItemFromStatusItem } from "./Home.context";
+    useStatusReview, useStatusReviewComments, useStatusReviewLink, useStatusReviewName, useBoardItemFromStatusItem, useStatusContextMenu } from "./Home.context";
 import { StatusItemArtists } from "./Home.StatusItem.Artists";
 import "./Home.StatusItem.scss";
 
@@ -32,10 +33,15 @@ const StatusThumbnail = React.memo(({Thumbnail, URL}) => {
         </div>)
 })
 
-export const HomeStatusItemSkeleton = React.memo(({statusItem, BoardItem}) => {
+export const HomeStatusItemSkeleton = React.memo(({statusItem, BoardItem, StatusContextMenu}) => {
     const Review = useStatusReview(BoardItem)
     const ReviewName = useStatusReviewName(statusItem?.Review);
-    return (<Stack direction="vertical" gap={2} className="pm-statusItem">
+    const StatusContextMenuRef = useRef();
+    return (<Stack direction="vertical" gap={2} className="pm-statusItem" onContextMenu={
+        (e) => StatusContextMenuRef?.current?.show(e) 
+    }>
+        <ContextMenu model={StatusContextMenu} 
+                ref={StatusContextMenuRef} className="pm-status-context"></ContextMenu>
         <Stack direction="horizontal" gap={2} className="pm-statusItem-header" 
             style={{background: statusItem?.color}}>
             <div>{statusItem?.group_title},</div>
@@ -58,12 +64,13 @@ export const HomeStatusItemSkeleton = React.memo(({statusItem, BoardItem}) => {
     </Stack>)
 })
 
-export const HomeStatusItemContent = React.memo(({statusItem, BoardItem}) => {
+export const HomeStatusItemContent = React.memo(({statusItem, BoardItem, StatusContextMenu}) => {
     const Review = useStatusReview(BoardItem);
     const ReviewName = useStatusReviewName(Review);
     const Link = useStatusReviewLink(Review);
     const Thumbnail = useStatusReviewThumbnail(Review);
     const Comments = useStatusReviewComments(Review);
+    const StatusContextMenuRef = useRef();
     return (
         <>
         {
@@ -73,7 +80,11 @@ export const HomeStatusItemContent = React.memo(({statusItem, BoardItem}) => {
             <div style={{width: 300}} ></div>
         }
         
-        <Stack direction="vertical" gap={2} className="pm-statusItem">
+        <Stack direction="vertical" gap={2} className="pm-statusItem" onContextMenu={
+            (e) => StatusContextMenuRef?.current?.show(e) 
+        }>
+            <ContextMenu model={StatusContextMenu} 
+                ref={StatusContextMenuRef} className="pm-status-context"></ContextMenu>
             {
                 statusItem?.BoardItem === SUSPENSE ?
                 <Stack direction="horizontal" style={{width: '100%', height: '100%', justifyContent: 'center'}}>
@@ -143,7 +154,8 @@ export const HomeStatusItem = React.memo(({statusItem, maxIndex}) => {
     const [visible, setVisible] = useState(false);
     const BoardItem = useBoardItemFromStatusItem(statusItem);
     const Review = useStatusReview(BoardItem);
-    
+    const StatusContextMenu = useStatusContextMenu(statusItem);
+
     useEffect(() => {
         if (statusItem.index < maxIndex && !visible)
             setVisible(true);
@@ -151,7 +163,7 @@ export const HomeStatusItem = React.memo(({statusItem, maxIndex}) => {
     }, [maxIndex, statusItem]);
 
     if (visible)
-        return <HomeStatusItemContent statusItem={statusItem} BoardItem={BoardItem}/>
+        return <HomeStatusItemContent statusItem={statusItem} BoardItem={BoardItem} StatusContextMenu={StatusContextMenu} />
         
-    return (<HomeStatusItemSkeleton statusItem={statusItem} BoardItem={BoardItem} />)
+    return (<HomeStatusItemSkeleton statusItem={statusItem} BoardItem={BoardItem} StatusContextMenu={StatusContextMenu}/>)
 });
