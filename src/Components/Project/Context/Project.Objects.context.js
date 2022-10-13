@@ -1,12 +1,12 @@
 import { bind, SUSPENSE } from "@react-rxjs/core";
 import { BehaviorSubject, combineLatest, EMPTY, map, tap, of, switchMap, take, debounceTime, merge, 
-    distinctUntilChanged, mergeMap, startWith, filter, delay, concatMap, from, distinct } from "rxjs";
+    distinctUntilChanged, mergeMap, startWith, filter, delay, concatMap, from, distinct, withLatestFrom } from "rxjs";
 import { FirebaseService } from "../../../Services/Firebase.service";
 import { MondayService } from "../../../Services/Monday.service";
 import { filterArtists, filterBadges, filterDepartments, filterFeedbackDepartment, filterSearch, 
     filterStatus, filterTags, sortFilteredItems } from "../Overview.filters";
 import { ProjectId$, BoardId$, BoardFilters$, GroupId$, 
-    BoardSorting$, BoardGrouping$ } from "./Project.Params.context";
+    BoardSorting$, BoardGrouping$, BoardReverseSorting$ } from "./Project.Params.context";
 import { combineKeys, createSignal, partitionByKey } from "@react-rxjs/utils";
 import * as _ from 'underscore';
 import { RemoveQueueMessage } from "../../../App.MessageQueue.context";
@@ -160,10 +160,11 @@ const [useFilteredBoardItemIds, FilteredBoardItemIds$] = bind(
 )
 // --- filtered, sorted and grouped board items ---
 const [useGroupedBoardItems, GroupedBoardItems$] = bind(
-    combineLatest([DepartmentBoardItems$, BoardSorting$, BoardGrouping$]).pipe(
-        map(([filtered, sortParams, Grouping]) => {
-            const sorted = sortFilteredItems(filtered, sortParams);
-            
+    combineLatest([DepartmentBoardItems$, BoardSorting$, BoardGrouping$, BoardReverseSorting$]).pipe(
+        map(([filtered, sortParams, Grouping, Reversed]) => {
+            let sorted = sortFilteredItems(filtered, sortParams);
+            if (Reversed)
+                sorted = sorted.reverse();
             return _.groupBy(sorted, (i) => {
                 if (Grouping == 'Status') {
                     return !!i.Status && !!i.Status.text ? i.Status.text : 'Not Started';
@@ -185,6 +186,8 @@ const [useGroupedBoardItems, GroupedBoardItems$] = bind(
                 [...acc, [group, _.pluck(grouped[group], 'id')]]
             , [])
         ),
+        withLatestFrom(BoardReverseSorting$),
+        map(([grouped, reversed]) => reversed ? grouped.reverse() : grouped)
     ), []
 )
 

@@ -43,6 +43,17 @@ export const [RequestorsChanged$, SetRequestors] = createSignal(r => {
    console.log("Setting Requestors", r);
    return r;
 });
+const supportSearchMap = (val, searchParams, setSearchParams) => {
+    if (setSearchParams && searchParams) {
+        searchParams.set('Search', val);
+        setSearchParams(searchParams);
+    }
+    return val;
+}
+export const [SupportSearchFilterChanged$, SetSupportSearchFilter] = createSignal(supportSearchMap);
+export const [useSupportSearchFilter, SupportSearchFilter$] = bind(
+    SupportSearchFilterChanged$, ''
+)
 
 export const [useRequestors, Requestors$] = bind(
     merge(RequestorsChanged$, MondayUser$.pipe(
@@ -234,12 +245,12 @@ export const [useSupportTickets, SupportTickets$] = bind(
             if (!groups) return of(null);
 
             const Group = _.find(groups, g => g.title === group);
-            if (!Group) return of(null);
+            if (!Group && group !== 'All Groups') return of(null);
 
             return FirebaseService.SubscribeToSupportGroup$(Board.id).pipe(
                 scan((acc, cur) => {
                     let result = acc.filter(i => i.id !== cur.id);
-                    if (cur.change != 'removed' && cur.group.id === Group.id)
+                    if (cur.change != 'removed' && (group === 'All Groups' || cur.group.id === Group.id))
                         result.push(cur);
                     return result;
                 }, []),
@@ -286,7 +297,7 @@ export const useTicketLastUpdated = (ticket) => {
             updated_at = reply_updated;
     }
 
-    return moment(updated_at).format('MMM DD, YYYY')
+    return moment(updated_at).format('MMM DD, YYYY HH:mm')
 }
 
 
@@ -318,6 +329,19 @@ export const useTicketPriority = (ticket) => {
     return DefaultPriority;
     
 }
+export const useTicketMachineName = (ticket) => {
+    if (!ticket) return ''
+    const col = useTicketColumn(ticket, 'Machine Name');
+    if (!col) return '';
+    return col?.text;
+}
+
+export const useTicketMachineIP = (ticket) => {
+    if (!ticket) return ''
+    const col = useTicketColumn(ticket, 'Machine IP');
+    if (!col) return '';
+    return col?.text;
+}
 
 export const useTicketRequestor = (ticket) => {
     if (!ticket) return [];
@@ -329,6 +353,17 @@ export const useTicketRequestor = (ticket) => {
         return people.split(', ');
     return [people];
 }
+
+export const SupportSortOptions = ['Last Updated', 'Title', 'Priority', 'Status', 'Machine Name']
+export const [SupportSortByChanged$, SetSupportSortBy] = createSignal(n => n);
+export const [useSupportSortBy, ] = bind(
+    SupportSortByChanged$, 'Last Updated'
+)
+
+export const [SupportSortReversedChanged$, SetSupportSortReversed] = createSignal(n => n);
+export const [useSupportSortReversed, ] = bind(
+    SupportSortReversedChanged$, false
+)
 
 export const useTicketAssignee = (ticket) => {
     if (!ticket) return [];

@@ -8,7 +8,8 @@ import { useBoardParams } from "./Context/Project.context";
 import './Project.Filters.component.scss'
 import { useDepartmentOptions, useGroup, useGroupOptions, useDepartment } from "./Context/Project.Objects.context";
 import { useBoardSortBy, useBoardView, useBoardReverseSorting, useBoardSearchFilter,
-    useBoardGrouping } from "./Context/Project.Params.context";
+    useBoardGrouping, 
+    SetBoardReverseSorting} from "./Context/Project.Params.context";
 import { SUSPENSE } from "@react-rxjs/core";
 
 const ViewIconMap = {
@@ -97,7 +98,7 @@ export const ProjectFilters = () => {
                     <Dropdown.Item onClick={() => SetParameter('End Date', 'BoardSortBy')}>End Date</Dropdown.Item>
                     <Dropdown.Divider></Dropdown.Divider>
                     <Dropdown.Item onClick={() => 
-                        ToggleReverseSorting(ReverseSorting)}>
+                        SetBoardReverseSorting(!ReverseSorting)}>
                             Reverse
                     </Dropdown.Item>
                 </Dropdown.Menu>

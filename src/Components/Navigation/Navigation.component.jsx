@@ -122,16 +122,21 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                                 <Dropdown.Menu variant="dark">
                                     {
                                         SupportOptions && SupportOptions !== SUSPENSE ?
-                                        SupportOptions.map(option => (
+                                        SupportOptions.map(option => ( 
                                             <NestedDropdown title={option.label} key={"Support_" + option.label}>
-                                            {
-                                                option.groups.map(g => (
+                                                <Dropdown.Item key={"Support_" + option.label + "_All"} 
+                                                       onClick={() => SetCurrentRoute(
+                                                        `/Support?Board=${option.label}&Group=All Groups&View=Tickets`)
+                                                    }>All {option.label}</Dropdown.Item>
+                                                <Dropdown.Divider />
+                                                {
+                                                    option.groups.map(g => (
                                                     <Dropdown.Item key={"Support_" + option.label + "_" + g.title} 
                                                         onClick={() => SetCurrentRoute(
                                                             `/Support?Board=${option.label}&Group=${g.title}&View=Tickets`)
                                                         }>{g.title}</Dropdown.Item>
-                                                ))
-                                            }
+                                                    ))
+                                                }
                                             <Dropdown.Divider />
                                                 <Dropdown.Item key={"Support_" + option.label + "_NewTicket"} 
                                                         onClick={() => ShowNewTicketDialog(option.label)}>New Ticket</Dropdown.Item>

@@ -12,6 +12,7 @@ import { SetSupportParams, useSupportParams } from "./Support.context";
 import { Tickets } from "./Tickets.component";
 import { NewTicket } from "./NewTicket.component";
 import "./Support.component.scss";
+import { SupportFilterBar } from "./Support.FilterBar";
 
 const SUPPORT_QID = '/Supportomponent'
 export const SupportComponent = ({headerHeight}) => {
@@ -47,16 +48,19 @@ export const SupportComponent = ({headerHeight}) => {
     }, [View, Board, Group])
 
     return (
-        <ScrollingPage key="page_scroll" offsetY={offsetY}>
-            <div id="Support_Items" style={{height: '100%'}}>
-                {
-                    {   'Tickets' : <Tickets Board={Board} Group={Group} />,
-                    }[View] || 
+        <>
+        <SupportFilterBar Board={Board} Group={Group}  />
+            <ScrollingPage key="page_scroll" offsetY={offsetY}>
+                <div id="Support_Items" style={{height: '100%'}}>
+                    {
+                        {   'Tickets' : <Tickets Board={Board} Group={Group} />,
+                        }[View] || 
 
-                    (<div style={{width: '100%'}}>
-                        <ErrorLoading text={`View as "${View}" In Development`} />
-                    </div>)
-                } 
-            </div>
-        </ScrollingPage>);
+                        (<div style={{width: '100%'}}>
+                            <ErrorLoading text={`View as "${View}" In Development`} />
+                        </div>)
+                    } 
+                </div>
+            </ScrollingPage>
+        </>);
 }
