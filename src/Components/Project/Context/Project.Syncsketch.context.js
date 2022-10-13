@@ -16,8 +16,6 @@ import { compareByFieldSpec } from "@fullcalendar/react";
 import { FirebaseService } from "../../../Services/Firebase.service";
 import { UPLOAD_QID } from "../TableView/TableItemDlgs/TableItem.UploadReview";
 
-
-
 const [useSyncsketchProject, SyncsketchProject$] = bind(
     Project$.pipe(
         switchMap(project => {

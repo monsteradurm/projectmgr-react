@@ -15,9 +15,21 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { refreshUsersCache, SimulateUser, useGroupedUsers, useIsAdmin, useManagers, useMyWorkspaces, useUserPhotoByName } from '../../App.Users.context';
 import { SUSPENSE } from '@react-rxjs/core';
 import { useHomeMenu } from '../Home/Home.context';
-import { SendToastWarning } from '../../App.Toasts.context';
+import { SendToastSuccess, SendToastWarning } from '../../App.Toasts.context';
 import { UserAvatar } from '../General/UserAvatar';
 import { ShowNewTicketDialog, useSupportOptions } from '../Support/Support.context';
+
+
+const ClearSyncsketchProjectCache = () => {
+    const key = "Syncsketch/Project/"
+    const validKeys = Object.keys(sessionStorage).filter(k => k.startsWith(key));
+    if (validKeys.length > 0) {
+        validKeys.forEach(k => sessionStorage.removeItem(k));
+        SendToastSuccess("Cleared " + validKeys.length + " Cached Keys");
+    } else {
+        SendToastWarning("No Syncsketch Project Cache Keys to Clear")
+    }
+}
 
 export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
     const PrimaryColor = usePrimaryColor();
@@ -148,8 +160,12 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                         <Dropdown autoClose="outside">
                                 <Dropdown.Toggle style={{fontSize:'20px'}}><FontAwesomeIcon icon={faCogs} /></Dropdown.Toggle>
                                 <Dropdown.Menu variant="dark">
-                                    <NestedDropdown title="Cache">
-                                            <Dropdown.Item key="Users_Cache"  onClick={() => refreshUsersCache()}>Clear Users</Dropdown.Item>
+                                    <NestedDropdown title="Clear Cache">
+                                        <NestedDropdown title="Syncsketch">
+                                                <Dropdown.Item key="SSProjcts_Cache" onClick={() => ClearSyncsketchProjectCache()}>Projects</Dropdown.Item>
+                
+                                        </NestedDropdown>
+                                            <Dropdown.Item key="Users_Cache"  onClick={() => refreshUsersCache()}>Users</Dropdown.Item>
                                     </NestedDropdown>
                                     <Dropdown.Divider />
                                     {

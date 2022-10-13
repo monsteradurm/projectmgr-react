@@ -4,77 +4,77 @@ import { combineLatest, debounceTime, map, tap } from "rxjs";
 import * as _ from 'underscore';
 
 // --- Project Parameters ---
-const [ProjectIdChanged$, SetProjectId] = createSignal();
-const [useProjectId, ProjectId$] = bind(
+export const [ProjectIdChanged$, SetProjectId] = createSignal();
+export const [useProjectId, ProjectId$] = bind(
     ProjectIdChanged$, null
 );
 
-const [BoardIdChanged$, SetBoardId] = createSignal();
-const [useBoardId, BoardId$] = bind(
+export const [BoardIdChanged$, SetBoardId] = createSignal();
+export const [useBoardId, BoardId$] = bind(
     BoardIdChanged$, null
 ); 
 
-const [GroupIdChanged$, SetGroupId] = createSignal();
-const [useGroupId, GroupId$] = bind(
+export const [GroupIdChanged$, SetGroupId] = createSignal();
+export const [useGroupId, GroupId$] = bind(
     GroupIdChanged$, null
 ); 
 
-const [BoardViewChanged$, SetBoardView] = createSignal();
-const [useBoardView, BoardView$] = bind(
+export const [BoardViewChanged$, SetBoardView] = createSignal();
+export const [useBoardView, BoardView$] = bind(
     BoardViewChanged$, 'Table'
 ); 
 
 const _mapFilter = (f) => f;
-const [BoardArtistFilterChanged$, SetBoardArtistFilter] = createSignal(_mapFilter);
-const [useBoardArtistFilter, BoardArtistFilter$] = bind(
+export const [BoardArtistFilterChanged$, SetBoardArtistFilter] = createSignal(_mapFilter);
+export const [useBoardArtistFilter, BoardArtistFilter$] = bind(
     BoardArtistFilterChanged$, ''
 ); 
 
-const [BoardDirectorFilterChanged$, SetBoardDirectorFilter] = createSignal(_mapFilter);
-const [useBoardDirectorFilter, BoardDirectorFilter$] = bind(
+export const [BoardDirectorFilterChanged$, SetBoardDirectorFilter] = createSignal(_mapFilter);
+export const [useBoardDirectorFilter, BoardDirectorFilter$] = bind(
     BoardDirectorFilterChanged$, ''
 ); 
 
-const [BoardSearchFilterChanged$, SetBoardSearchFilter] = createSignal(_mapFilter);
-const [useBoardSearchFilter, BoardSearchFilter$] = bind(
+export const [BoardSearchFilterChanged$, SetBoardSearchFilter] = createSignal(_mapFilter);
+export const [useBoardSearchFilter, BoardSearchFilter$] = bind(
     BoardSearchFilterChanged$, ''
 )
 
-const [BoardTagsFilterChanged$, SetBoardTagsFilter] = createSignal(_mapFilter);
-const [useBoardTagsFilter, BoardTagsFilter$] = bind(
+export const [BoardTagsFilterChanged$, SetBoardTagsFilter] = createSignal(_mapFilter);
+export const [useBoardTagsFilter, BoardTagsFilter$] = bind(
     BoardTagsFilterChanged$, ''
 )
 
-const [BoardBadgeFilterChanged$, SetBoardBadgeFilter] = createSignal(_mapFilter);
-const [useBoardBadgeFilter, BoardBadgeFilter$] = bind(
+export const [BoardBadgeFilterChanged$, SetBoardBadgeFilter] = createSignal(_mapFilter);
+export const [useBoardBadgeFilter, BoardBadgeFilter$] = bind(
     BoardBadgeFilterChanged$, ''
 )
-const [BoardStatusFilterChanged$, SetBoardStatusFilter] = createSignal(_mapFilter);
-const [useBoardStatusFilter, BoardStatusFilter$] = bind(
+export const [BoardStatusFilterChanged$, SetBoardStatusFilter] = createSignal(_mapFilter);
+export const [useBoardStatusFilter, BoardStatusFilter$] = bind(
     BoardStatusFilterChanged$, ''
 )
 
-const [BoardSortByChanged$, SetBoardSortBy] = createSignal(_mapFilter);
-const [useBoardSortBy, BoardSortBy$] = bind(
+export const [BoardSortByChanged$, SetBoardSortBy] = createSignal(_mapFilter);
+export const [useBoardSortBy, BoardSortBy$] = bind(
     BoardSortByChanged$, 'Name'
 )
 
-const [BoardReverseSortingChanged$, SetBoardReverseSorting] = createSignal(_mapFilter);
-const [useBoardReverseSorting, BoardReverseSorting$] = bind(
+export const [BoardReverseSortingChanged$, SetBoardReverseSorting] = createSignal(_mapFilter);
+export const [useBoardReverseSorting, BoardReverseSorting$] = bind(
     BoardReverseSortingChanged$, false
 )
 
-const [BoardGroupingChanged$, SetBoardGrouping] = createSignal(_mapFilter);
-const [useBoardGrouping, BoardGrouping$] = bind(
+export const [BoardGroupingChanged$, SetBoardGrouping] = createSignal(_mapFilter);
+export const [useBoardGrouping, BoardGrouping$] = bind(
     BoardGroupingChanged$, 'Element'
 )
 
-const [BoardFeedbackDepartmentChanged$, SetBoardFeedbackDepartmentFilter] = createSignal(_mapFilter);
-const [useBoardFeedbackDepartmentFilter, BoardFeedbackDepartmentFilter$] = bind(
+export const [BoardFeedbackDepartmentChanged$, SetBoardFeedbackDepartmentFilter] = createSignal(_mapFilter);
+export const [useBoardFeedbackDepartmentFilter, BoardFeedbackDepartmentFilter$] = bind(
     BoardFeedbackDepartmentChanged$, ''
 )
 
-const [useBoardFilters, BoardFilters$] = bind(
+export const [useBoardFilters, BoardFilters$] = bind(
     combineLatest(
         [BoardTagsFilter$, BoardSearchFilter$, BoardArtistFilter$, BoardDirectorFilter$,
             BoardBadgeFilter$, BoardStatusFilter$, BoardFeedbackDepartmentFilter$]
@@ -86,7 +86,7 @@ const [useBoardFilters, BoardFilters$] = bind(
         )
     ), {}
 )
-const [useBoardSorting, BoardSorting$] = bind(
+export const [useBoardSorting, BoardSorting$] = bind(
     combineLatest(
         [BoardSortBy$, BoardReverseSorting$]
     ).pipe(
@@ -97,46 +97,3 @@ const [useBoardSorting, BoardSorting$] = bind(
         )
     ), {}
 )
-export {
-    ProjectId$,
-    BoardId$,
-    GroupId$,
-    BoardFilters$,
-    BoardSorting$,
-    BoardSortBy$,
-    BoardReverseSorting$,
-    BoardGrouping$,
-    BoardView$,
-    BoardTagsFilter$, 
-    BoardSearchFilter$, 
-    BoardArtistFilter$, 
-    BoardDirectorFilter$,
-    BoardStatusFilter$,
-    BoardBadgeFilter$,
-    BoardFeedbackDepartmentFilter$,
-
-    useBoardId,
-    useGroupId,
-    useProjectId,
-    useBoardView, 
-    useBoardSortBy,
-    useBoardReverseSorting,
-    useBoardGrouping,
-    useBoardSearchFilter,
-    useBoardFilters,
-    SetBoardView,
-    SetProjectId,
-    SetBoardId,
-    SetGroupId,   
-
-    SetBoardTagsFilter,
-    SetBoardSearchFilter,
-    SetBoardStatusFilter,
-    SetBoardArtistFilter,
-    SetBoardDirectorFilter,
-    SetBoardFeedbackDepartmentFilter,
-    SetBoardBadgeFilter,
-    SetBoardGrouping,
-    SetBoardSortBy,
-    SetBoardReverseSorting
-}

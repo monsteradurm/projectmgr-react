@@ -14,9 +14,9 @@ import { useSyncsketchGroup, useSyncsketchProject } from "./Project.Syncsketch.c
 import * as _ from 'underscore';
 import React, { useEffect, useState } from "react";
 
-const PROJ_QID = '/Project'
+export const PROJ_QID = '/Project'
 
-const [useBoardParams, BoardParams$] = bind(
+export const [useBoardParams, BoardParams$] = bind(
     combineLatest([
         ProjectId$, BoardId$, GroupId$, Department$, BoardView$, BoardGrouping$,
         BoardSortBy$, BoardReverseSorting$, BoardTagsFilter$, BoardSearchFilter$,
@@ -40,14 +40,14 @@ const [useBoardParams, BoardParams$] = bind(
     ), {}
 );
 
-const AllBoardParamFunctions = {
+export const AllBoardParamFunctions = {
     SetProjectId, SetBoardId, SetGroupId, SetDepartment, SetBoardView, SetBoardGrouping,
     SetBoardSortBy, SetBoardReverseSorting, SetBoardTagsFilter, SetBoardSearchFilter,
     SetBoardArtistFilter, SetBoardDirectorFilter, SetBoardStatusFilter, SetBoardBadgeFilter,
     SetBoardFeedbackDepartmentFilter
 }
 
-const SetBoardParam = (key, val) => {
+export const SetBoardParam = (key, val) => {
     if (AllBoardParamFunctions[key]) {
         AllBoardParamFunctions[key](val);
     }
@@ -64,59 +64,43 @@ const defaultProjectState = {
 
 
 // store boarditem id and current reivew id as context in provider across children
-const ProjectContext = React.createContext(); 
+export const ProjectContext = React.createContext(); 
 
 
-const ProjectProvider = ({children}) => {
-const [state, setState] = useState(defaultProjectState);
-const Project = useProject();
-const Board = useBoard();
-const Group = useGroup();
-const ReferenceFolder = useProjectReference();
-const SyncsketchProject = useSyncsketchProject();
-const SyncsketchGroup = useSyncsketchGroup();
+export const ProjectProvider = ({children}) => {
+    const [state, setState] = useState(defaultProjectState);
+    const Project = useProject();
+    const Board = useBoard();
+    const Group = useGroup();
+    const ReferenceFolder = useProjectReference();
+    const SyncsketchProject = useSyncsketchProject();
+    const SyncsketchGroup = useSyncsketchGroup();
 
-useEffect(() => {
+    useEffect(() => {
 
-    if (SyncsketchProject === SUSPENSE || SyncsketchGroup === SUSPENSE) {
-        AddQueueMessage(PROJ_QID, 'init-sync', 'Retrieving Syncsketch Project & Board..');
-    } else {
-        RemoveQueueMessage(PROJ_QID, 'init-sync');
-    }
+        if (SyncsketchProject === SUSPENSE || SyncsketchGroup === SUSPENSE) {
+            AddQueueMessage(PROJ_QID, 'init-sync', 'Retrieving Syncsketch Project & Board..');
+        } else {
+            RemoveQueueMessage(PROJ_QID, 'init-sync');
+        }
 
-    const result = {
-        Project,
-        Board, 
-        Group,
-        SyncsketchProject, 
-        SyncsketchGroup,
-        ReferenceFolder
-    };
+        const result = {
+            Project,
+            Board, 
+            Group,
+            SyncsketchProject, 
+            SyncsketchGroup,
+            ReferenceFolder
+        };
 
-    if (JSON.stringify(result) !== JSON.stringify(state))
-        setState(result)
+        if (JSON.stringify(result) !== JSON.stringify(state))
+            setState(result)
 
-}, [Project, Board, Group, SyncsketchProject, SyncsketchGroup, ReferenceFolder]);
+    }, [Project, Board, Group, SyncsketchProject, SyncsketchGroup, ReferenceFolder]);
 
-return (
-    <ProjectContext.Provider value={state}>
-        {children}
-    </ProjectContext.Provider>
-)
-}
-
-export {
-    PROJ_QID,
-    useBoard,
-    useGroupedBoardItems,
-    useProject,
-
-    useBoardParams,
-    useDepartment,
-
-    SetBoardParam,
-    
-    useSyncsketchProject,
-    ProjectProvider,
-    ProjectContext
+    return (
+        <ProjectContext.Provider value={state}>
+            {children}
+        </ProjectContext.Provider>
+    )
 }

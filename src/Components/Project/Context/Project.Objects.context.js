@@ -14,12 +14,12 @@ import { PROJ_QID } from "./Project.context";
 import { BoxService } from "@Services/Box.service"
 const M_GetBoardItems = ['get-boarditems', 'Retrieving Monday Board Items (Firebase)...']
 
-const BoardItemParam$ = combineLatest([ProjectId$, BoardId$, GroupId$]).pipe(
+export const BoardItemParam$ = combineLatest([ProjectId$, BoardId$, GroupId$]).pipe(
     switchMap(params => params.filter(p => !p).length > 0 ? 
         EMPTY : of(params)),
 );
 
-const InitialBoardItems$ = BoardItemParam$.pipe(
+export const InitialBoardItems$ = BoardItemParam$.pipe(
     switchMap(params => {
         const [ProjectId, BoardId, GroupId] = params;
         return FirebaseService.BoardItems$(ProjectId, BoardId, GroupId)
@@ -28,7 +28,7 @@ const InitialBoardItems$ = BoardItemParam$.pipe(
     tap(() => RefreshBadges()),
     tap(() => RefreshTags())
 )
-const BoardItemChanged$ = BoardItemParam$.pipe(
+export const BoardItemChanged$ = BoardItemParam$.pipe(
     switchMap(params => {
         const [ProjectId, BoardId, GroupId] = params;
         return FirebaseService.BoardItemsChanged$(ProjectId, BoardId, GroupId)
@@ -38,18 +38,18 @@ const BoardItemChanged$ = BoardItemParam$.pipe(
     tap(() => RefreshTags())
 )
 
-const BoardItemStream$ = merge(InitialBoardItems$.pipe(
+export const BoardItemStream$ = merge(InitialBoardItems$.pipe(
     concatMap(reviewArr => from(reviewArr))
 ), BoardItemChanged$);
 
-const [BoardItemById, BoardItemIds$] = partitionByKey(
+export const [BoardItemById, BoardItemIds$] = partitionByKey(
     BoardItemStream$, x => x.id
 )
 
 // --- holding unfiltered board items
-const BoardItemsMap$ = combineKeys(BoardItemIds$, BoardItemById);
+export const BoardItemsMap$ = combineKeys(BoardItemIds$, BoardItemById);
 
-const [useRawBoardItems, RawBoardItems$] = bind(
+export const [useRawBoardItems, RawBoardItems$] = bind(
     BoardItemsMap$.pipe(
         map(x => Array.from(x.values())),
     ), []
@@ -57,7 +57,7 @@ const [useRawBoardItems, RawBoardItems$] = bind(
 
 // --- use unfiltered board items to extrapolate departments options ---
 //          * this avoids frequent calls from department change emissions
-const [, DepartmentOptions$] = partitionByKey(
+export const [, DepartmentOptions$] = partitionByKey(
     BoardItemStream$.pipe(
         filter(x => x?.Department?.value),
         map(x => x.Department.value),
@@ -67,18 +67,18 @@ const [, DepartmentOptions$] = partitionByKey(
     x => x
 );
 
-const [useDepartmentOptions,] = bind(
+export const [useDepartmentOptions,] = bind(
     DepartmentOptions$.pipe(
         map(options => options.concat(['All Departments']))
     ), ['All Departments']
 )
 
-const [DepartmentChanged$, SetDepartment] = createSignal();
-const [useDepartment, Department$] = bind(
+export const [DepartmentChanged$, SetDepartment] = createSignal();
+export const [useDepartment, Department$] = bind(
     DepartmentChanged$, 'All Departments'
 )
 
-const [useProject, Project$] = bind(
+export const [useProject, Project$] = bind(
     ProjectId$.pipe(
         switchMap( id => FirebaseService.Project$(id)
             .pipe(take(1))
@@ -86,7 +86,7 @@ const [useProject, Project$] = bind(
     ), SUSPENSE
 );
 
-const [useBoard, Board$] = bind(
+export const [useBoard, Board$] = bind(
     combineLatest([ProjectId$, BoardId$]).pipe(
         // ensure all params have values
         switchMap(params => params.filter(p => !p || p === SUSPENSE).length ? EMPTY : of(params)),
@@ -94,7 +94,7 @@ const [useBoard, Board$] = bind(
     ), SUSPENSE
 );
 
-const [useColumnSettings, ColumnSettings$] = bind(
+export const [useColumnSettings, ColumnSettings$] = bind(
     BoardId$.pipe(
 
         switchMap((boardId) => {
@@ -116,7 +116,7 @@ const [useColumnSettings, ColumnSettings$] = bind(
 );
 
 // --- filtered board items ---
-const [useDepartmentBoardItems, DepartmentBoardItems$] = bind(
+export const [useDepartmentBoardItems, DepartmentBoardItems$] = bind(
     combineLatest([RawBoardItems$, Department$]).pipe(
         map(([items, Department]) => {
             if (Department === 'All Departments')
@@ -127,7 +127,7 @@ const [useDepartmentBoardItems, DepartmentBoardItems$] = bind(
     )
 );
 
-const [useDepartmentElements, DepartmentElements$] = bind(
+export const [useDepartmentElements, DepartmentElements$] = bind(
     DepartmentBoardItems$.pipe(
         map(items => _.pluck(items, 'name')
             .map(name => ParseBoardItemName(name))
@@ -135,7 +135,7 @@ const [useDepartmentElements, DepartmentElements$] = bind(
     )
 )
 
-const [useFilteredBoardItemIds, FilteredBoardItemIds$] = bind(
+export const [useFilteredBoardItemIds, FilteredBoardItemIds$] = bind(
     combineLatest([
         DepartmentBoardItems$, BoardFilters$
     ]).pipe(
@@ -159,7 +159,7 @@ const [useFilteredBoardItemIds, FilteredBoardItemIds$] = bind(
     ), []
 )
 // --- filtered, sorted and grouped board items ---
-const [useGroupedBoardItems, GroupedBoardItems$] = bind(
+export const [useGroupedBoardItems, GroupedBoardItems$] = bind(
     combineLatest([DepartmentBoardItems$, BoardSorting$, BoardGrouping$, BoardReverseSorting$]).pipe(
         map(([filtered, sortParams, Grouping, Reversed]) => {
             let sorted = sortFilteredItems(filtered, sortParams);
@@ -192,12 +192,12 @@ const [useGroupedBoardItems, GroupedBoardItems$] = bind(
 )
 
 
-const [useGroupOptions, GroupOptions$] = bind(
+export const [useGroupOptions, GroupOptions$] = bind(
     Board$.pipe(
         switchMap(board => board ? of(board.groups) : EMPTY)
     ), []
 );
-const [useStatusOptions, StatusOptions$] = bind(
+export const [useStatusOptions, StatusOptions$] = bind(
     ColumnSettings$.pipe(
         switchMap(settings => settings ? of(settings) : EMPTY),
         map(settings => settings['Status'] ? settings['Status'] : []),
@@ -218,19 +218,19 @@ const [useStatusOptions, StatusOptions$] = bind(
     ), []
 );
 
-const _TagsSubject$ = new BehaviorSubject(SUSPENSE);
-const RefreshTags = () => {
+export const _TagsSubject$ = new BehaviorSubject(SUSPENSE);
+export const RefreshTags = () => {
     MondayService.AllTags().pipe(
         debounceTime(1000),
         take(1))
         .subscribe((res) => _TagsSubject$.next(res));
 }
-const [useTagOptions, TagOptions$] = bind(
+export const [useTagOptions, TagOptions$] = bind(
     _TagsSubject$, SUSPENSE
 )
 
-const _BadgesSubject$ = new BehaviorSubject(SUSPENSE);
-const RefreshBadges = () => {
+export const _BadgesSubject$ = new BehaviorSubject(SUSPENSE);
+export const RefreshBadges = () => {
     FirebaseService.AllBadges$.pipe(
             debounceTime(1000),
             take(1)
@@ -240,11 +240,11 @@ const RefreshBadges = () => {
     )
 }
 
-const [useBadgeOptions, BadgeOptions$] = bind(
+export const [useBadgeOptions, BadgeOptions$] = bind(
     _BadgesSubject$, SUSPENSE
 )
 
-const [useGroup, Group$] = bind(
+export const [useGroup, Group$] = bind(
     combineLatest([GroupOptions$, GroupId$]).pipe(
         switchMap(([groups, groupId]) => {
             if (!groups || groups.length < 1 || !groupId) return EMPTY
@@ -259,14 +259,14 @@ const [useGroup, Group$] = bind(
         }),
     ), null
 )
-const [useBoardItemsCount, BoardItemsCount$] = bind(
+export const [useBoardItemsCount, BoardItemsCount$] = bind(
     FilteredBoardItemIds$.pipe(
         map(items => items && Array.isArray(items) ? items.length : 0)
     ), 0
 )
 
 
-const [useProjectReference, ProjectReference$] = bind(
+export const [useProjectReference, ProjectReference$] = bind(
     combineLatest([Project$, Board$, Group$]
     ).pipe(
         switchMap(params => params.indexOf(SUSPENSE) >= 0 ? EMPTY : of(params)),
@@ -304,37 +304,3 @@ const [useProjectReference, ProjectReference$] = bind(
         switchMap(id => id ? BoxService.FolderContents$(id) : of(null))
     ), SUSPENSE
 )
-export {
-    ColumnSettings$,
-    RawBoardItems$,
-    Board$,
-    Project$,
-    Group$,
-    Department$,
-    TagOptions$,
-    BadgeOptions$,
-    DepartmentOptions$,
-    StatusOptions$,
-    DepartmentBoardItems$,
-    FilteredBoardItemIds$,
-    GroupedBoardItems$,
-    ProjectReference$,
-
-    SetDepartment,
-    RefreshBadges,
-    RefreshTags,
-
-    useBoard,
-    useGroupedBoardItems,
-    useProject,
-    useGroup,
-    useDepartmentOptions,
-    useDepartment,
-    useGroupOptions,
-    useBoardItemsCount,
-    useTagOptions,
-    useBadgeOptions,
-    useStatusOptions,
-    useProjectReference,
-    useFilteredBoardItemIds
-}
