@@ -1,15 +1,34 @@
 import { bind, SUSPENSE } from "@react-rxjs/core";
 import { createSignal } from "@react-rxjs/utils";
-import { combineLatest, EMPTY, of, switchMap, map, take, from, tap, shareReplay, merge, withLatestFrom } from "rxjs";
+import { combineLatest, EMPTY, of, switchMap, map, take, from, pairwise, tap, timeout, 
+    shareReplay, merge, withLatestFrom, scan, debounceTime, catchError } from "rxjs";
 import { MondayService } from "../../Services/Monday.service";
 import * as _ from 'underscore';
 import { AllUsers$, MondayUser$ } from "../../App.Users.context";
+import { SendToastSuccess, SendToastError } from "./../../App.Toasts.context";
+import { FirebaseService } from "../../Services/Firebase.service";
+import moment from 'moment';
 
 const defaultSupport = {Board: null, Group:null, View: null}
 const supportMap = (Board, Group, View) => ({Board, Group, View});
 
 export const [SupportParamsChanged$, SetSupportParams] = createSignal(supportMap);
 export const [NewTicketDialogEvent$, ShowNewTicketDialog] = createSignal(board => board);
+export const [TicketItemInfoChanged$, ShowTicketItemInfo] = createSignal(
+    (ticketId, searchParams, setSearchParams) => {
+        if (ticketId && searchParams && setSearchParams) {
+            searchParams.set('SelectedTicket', ticketId);
+            setSearchParams(searchParams);
+        } else if (!ticketId && searchParams && !setSearchParams) {
+            searchParams.delete('SelectedTicket');
+            setSearchParams(searchParams);
+        }
+    return ticketId;
+});
+
+export const [useTicketItemInfo,] = bind(
+    TicketItemInfoChanged$, null
+)
 
 export const [useRequestorOptions, RequestorOptions$] = bind(
     AllUsers$.pipe(
@@ -202,21 +221,141 @@ export const [useStatusOptions, StatusOptions$] = bind(
 )
 
 export const [useSupportTickets, SupportTickets$] = bind(
-    groupid =>
-    of([]), []
-    /*SupportParams$.pipe(
-        switchMap(([board, ,]) => {
-            if (!board || !groupId) return EMPTY;
-            else if ([board, groupId].indexOf(SUSPENSE) >= 0) return EMPTY;
-            return MondayService.Support_Tickets$(boardId, groupId);
-        })
-    ), SUSPENSE*/
+    (board, group) =>
+    SupportBoard$(board).pipe(
+        switchMap(Board => {
+            if (Board === SUSPENSE)
+                return EMPTY;
+            else if (!Board)
+                return of(null);
+
+            const groups = Board.groups;
+
+            if (!groups) return of(null);
+
+            const Group = _.find(groups, g => g.title === group);
+            if (!Group) return of(null);
+
+            return FirebaseService.SubscribeToSupportGroup$(Board.id).pipe(
+                scan((acc, cur) => {
+                    let result = acc.filter(i => i.id !== cur.id);
+                    if (cur.change != 'removed' && cur.group.id === Group.id)
+                        result.push(cur);
+                    return result;
+                }, []),
+                debounceTime(100),
+            )
+        }),
+        catchError((err) => of([])),
+        tap(t => console.log("Support Tickets: ", t))
+    ), SUSPENSE
 )
 
-/*
-    TicketName, MachineName, Priority, Description, Group, MachineIP, Requestors
-*/
+const DefaultStatus = { color: '#222', label: 'New'}
+const useTicketColumn = (ticket, title) => {
+    const columns = ticket?.column_values;
+
+    if (!columns) return null;
+    const col = _.find(columns, c => c.title === title);
+    return col ? col : null;
+}
+export const useTicketContent = (ticket) => {
+    if (!ticket) return null;
+
+   return ticket.updates?.length > 0 ? ticket.updates[0] : null
+}
+
+export const useTicketReplies = (ticket) => {
+    if (!ticket) return []
+    const content = useTicketContent(ticket);
+    if (!content?.replies) return [];
+
+    return content.replies
+ }
+
+export const useTicketLastUpdated = (ticket) => {
+    if (!ticket) return null;
+    let updated_at = ticket.updated_at ? ticket.updated_at : ticket.created_at;
+    const replies = useTicketReplies(ticket);
+
+    if (replies.length > 0) {
+        const last = _.last(replies);
+        const reply_updated = last.updated_at ? last.updated_at : last.created_at;
+        
+        if (reply_updated > updated_at)
+            updated_at = reply_updated;
+    }
+
+    return moment(updated_at).format('MMM DD, YYYY')
+}
+
+
+export const useTicketStatus = (ticket) => {
+    if (!ticket) return DefaultStatus;
+    const Status = useTicketColumn(ticket, 'Status');
+    const info = Status?.additional_info;
+    if (info) {
+        try {
+            const data = JSON.parse(info);
+            if (data.label === 'New')
+                return DefaultStatus;
+            return data;
+        } catch { }
+    }
+    return DefaultStatus;
+}
+
+const DefaultPriority = {color: 'gray', label: ''}
+export const useTicketPriority = (ticket) => {
+    if (!ticket) return DefaultPriority
+    const Status = useTicketColumn(ticket, 'Priority');
+    const info = Status?.additional_info;
+
+    try {
+        const result = JSON.parse(info)
+        return result;
+    } catch { }
+    return DefaultPriority;
+    
+}
+
+export const useTicketRequestor = (ticket) => {
+    if (!ticket) return [];
+
+    const col = useTicketColumn(ticket, 'Requestor');
+    if (!col) return [];
+    const people = col.text;
+    if (people.indexOf(', ') >= 0)
+        return people.split(', ');
+    return [people];
+}
+
+export const useTicketAssignee = (ticket) => {
+    if (!ticket) return [];
+    const col = useTicketColumn(ticket, 'Assignee');
+    if (!col) return [];
+    const people = col.text;
+    if (people.indexOf(', ') >= 0)
+        return peoples.split(', ');
+    return [people];
+}
 
 export const CreateTicket = (board, ticket) => {
-
+    combineLatest([
+        SupportBoard$(board), SupportSettings$(board)
+    ]).pipe(
+        switchMap(([board, settings]) => {
+            console.log(board.id, settings, ticket);
+            return MondayService.CreateSupportItem(board.id, settings, ticket)
+        }),
+        take(1)
+    ).subscribe((res) => { 
+        if (res?.create_update?.id) {
+            SendToastSuccess("Ticket Created Successfully!");
+            ShowNewTicketDialog(null);
+            SetNewTicketName('');
+        } else {
+            SendToastError("Error Creating new Ticket!");
+        }
+    })
 }

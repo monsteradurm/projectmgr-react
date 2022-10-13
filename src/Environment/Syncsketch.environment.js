@@ -29,7 +29,7 @@ export const SyncsketchQueries = {
 
     ReviewsByName: (name) => `/syncsketch/review/?name__istartswith=${name}&active=1`,
     ItemById: (id) => `/syncsketch/item/${id}/`,
-    ThumbnailById: (id) => `/syncsketch/item/${id}/?fields=id,thumbnail_url,name`,
+    ThumbnailById: (id) => `/syncsketch/item/${id}/`,
     AllFeedback: (itemId) => `/syncsketch/frame/?item__id=${itemId}`,
     ItemsByReview: (reviewId) => `$/syncsketch/item/?reviews__id=${reviewId}&active=1`,
     ReviewsByProjectId: (id) => `/syncsketch/review/?project__id=${id}&active=1&fields=id,name,description,review_url,group`

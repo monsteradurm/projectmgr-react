@@ -5,7 +5,7 @@ import { Skeleton } from "primereact/skeleton";
 import { NavigationService } from "../../Services/Navigation.service";
 import { SUSPENSE } from "@react-rxjs/core";
 
-export const LazyThumbnail = ({thumbnail$, width, height, url, borderRadius, border, style, thumbnail}) => {
+export const LazyThumbnail = ({thumbnail$, width, height, url, borderRadius, border, style, thumbnail, onError}) => {
     const [observedThumbnail, setObservedThumbnail] = useState(null);
     const [visible, setVisible] = useState(false);
     
@@ -45,6 +45,7 @@ export const LazyThumbnail = ({thumbnail$, width, height, url, borderRadius, bor
 
     return(
         <img src={thumbnail ? thumbnail : observedThumbnail} className={url ? "pm-thumbnail-link" : null}
+            onError={(evt) => onError ? onError(evt) : () => { }}
         style={{width: width, height:height, cursor: url ? 'pointer' : null, objectFit: 'cover',
         borderRadius: borderRadius ? borderRadius : null, border: border ? border : null, ...style}} 
         onClick={onClickHandler} />

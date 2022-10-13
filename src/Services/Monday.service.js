@@ -1,13 +1,22 @@
-import { BehaviorSubject, concatMap, finalize, from, map, Observable, of, 
+import { BehaviorSubject, concatMap, EMPTY, finalize, from, map, Observable, of, 
     retry, shareReplay, switchMap, take, takeWhile, tap, timer, toArray } from "rxjs";
 import { MondayConfig, MondayGraphQL } from "../Environment/Monday.environment";
 import * as _ from 'underscore';
 import mondaySdk from 'monday-sdk-js';
 import { ToastService } from "./Toast.service";
 import { RandomRGB } from "../Helpers/Colors.helper";
+import { SendToastError } from "../App.Toasts.context";
 
 const monday = mondaySdk();
 monday.setToken(MondayConfig.token);
+
+const ParseColumnIdMap = (columns, title) => {
+  return _.reduce(columns, (acc, curr) => {
+    acc[curr.title] = curr.id;
+    return acc;
+  }, {})
+}
+
 export class MondayService {
 
     static Toaster = null;
@@ -238,8 +247,36 @@ export class MondayService {
       }
 
     
-    static CreateSupportItem = () => {
+    
+    static CreateSupportItem = (boardId, settings, ticket) => {
+      const column_ids = ParseColumnIdMap(settings); 
+      return MondayService.Execute$(MondayGraphQL.Create_Item(boardId, ticket.Group.id, ticket.TicketName)).pipe(
+        switchMap(res => {
+          if (!res?.create_item?.id) {
+            SendToastError("Could not generate support ticket (Create_Item issue)");
+            return EMPTY;
+          }
+          return of(res?.create_item?.id)
+        }),
+        switchMap(id => {
+          let values = {};
+          values[column_ids['Priority']] = ticket.Priority.index;
+          values[column_ids['Machine IP']] = ticket.MachineIP;
+          values[column_ids['Machine Name']] = ticket.MachineName;
+          values[column_ids['Requestor']] = { 
+            personsAndTeams: ticket.Requestors.map(a => ({id: a.id, kind: "person"}))
+          };
+          const mutation = MondayGraphQL.Mutate_Columns(boardId, id, values);
 
+          console.log(mutation);
+          return MondayService.Execute$(mutation).pipe(
+            map(() => id)
+          )
+        }),
+        switchMap(id => MondayService.StoreUpdate$(id, "Description: " + ticket.Description).pipe(
+          tap(console.log)
+        ))
+      )
     }
 
     static ParseSupportBoard = (board, label) => {

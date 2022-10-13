@@ -287,6 +287,7 @@ export class SyncsketchService {
         if (!id) return of(null);
         return SyncsketchService.Query$(SyncsketchQueries.ThumbnailById(id)).pipe(
             map(item => {
+                console.log("Thumbnail from Id", item);
                 if (!item?.thumbnail_url) return null;
                 
                 return item.thumbnail_url

@@ -16,7 +16,7 @@ export const TableItemThumbnail = () => {
     return (
         <div className="pm-task-thumb-container">
             <LazyThumbnail width={100} height={60} thumbnail={thumbnail} 
-            style={{borderRight: 'solid 1px black'}}
+            style={{borderRight: 'solid 1px black'}} onError={(evt) => console.log("Could not resolve Syncsketch Image", evt)}
             url={reviewLink}/>
         </div>
     )

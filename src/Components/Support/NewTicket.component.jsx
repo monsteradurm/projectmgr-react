@@ -55,6 +55,9 @@ export const NewTicketDialog = ({}) => {
     const editTicketRef = useRef();
     const dialogRef = useRef()
     
+    useEffect(() => {
+        setEditorState('');
+    }, [Board])
     const searchRequestors = (event) => {
         try {
             const optionIds = _.pluck(Requestors, 'id');
@@ -167,7 +170,7 @@ export const NewTicketDialog = ({}) => {
                     <Stack direction="horizontal" style={{padding: '30px 0 10px 10px'}}>
                         <div className="mx-auto"></div>
                         <Button label="Submit" onClick={() => CreateTicket(Board, {
-                            TicketName, MachineName, Priority: priority, Description: editorState, 
+                            TicketName, MachineName, Priority: priority, Description: editorState,
                             Group: group, MachineIP, Requestors
                         }) }
                             style={{width: 100}}/>

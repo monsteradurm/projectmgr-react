@@ -1,10 +1,10 @@
 import { FirebaseConfig } from "../Environment/Firebase.environment"
 import * as firebase from 'firebase/app';
 import { getFirestore, collection as fsCollection, doc as fsDoc, query, runTransaction, setDoc,
-    deleteDoc  } from 'firebase/firestore';
+    deleteDoc, QuerySnapshot   } from 'firebase/firestore';
 import { collectionChanges, doc, collection } from 'rxfire/firestore';
 import * as _ from 'underscore';
-import { BehaviorSubject, concatAll, concatMap, EMPTY, expand, firstValueFrom, from, map, mergeMap, reduce, skip, switchMap, take, tap, toArray } from "rxjs";
+import { BehaviorSubject, concatAll, concatMap, EMPTY, expand, filter, firstValueFrom, from, map, mergeMap, reduce, skip, switchMap, take, tap, toArray } from "rxjs";
 import { ajax } from "rxjs/ajax";
 import { ReverseProxy } from "../Environment/proxy.environment";
 import moment from 'moment';
@@ -31,6 +31,8 @@ export class FirebaseService {
                 take(1)
             );
     }
+
+
     static AllDocsFromCollectionGroup$ (name, subcollection) {
         return FirebaseService.AllDocsFromCollection$(name).pipe(
             take(1),
@@ -66,7 +68,33 @@ export class FirebaseService {
     }
 
     static SubscribeToCollection$(collection) {
-        return collectionChanges(fsCollection(FirebaseService.db, collection));
+        return collectionChanges(fsCollection(FirebaseService.db, collection))
+    }
+
+    static SubscribeToSupportGroup$(boardId) {
+        console.log("Subscribing to Support Group", boardId);
+        const collection_name = `SupportItems/${boardId}/items`;
+
+        const collectionRef = fsCollection(FirebaseService.db, collection_name);
+
+        const exists$ = collection(collectionRef).pipe(
+            map(c => c?.length > 0)
+        )
+        return exists$.pipe(
+            switchMap(exists => { 
+                console.log("HERE", exists);
+                if (!exists)
+                    throw 'EMPTY';
+
+                return collectionChanges(collectionRef).pipe(
+                    concatMap(reviewArr => from(reviewArr).pipe(
+                        concatMap(change => FirebaseService.GetDocument$(collection_name, change.doc.id).pipe(
+                            map(d => d.data()),
+                        )
+                    )),
+                )
+            )
+        }))
     }
     static SubscribeToDocument$(path) {
         return doc(fsDoc(FirebaseService.db, path));
@@ -179,6 +207,13 @@ export class FirebaseService {
     static Project$(projectId) {
         return doc(fsDoc(FirebaseService.db, 'ProjectManager/' + projectId)).pipe(
             map(doc => doc.exists ? doc.data() : null),
+            take(1)
+        )
+    }
+
+    static DocumentExists$(path) {
+        return doc(fsDoc(FirebaseService.db, path)).pipe(
+            map(doc => doc.exists()),
             take(1)
         )
     }

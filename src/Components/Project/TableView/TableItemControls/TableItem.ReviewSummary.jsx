@@ -10,15 +10,12 @@ export const TableItemReviewSummary = () => {
     const ReviewName = useReviewName(CurrentReviewId);
     const Timeline = useAssignedTimeline(BoardItemId, CurrentReviewId);
     const [TimelineHTML, setTimelineHTML] = useState(null);
+
     useEffect(() => {
         const tl = formatTimeline(Timeline);
 
-        if (tl === 'No Timeline')
-            setTimelineHTML(
-                <div className="pm-task-latest-timeline">{tl}</div>
-            )
-        else setTimelineHTML(
-            <div className="pm-task-latest-timeline"> ({tl})</div>
+        setTimelineHTML(
+            <div className="pm-task-latest-timeline">{tl}</div>
         )
     }, [Timeline])
 

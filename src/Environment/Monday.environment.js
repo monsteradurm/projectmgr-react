@@ -174,6 +174,12 @@ export const MondayGraphQL = {
           }`
     },
 
+    Create_Item: (board_id, group_id, item_name) => `
+      mutation {
+        create_item (board_id: ${board_id}, group_id: "${group_id}", item_name: "${item_name}") {
+            id
+        }
+      }`,
     Create_SubItem: (itemId, name) => 
         `mutation {
             create_subitem (parent_item_id: ${itemId}, item_name: "${name}") {
