@@ -65,7 +65,7 @@ export const SupportFilterBar = ({Board, Group}) => {
                     <FormControl
                             value={Search}
                             ref={searchRef}
-                            onChange={(e) => SetSupportSearchFilter(e.target.value, searhParams, setSearchParams)}
+                            onChange={(e) => SetSupportSearchFilter(e.target.value, searchParams, setSearchParams)}
                             placeholder="Search Tickets..."
                             style={{width:'400px', display: 'unset', borderRadius: 0, marginRight: 20}}
                         />
