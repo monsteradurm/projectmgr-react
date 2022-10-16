@@ -11,6 +11,7 @@ import { useSearchParams } from "react-router-dom";
 import { SupportUsers } from "./Support.Users";
 import { Column, DataTable } from "primereact";
 import moment from 'moment';
+import { onArtistClick } from "../Project/Overview.filters";
 
 const LastUpdatedTemplate = (ticket) => {
     const LastUpdate = useTicketLastUpdated(ticket);
@@ -111,7 +112,30 @@ export const Tickets = ({Board, Group}) => {
     const SortBy = useSupportSortBy();
     const SortByReversed = useSupportSortReversed();
     const Search = useSupportSearchFilter();
+    const [FilteredRequestors, SetFilteredRequestors] = useState([]);
+    const [FilteredAssignees, SetFilteredAssignees] = useState([]);
 
+    useEffect(() => {
+        let req = searchParams.get('Requestors');
+        let ass = searchParams.get('Assignees');
+
+        if (!req) req = [];
+        else {
+            if (req.indexOf(',') > 0)
+                req = req.split(',');
+            else req = [req];
+        }
+        if (!ass) ass = [];
+        else {
+            if (ass.indexOf(',') > 0)
+                ass = ass.split(',');
+            else ass = [ass]
+        }
+        if (req !== FilteredRequestors) 
+            SetFilteredRequestors(req);
+        if (ass !== FilteredAssignees) 
+            SetFilteredAssignees(ass);
+    }, [searchParams])
     const onRowExpand = (evt) => {
         if (!evt?.data?.id)
             return;
@@ -135,6 +159,17 @@ export const Tickets = ({Board, Group}) => {
             const search = Search.toLowerCase();
             filtered = filtered.filter(t => JSON.stringify(t).toLowerCase().indexOf(search) >= 0)
         }
+        if (FilteredRequestors?.length > 0)
+            filtered = filtered.filter(t => {
+               const requestors = useTicketRequestor(t).map(r => r.replace(/\s/g, ''));
+               return !!_.find(FilteredRequestors, r => requestors.indexOf(r) >= 0)
+            })
+        if (FilteredAssignees?.length > 0)
+            filtered = filtered.filter(t => {
+                const assignees = useTicketAssignee(t).map(r => r.replace(/\s/g, ''));
+                return !!_.find(FilteredAssignees, r => assignees.indexOf(r) >= 0)
+            })
+
         //'Last Updated', 'Title', 'Priority', 'Status', 'Machine Name'
         filtered = _.sortBy(filtered, (t) => {
             switch(SortBy) {
@@ -152,7 +187,7 @@ export const Tickets = ({Board, Group}) => {
             filtered = filtered.reverse();
 
         setTickets(filtered);
-    }, [AllTickets, Search, SortByReversed, SortBy])
+    }, [AllTickets, Search, SortByReversed, SortBy, FilteredRequestors, FilteredAssignees])
 
     useEffect(() => {
         if (!SelectedTicketId) {
@@ -190,9 +225,24 @@ export const Tickets = ({Board, Group}) => {
 
             return (
                 <>
-                <div className="pm-tag-filter" style={{color: '#888', fontWeight: 400, fontSize: 20}}>
-                    {Tickets?.length} Tickets...
-                </div>
+                <Stack direction="horizontal" gap={3}>
+                    <div className="pm-tag-filter" style={{color: '#888', fontWeight: 400, fontSize: 20}}>
+                        {Tickets?.length} Tickets...
+                    </div>
+                    {
+                        FilteredRequestors.map(r => <div key={"FilteredRequestor_" + r} className="pm-tag-filter"
+                        onClick={(evt) => onArtistClick(r, searchParams, setSearchParams, true, 'Requestors')}
+                            style={{color: '#888', fontWeight: 400, fontSize: 20}}>#{r}
+                        </div>)    
+                    }
+
+                    {
+                        FilteredAssignees.map(r => <div key={"FilteredAssignee_" + r} className="pm-tag-filter" 
+                        onClick={(evt) => onArtistClick(r, searchParams, setSearchParams, true, 'Assignees')}
+                            style={{color: '#888', fontWeight: 400, fontSize: 20}}>#{r}
+                        </div>)    
+                    }
+                </Stack>
                 <DataTable value={Tickets} style={{marginBottom: 30, paddingLeft: 10, paddingRight: 10}} 
                     onRowToggle={(e) => setExpandedRows(e.data)}
                     rowExpansionTemplate={rowExpansionTemplate} dataKey="id" expandedRows={expandedRows}>
@@ -208,8 +258,6 @@ export const Tickets = ({Board, Group}) => {
                     <Column header="Title" body={TitleTemplate} className="ticket-title"></Column>     
                     
                     <Column header="Status" body={StatusTemplate} className="ticket-status"></Column>
-                    <Column header="Machine Name" body={MachineNameTemplate} className="ticket-center"></Column>
-                    <Column header="Machine IP" body={MachineIPTemplate} className="ticket-center"></Column> 
                     <Column header="Replies" body={RepliesTemplate} className="ticket-center"></Column>
                     <Column header="Last Updated" body={LastUpdatedTemplate} className="ticket-center"></Column>
                     <Column header="Assigned" body={AssigneeTemplate} className="ticket-assignee"></Column>

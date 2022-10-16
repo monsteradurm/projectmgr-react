@@ -113,6 +113,12 @@
         border-color: black !important;
     }
 }
+.pm-tag-filter {
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 20px;
+    color: #888 !important;
+}
 
 .pm-supportItem {
     border: solid 1px black;
@@ -128,6 +134,10 @@
 .p-row-toggler {
     box-shadow: none !important;
     background: transparent !important;
+    opacity: 0.45;
+}
+.p-row-toggler:hover {
+    opacity: 1;
 }
 .p-column-header-content, td {
     justify-content: center;

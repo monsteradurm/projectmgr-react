@@ -360,7 +360,7 @@ export const useTicketRequestor = (ticket) => {
     return [people];
 }
 
-export const SupportSortOptions = ['Last Updated', 'Title', 'Type', 'Priority', 'Status', 'Machine Name']
+export const SupportSortOptions = ['Last Updated', 'Title', 'Type', 'Priority', 'Status']
 export const [SupportSortByChanged$, SetSupportSortBy] = createSignal(n => n);
 export const [useSupportSortBy, ] = bind(
     SupportSortByChanged$, 'Last Updated'

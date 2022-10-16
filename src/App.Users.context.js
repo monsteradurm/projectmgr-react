@@ -360,7 +360,7 @@ const [useGroupedUsers, GroupedUsers$] = bind(
             const result = []
             
             keys.forEach(k => {
-                const label = (k[0] + ' - ' + k[1]).toUpperCase();
+                const label = (k[0] + ' - ' + k[k.length - 1]).toUpperCase();
                 const group = users.filter(u => k.indexOf(u[0]) >= 0).sort().map(u => allUsers[u]);
                 result.push({label, users: group}) 
             })
