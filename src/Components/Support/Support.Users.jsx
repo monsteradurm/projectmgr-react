@@ -30,7 +30,7 @@ export const SupportUsers = ({artists, color, id, align, searchKey}) => {
         return <></>
         
     return (
-        <Stack direction="horizontal" style={{width: 200}}>
+        <Stack direction="horizontal" style={{width: 150}}>
             {
                 align === "left" && <div className="mx-auto"></div>
             }

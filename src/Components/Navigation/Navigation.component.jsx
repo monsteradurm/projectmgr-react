@@ -1,6 +1,6 @@
 import { Dropdown, Navbar, Container, Stack } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faList, faUsers, faFilm, faCogs, faHome, faTruckMedical } from '@fortawesome/free-solid-svg-icons';
+import { faList, faUsers, faFilm, faCogs, faHome, faTruckMedical, faLink } from '@fortawesome/free-solid-svg-icons';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { FirebaseService } from '../../Services/Firebase.service';
 import { NestedDropdown } from '../General/NestedDropDown.component';
@@ -63,6 +63,7 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
         window.open('https://liquidanimation.atlassian.net/wiki/spaces/LAT0003/overview','_blank');
     }
     
+    const onTabOpen = (url) => window.open(url, '_blank');
     return (
         <>
             <Navbar expand="lg" bg="dark" ref={navRef} style={{height: 50}}>
@@ -94,8 +95,20 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                                                         return (
                                                             <NestedDropdown key={project.name} title={project.name}>
                                                                 <ProjectDropdown projectId={project.name} MyBoards={MyBoards}/>
-                                                                <Dropdown.Divider />
-                                                                <Dropdown.Item onClick={() => SendToastWarning("not Yet Implemented..")}>Confluence</Dropdown.Item>
+                                                                <Dropdown.Divider /> {
+                                                                    project?.nesting?.length > 0 &&
+                                                                    <Dropdown.Item onClick={() => onTabOpen(
+                                                                        `https://liquidanimation.atlassian.net/wiki/spaces/${
+                                                                            project.nesting.length > 1 ? (
+                                                                                project.nesting[1].indexOf('_') > 0 ? 
+                                                                                project.nesting[1].split('_')[0] : project.nesting[1]
+                                                                            ) : (
+                                                                                project.nesting[0].indexOf('_') > 0 ? 
+                                                                                project.nesting[0].split('_')[0] : project.nesting[1]
+                                                                            )
+                                                                        }/overview`)}>Confluence</Dropdown.Item>
+                                                                }
+                                                                
                                                                 <Dropdown.Item onClick={() => SendToastWarning("not Yet Implemented..")}>Reference</Dropdown.Item>
                                                             </NestedDropdown>)
                                                         }
@@ -157,6 +170,43 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                                     }
                                 </Dropdown.Menu>
                         </Dropdown>    
+                        <Dropdown autoClose="outside">
+                            <Dropdown.Toggle style={{fontSize: 20}}>
+                                <FontAwesomeIcon icon={faLink}></FontAwesomeIcon>
+                                <Dropdown.Menu variant="dark">
+                                    <NestedDropdown title="Disney">              
+                                        <Dropdown.Item onClick={() => onTabOpen('https://fastpass-wdi.disney.com/aspera/faspex')}>Fast Pass</Dropdown.Item>
+                                        <Dropdown.Item onClick={() => onTabOpen('https://myid.disney.com/')}>My ID</Dropdown.Item>
+                                        <Dropdown.Item onClick={() => onTabOpen('https://api.ibmaspera.com/api/v1/oauth2/disneysendit/login')}>Send It</Dropdown.Item>
+                                        <Dropdown.Item onClick={() => onTabOpen('https://disney.slack.com')}>Slack</Dropdown.Item>
+                                    </NestedDropdown>
+                                    <NestedDropdown title="Lego">
+                                    <Dropdown.Item onClick={() => onTabOpen('https://legogroup.sharepoint.com/')}>SharePoint</Dropdown.Item>
+                                    </NestedDropdown>
+                                    <NestedDropdown title="Liquid">
+                                        <NestedDropdown title="Box">
+                                            <Dropdown.Item onClick={() => onTabOpen('https://liquidanimation.app.box.com')}>Home</Dropdown.Item>
+                                            <Dropdown.Item onClick={() => onTabOpen('https://liquidanimation.box.com/s/hoxxs0m9ytrc6qfpk82r4jl5n5whpqf1')}>Utilities</Dropdown.Item>
+                                        </NestedDropdown>
+                                        <Dropdown.Item onClick={() => onTabOpen('https://liquidanimation.monday.com')}>Monday</Dropdown.Item>
+                                        <Dropdown.Item onClick={() => onTabOpen('http://mail.liquidanimation.com')}>Outlook</Dropdown.Item>
+                                        <Dropdown.Item onClick={() => onTabOpen('https://liquidanimation.slack.com')}>Slack</Dropdown.Item>
+                                        <Dropdown.Item  
+                                            onClick={() => onTabOpen('https://teams.microsoft.com')}>Teams</Dropdown.Item>
+                                    </NestedDropdown>
+                                    <NestedDropdown title="Technical">
+                                        <Dropdown.Item onClick={() => onTabOpen('https://aad.portal.azure.com/')}>Azure Portal</Dropdown.Item>
+                                        <Dropdown.Item onClick={() => onTabOpen('https://cloud.digitalocean.com/login?redirect_url=https%3A%2F%2Fcloud.digitalocean.com%2Flanding')}>Digital Ocean</Dropdown.Item>
+                                        <Dropdown.Item onClick={() => onTabOpen('https://my.fastcomet.com/clientarea.php')}>Fast Comet</Dropdown.Item>
+                                        <Dropdown.Item onClick={() => onTabOpen('https://firebase.google.com')}>Firebase</Dropdown.Item>
+                                        <Dropdown.Item onClick={() => onTabOpen('https://www.hostinger.com/cpanel-login')}>Hostinger</Dropdown.Item>
+                                    </NestedDropdown>
+                                    <Dropdown.Divider />
+                                    <Dropdown.Item onClick={() => onTabOpen('https://jsonformatter.curiousconcept.com')}>JSON Formatter</Dropdown.Item>
+                                    
+                                </Dropdown.Menu>
+                            </Dropdown.Toggle>
+                        </Dropdown>
                         <Dropdown autoClose="outside">
                                 <Dropdown.Toggle style={{fontSize:'20px'}}><FontAwesomeIcon icon={faCogs} /></Dropdown.Toggle>
                                 <Dropdown.Menu variant="dark">

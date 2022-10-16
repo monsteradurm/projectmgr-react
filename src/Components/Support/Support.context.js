@@ -200,6 +200,8 @@ const ParseStatusOptions = (options) => {
     );
 }
 
+export const useTypeOptions = () => ['Problem', 'Incident', 'Question', 'Task'];
+
 export const [usePriorityOptions, PriorityOptions$] = bind(
     board =>
     PriorityColumn$(board).pipe(
@@ -300,7 +302,11 @@ export const useTicketLastUpdated = (ticket) => {
     return moment(updated_at).format('MMM DD, YYYY HH:mm')
 }
 
-
+export const useTicketType = (ticket) => {
+    if (!ticket) return DefaultType;
+    const Type = useTicketColumn(ticket, 'Type');
+    return Type?.text;
+}
 export const useTicketStatus = (ticket) => {
     if (!ticket) return DefaultStatus;
     const Status = useTicketColumn(ticket, 'Status');
@@ -354,7 +360,7 @@ export const useTicketRequestor = (ticket) => {
     return [people];
 }
 
-export const SupportSortOptions = ['Last Updated', 'Title', 'Priority', 'Status', 'Machine Name']
+export const SupportSortOptions = ['Last Updated', 'Title', 'Type', 'Priority', 'Status', 'Machine Name']
 export const [SupportSortByChanged$, SetSupportSortBy] = createSignal(n => n);
 export const [useSupportSortBy, ] = bind(
     SupportSortByChanged$, 'Last Updated'

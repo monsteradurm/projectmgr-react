@@ -3,7 +3,9 @@ import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { useEffect, useRef, useState } from "react";
 import { Stack } from "react-bootstrap";
-import { CreateTicket, SetMachineIP, SetMachineName, SetNewTicketName, SetRequestors, ShowNewTicketDialog, useMachineIP, useMachineName, useNewTicketDialog, useNewTicketName, usePriorityOptions, useRequestorOptions, useRequestors, useSupportGroups } from "./Support.context";
+import { CreateTicket, SetMachineIP, SetMachineName, SetNewTicketName, SetRequestors, 
+    ShowNewTicketDialog, useMachineIP, useMachineName, useNewTicketDialog, useNewTicketName, 
+    usePriorityOptions, useRequestorOptions, useRequestors, useSupportGroups, useTypeOptions } from "./Support.context";
 import { DialogHeader } from "../General/DialogHeader";
 import "./Support.component.scss"
 import { ScrollPanel } from "primereact/scrollpanel";
@@ -42,11 +44,13 @@ export const NewTicketDialog = ({}) => {
     const MachineIP = useMachineIP();
     const GroupOptions = useSupportGroups(Board);
     const PriorityOptions = usePriorityOptions(Board);
+    const TypeOptions = useTypeOptions();
     const RequestorOptions = useRequestorOptions();
     const Requestors = useRequestors();
     const [filteredOptions, setFilteredOptions] = useState([]);
-    const [priority, setPriority] = useState(null);
+    const [priority, setPriority] = useState(_.find(PriorityOptions, p => p.label === 'Normal'));
     const [group, setGroup] = useState(null);
+    const [type, setType] = useState(null);
     const background = priority ? priority.color : 'black';
     const [editorState, setEditorState] = useState(
         ''
@@ -124,7 +128,11 @@ export const NewTicketDialog = ({}) => {
                                 <label htmlFor="Priority">Priority</label> 
                             </span>
                         }
-                        
+                        <span className="p-float-label">
+                            <Dropdown id="Type" value={type} options={TypeOptions} onChange={(e) => setType(e.value)}
+                            placeholder="Select A Type"></Dropdown>
+                            <label htmlFor="Type">Type</label> 
+                        </span>
                         <span className="p-float-label" style={{width: '100%'}}>
                             <InputText id="NewTicketName" value={TicketName}  
                                 style={{width:'100%'}} onChange={(e) => SetNewTicketName(e.target.value)}
