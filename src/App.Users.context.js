@@ -372,6 +372,14 @@ const [useGroupedUsers, GroupedUsers$] = bind(
 // retrieve active tab from id
 //const [useMyWorkspaces, ActiveTab$] = bind((id) => ActiveTabById(id), SUSPENSE);
 
+const [useAllUsersByGraphId, ] = bind(
+    AllUsers$.pipe(
+        map(users => Object.entries(users).map(
+            ([key, obj]) => [obj.graph.id, obj]) 
+        ),
+        map(users => Object.fromEntries(users)),
+    ), SUSPENSE
+) 
 
 export {
     AllUsers$,
@@ -394,5 +402,6 @@ export {
     useIsAdmin,
     IsAdmin$,
     useManagers,
-    refreshUsersCache
+    refreshUsersCache,
+    useAllUsersByGraphId
 }

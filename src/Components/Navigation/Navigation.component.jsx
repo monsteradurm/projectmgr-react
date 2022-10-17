@@ -18,6 +18,7 @@ import { useHomeMenu } from '../Home/Home.context';
 import { SendToastSuccess, SendToastWarning } from '../../App.Toasts.context';
 import { UserAvatar } from '../General/UserAvatar';
 import { ShowNewTicketDialog, useSupportOptions } from '../Support/Support.context';
+import { useApplicationForms, useApplicationGroups } from '../Applications/Applications.context';
 
 
 const ClearSyncsketchProjectCache = () => {
@@ -45,6 +46,7 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
     const Photo = useMyAvatar();
     const isAdmin = useIsAdmin();
     const Managers = useManagers();
+    const ApplicationGroups = useApplicationGroups();
     const SupportOptions = useSupportOptions();
     useEffect(() => {
         if (MyWorkspaces === SUSPENSE || !MyWorkspaces)
@@ -131,8 +133,21 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                                 <Dropdown.Item key="teams" 
                                     onClick={() => SetCurrentRoute('/Users?View=Teams')}>Teams</Dropdown.Item>
                                 <Dropdown.Divider />
-                                <Dropdown.Item key="applications" 
-                                    onClick={() => SetCurrentRoute('/Applications')}>Applications</Dropdown.Item>
+                                <NestedDropdown title="Applications">
+                                    {
+                                        ApplicationGroups.map(a => 
+                                            <NestedDropdown key={"ApplicationFormGroup_" + a.group} title={a.group}>
+                                            {
+                                                a.forms.map(f => <Dropdown.Item key={"ApplicationForm_" + f.id}
+                                                    onClick={() => SetCurrentRoute('/Applications?Form=' + f.id)}>
+                                                        {f.nesting[1]}
+                                                    </Dropdown.Item>
+                                                )
+                                            }
+                                            </NestedDropdown>
+                                        )
+                                    }
+                                </NestedDropdown>
                             </Dropdown.Menu>
                         </Dropdown>
 

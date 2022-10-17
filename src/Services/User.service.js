@@ -40,9 +40,8 @@ const UserPhoto$ = (userId, token) => {
     )
 }
 
-
 export {
     UserPhoto$,
     FetchAllUsers$,
-    Me$
+    Me$,
 };

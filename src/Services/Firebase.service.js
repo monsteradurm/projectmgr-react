@@ -4,11 +4,10 @@ import { getFirestore, collection as fsCollection, doc as fsDoc, query, runTrans
     deleteDoc, QuerySnapshot   } from 'firebase/firestore';
 import { collectionChanges, doc, collection } from 'rxfire/firestore';
 import * as _ from 'underscore';
-import { BehaviorSubject, concatAll, concatMap, EMPTY, expand, filter, firstValueFrom, from, map, mergeMap, reduce, skip, switchMap, take, tap, toArray } from "rxjs";
+import { BehaviorSubject, concatAll, concatMap, EMPTY, expand, scan, firstValueFrom, from, map,debounceTime, mergeMap, reduce, skip, switchMap, take, tap, toArray } from "rxjs";
 import { ajax } from "rxjs/ajax";
 import { ReverseProxy } from "../Environment/proxy.environment";
 import moment from 'moment';
-
 const app = firebase.initializeApp(FirebaseConfig);
 export class FirebaseService {
 
@@ -300,6 +299,31 @@ export class FirebaseService {
         )
 
         return result;
+    }
+
+    static ApplicationResponseData$ = (form_id) => {
+        const col = 'Typeforms/' + form_id + '/responses';
+        return FirebaseService.SubscribeToCollection$(col).pipe(
+            concatMap(reviewArr => from(reviewArr).pipe(
+                concatMap(change => FirebaseService.GetDocument$(col, change.doc.id).pipe(
+                            map(doc => ({...doc.data(), change: change.type, response_id: change.doc.id}))
+                        )
+                    ),
+                )
+            ),
+            scan((acc, cur) => {
+                let result = acc.filter(r => r.response_id !== cur.response_id);
+                if (cur?.change === 'removed')
+                    return result;
+                return [...result, cur]
+            }, []),
+            debounceTime(250),
+            map(data => _.reduce(data, (acc, cur) => {
+                    acc[cur.response_id] = cur;
+                    return acc;
+                }, {})
+            )
+        )
     }
 }
 

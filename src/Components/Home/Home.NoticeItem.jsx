@@ -8,8 +8,6 @@ import { useNoticeContextMenu } from "./Home.Notices.context";
 export const NoticeItem = ({notice}) => {
     const NoticeContextMenuRef = useRef();
     const NoticeContextMenu = useNoticeContextMenu(notice.id);
-
-    console.log("NOTICE CONTEXT MENU", NoticeContextMenu);
     if (!notice) return <></>
 return (
     <Stack direction="vertical" gap={2} className="pm-notice" key={notice.id} 

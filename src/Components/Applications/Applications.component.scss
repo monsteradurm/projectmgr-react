@@ -1,0 +1,75 @@
+
+.pm-response-sidebar {
+    .p-button {
+        background: black;
+    }
+    
+    .p-button:hover {
+        background: #555;
+    }
+
+        
+    .speech-bubble {
+        position: relative;
+        border-radius: .4em;
+        color: white !important;
+        width: fit-content;
+        background: #333;
+        padding: 15px 25px;
+        margin: 5px;
+    }
+
+    .comment-header {
+        border-bottom: solid 2px #964cc9;
+        padding-bottom: 5px;
+        margin-bottom: 5px;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .comment-note {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}
+.response-table {
+    padding: 0px 40px;
+    margin-bottom: 40px;
+    .pi-star {
+        opacity: 0.3;
+    }
+    .p-rating.no-rating > .p-rating-item > .p-rating-icon {
+        color: #555 !important;
+    }
+    .p-rating > .p-rating-item > .p-rating-icon {
+        color: rgb(150, 76, 201) !important;
+    }
+
+    td.response-rating {
+       display:flex;
+    }
+
+    td.response-resume, td.response-cv, td.response-experience, td.response-website,
+    td.response-submitted, td.response-comment_count,
+    td.response-email, td.response-phone {
+        text-align: center !important;
+    }
+    td.response-name:hover {
+        color: rgb(150, 76, 201);
+    }
+    
+    th.response-location > div, th.response-name > div {
+        text-align: left !important; 
+        justify-content: start !important;
+    }
+
+    div.response-link {
+        color: rgb(150, 76, 201) !important;
+        font-weight: 600;
+        text-decoration: underline;
+        cursor: pointer;
+        font-size: 20px;
+    }
+    div.response-link:hover {
+        filter:brightness(1.5) saturate(0.3)
+    }
+}
