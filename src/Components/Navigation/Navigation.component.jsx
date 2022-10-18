@@ -135,7 +135,7 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                                     onClick={() => SetCurrentRoute('/Users?View=Teams')}>Teams</Dropdown.Item>
                                 
                                 {
-                                    !isReviewer && <>
+                                    isReviewer && <>
                                         <Dropdown.Divider />
                                         <NestedDropdown title="Applications">
                                         {
