@@ -254,8 +254,10 @@ const [useMondayUser, MondayUser$] = bind(
     combineLatest([LoggedInUser$, AllUsers$, SimulatedUser$]).pipe(
         switchMap(([user, allUsers, simUser]) => {
             if (!user || !allUsers) return EMPTY;
+            const name = standardizeName(user.displayName);
+            
+            let result = allUsers[name];
 
-            let result = allUsers[user.displayName.toLowerCase()];
             if (simUser?.monday?.name && allUsers[simUser.monday.name.toLowerCase()]) {
                 result = allUsers[simUser.monday.name.toLowerCase()];
             }
