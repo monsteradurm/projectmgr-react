@@ -267,7 +267,24 @@ const [useMondayUser, MondayUser$] = bind(
 
 
 const [useManagers, Managers$] = bind(
+    MondayService.ApplicationsTeam$, []
+)
+
+const [useApplicationTeam, ApplicationTeam$] = bind(
     MondayService.ManagementTeam$, []
+)
+
+const [useCanReviewApplications, ] = bind(
+    combineLatest([LoggedInUser$, ApplicationTeam$]).pipe(
+        map(([user, reviewers]) => {
+            if (!user || !reviewers)
+                return false;
+
+            const u = user.displayName;
+            const mgt = _.pluck(reviewers, 'name');
+            return mgt.indexOf(u) >= 0
+        }),
+    ), false
 )
 
 const [useIsAdmin, IsAdmin$,] = bind(
@@ -403,5 +420,6 @@ export {
     IsAdmin$,
     useManagers,
     refreshUsersCache,
-    useAllUsersByGraphId
+    useAllUsersByGraphId,
+    useCanReviewApplications
 }

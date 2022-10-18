@@ -361,11 +361,17 @@ export class MondayService {
         )
       }
 
+      static ApplicationsTeam$ = MondayService.Execute$(MondayGraphQL.ApplicationsTeam).pipe(
+        take(1),
+        map(t => t?.teams ? t.teams : []),
+        map(teams => teams.length > 0 ? teams[0] : ({users: []})),
+        map(team => team?.users ? team.users : []),
+      )
+
       static ManagementTeam$ = MondayService.Execute$(MondayGraphQL.ManagementTeam).pipe(
         take(1),
         map(t => t?.teams ? t.teams : []),
         map(teams => teams.length > 0 ? teams[0] : ({users: []})),
         map(team => team?.users ? team.users : []),
-        tap(t => console.log("MANAGEMENT TEAM", t))
       )
 }

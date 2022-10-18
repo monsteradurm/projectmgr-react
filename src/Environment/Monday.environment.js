@@ -133,7 +133,15 @@ export const MondayGraphQL = {
         }
       }
     }`,
-
+    
+    ApplicationsTeam: `query{ teams (ids:717652) {
+      id
+      name
+      users {
+        id
+        name
+      }
+    }}`,
     ManagementTeam: `query{ teams (ids:434736) {
       id
       name

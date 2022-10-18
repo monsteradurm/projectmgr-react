@@ -12,7 +12,7 @@ import { Avatar } from 'primereact/avatar';
 import { SetCurrentRoute, useAllUsers, useMyAvatar, useMyBoards, usePrimaryColor, useTitles } from '../../Application.context';
 import { DelayBy } from '../General/DelayBy';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { refreshUsersCache, SimulateUser, useGroupedUsers, useIsAdmin, useManagers, useMyWorkspaces, useUserPhotoByName } from '../../App.Users.context';
+import { refreshUsersCache, SimulateUser, useCanReviewApplications, useGroupedUsers, useIsAdmin, useManagers, useMyWorkspaces, useUserPhotoByName } from '../../App.Users.context';
 import { SUSPENSE } from '@react-rxjs/core';
 import { useHomeMenu } from '../Home/Home.context';
 import { SendToastSuccess, SendToastWarning } from '../../App.Toasts.context';
@@ -46,6 +46,7 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
     const Photo = useMyAvatar();
     const isAdmin = useIsAdmin();
     const Managers = useManagers();
+    const isReviewer = useCanReviewApplications();
     const ApplicationGroups = useApplicationGroups();
     const SupportOptions = useSupportOptions();
     useEffect(() => {
@@ -132,22 +133,28 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                                     onClick={() => SetCurrentRoute('/Users?View=Users')}>Users</Dropdown.Item>
                                 <Dropdown.Item key="teams" 
                                     onClick={() => SetCurrentRoute('/Users?View=Teams')}>Teams</Dropdown.Item>
-                                <Dropdown.Divider />
-                                <NestedDropdown title="Applications">
-                                    {
-                                        ApplicationGroups.map(a => 
-                                            <NestedDropdown key={"ApplicationFormGroup_" + a.group} title={a.group}>
-                                            {
-                                                a.forms.map(f => <Dropdown.Item key={"ApplicationForm_" + f.id}
-                                                    onClick={() => SetCurrentRoute('/Applications?Form=' + f.id)}>
-                                                        {f.nesting[1]}
-                                                    </Dropdown.Item>
-                                                )
-                                            }
-                                            </NestedDropdown>
-                                        )
-                                    }
-                                </NestedDropdown>
+                                
+                                {
+                                    !isReviewer && <>
+                                        <Dropdown.Divider />
+                                        <NestedDropdown title="Applications">
+                                        {
+                                            ApplicationGroups.map(a => 
+                                                <NestedDropdown key={"ApplicationFormGroup_" + a.group} title={a.group}>
+                                                {
+                                                    a.forms.map(f => <Dropdown.Item key={"ApplicationForm_" + f.id}
+                                                        onClick={() => SetCurrentRoute('/Applications?Form=' + f.id)}>
+                                                            {f.nesting[1]}
+                                                        </Dropdown.Item>
+                                                    )
+                                                }
+                                                </NestedDropdown>
+                                            )
+                                        }
+                                        </NestedDropdown>
+                                    </>
+                                }
+                                
                             </Dropdown.Menu>
                         </Dropdown>
 

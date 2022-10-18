@@ -8,7 +8,7 @@ import { fromFetch } from "rxjs/fetch";
 const httpOptions = {
     'Accept': 'application/json, text/plain, */*',
       'Content-Type':  'application/json',
-      'Authorization': `Bearer ` + TypeformConfig.token
+      'Authorization': `Bearer ` + TypeformConfig._T
 };
 
 export class TypeformService {
