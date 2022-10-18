@@ -1,5 +1,5 @@
 import { bind, SUSPENSE } from "@react-rxjs/core";
-import { combineLatest, concatMap, EMPTY, map, merge, of, switchMap, tap } from "rxjs";
+import { catchError, combineLatest, concatMap, EMPTY, map, merge, of, switchMap, tap } from "rxjs";
 import { TypeformService } from "../../Services/Typeform.service";
 import * as _ from 'underscore';
 import { createSignal } from "@react-rxjs/utils";
@@ -53,6 +53,7 @@ export const [useApplicationForms, ApplicationForms$] = bind(
                 nesting = i.title.split('/');
             return {...i, nesting} ;
         }) : null),
+        catchError(err => of([]))
     ), []
 )
 
