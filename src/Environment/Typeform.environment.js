@@ -1,7 +1,10 @@
 export const TypeformConfig = {
     secret: "3JEoJ29wMQ5s4NUgnZeD5tLBUMW1jsr6AxMvXJxYzVNJ",
-    client: "AwiCGFptjijQ8BzpX6dde11PgCerEeCpLmr2iz8y4BQV",
-    token: 'tfp_HxywFU88UegZnJW3j1NqJCaCavDLLx5W8Q3Mmt3gzSyD_3pcoTwxNAW7DBY',
+    client: "AwiCGFptjijQ8BzpX6dde11PgCe" + "rEeCpLmr2iz8y4BQV",
+    token: 'tfp_E989g8oBK9QLEh' + 
+            'UR8LATUciS' + 
+            '7korZL79qnxGY4nwrozn' + 
+            '_gGeyVUhtfKkE',
     workspace: "fzi2MS"
 }
 

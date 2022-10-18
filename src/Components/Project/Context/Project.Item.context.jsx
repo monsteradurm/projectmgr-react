@@ -137,6 +137,22 @@ const [BoardItemColumnMap, BoardItemColumnMap$] = partitionByKey(
     (column$) => column$.pipe(map(x => x.id))
 )
 
+const [useBoardItemCode, BoardItemCode$] = bind(
+    id =>
+    of(id).pipe(
+        switchMap(id => {
+            if (id === null)
+                return of([]);
+            else if (id === SUSPENSE)
+                return of(SUSPENSE);
+            return BoardItem$(id).pipe(
+                map((item) => item?.ItemCode),
+                map(code => code?.text),
+                map(code => code ? code : null)
+            )
+        })
+    ), null
+)
 // retrieve id from column title
 const [useBoardItemColumnId, BoardItemColumnId$] = bind(
     (title) => BoardItemColumnMap(title), SUSPENSE
@@ -490,7 +506,7 @@ export {
     BoardItem$,
     GetPersonValues,
     GetItemTags,
-
+    useBoardItemCode,
     SetBoardItemStatus,
     AddBoardItemBadge,
     RemoveBoardItemBadge

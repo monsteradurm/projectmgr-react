@@ -42,7 +42,7 @@ export const TableView = () => {
 
                 return (
                     <div key={group} className="pm-item-container" style={{display}}>
-                        <div className="pm-element">{group}</div>
+                        <div className="pm-element" style={{fontSize:16}}>{group}</div>
                             {
                                 ids.map(id => 
                                 <div key={id} className="pm-task-container" 

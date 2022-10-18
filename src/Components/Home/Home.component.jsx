@@ -13,7 +13,7 @@ import { LastHomeNavigationEvent, useStatusNesting, SetStatusNesting, SetHomeVie
 import { ErrorLoading } from "../General/ErrorLoading";
 import { HomeFilterBar } from "./Home.FilterBar"
 import "./Home.component.scss";
-
+import 'react-quill/dist/quill.snow.css';
 const HOME_QID = '/HomeComponent'
 export const HomeComponent = ({headerHeight}) => {
     const BusyMessage = useBusyMessage(HOME_QID)
