@@ -66,8 +66,8 @@ export const [useNoticeEvents, NoticeEvents$] = bind(
 )
 const InitialMenu = [{label: 'Add Notice', command: () => ShowEditNoticeDlg('New')}]
 
-export const StoreNotice = (notice) => {
-    FirebaseService.StoreNotice$(notice).pipe(
+export const StoreNotice = (notice, updateDate) => {
+    FirebaseService.StoreNotice$(notice, updateDate).pipe(
         take(1)
     ).subscribe(() => { ShowEditNoticeDlg(null) })
 }

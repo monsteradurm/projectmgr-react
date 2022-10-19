@@ -1,6 +1,6 @@
 import { Dropdown, Navbar, Container, Stack } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faList, faUsers, faFilm, faCogs, faHome, faTruckMedical, faLink } from '@fortawesome/free-solid-svg-icons';
+import { faList, faUsers, faFilm, faCogs, faHome, faTruckMedical, faLink, faUser } from '@fortawesome/free-solid-svg-icons';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { FirebaseService } from '../../Services/Firebase.service';
 import { NestedDropdown } from '../General/NestedDropDown.component';
@@ -221,6 +221,7 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                                         <Dropdown.Item onClick={() => onTabOpen('https://cloud.digitalocean.com/login?redirect_url=https%3A%2F%2Fcloud.digitalocean.com%2Flanding')}>Digital Ocean</Dropdown.Item>
                                         <Dropdown.Item onClick={() => onTabOpen('https://my.fastcomet.com/clientarea.php')}>Fast Comet</Dropdown.Item>
                                         <Dropdown.Item onClick={() => onTabOpen('https://firebase.google.com')}>Firebase</Dropdown.Item>
+                                        <Dropdown.Item onClick={() => onTabOpen('https://fontawesome.com/icons')}>Font Awesome</Dropdown.Item>
                                         <Dropdown.Item onClick={() => onTabOpen('https://www.hostinger.com/cpanel-login')}>Hostinger</Dropdown.Item>
                                     </NestedDropdown>
                                     <Dropdown.Divider />
@@ -266,21 +267,30 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                                     
                                     }
                             </Dropdown.Menu>
-                        </Dropdown>        
+                        </Dropdown>
+                       
                     </> : null
                 }  
                 {
-                    <Stack direction="horizontal" gap={1} style={{width: '100%'}}>
+                    <Stack direction="horizontal" gap={1} style={{width: '100%', justifyContent: 'end'}}>
                         {   
                             User && User !== SUSPENSE?
                             <>
-                            <Navbar.Brand  style={{color:"white", textAlign:"right", 
-                                fontWeight: 300, fontSize: 18}}>
-                                {
-                                SimulatedUser ? 
-                                    SimulatedUser.monday.name + ' (Simulated)': 
-                                        User ? User.displayName : ''}
-                            </Navbar.Brand>
+                            <Dropdown autoClose="outside" style={{marginRight: 0, height: 45}}>
+                                <Dropdown.Toggle style={{fontSize:'20px'}}>
+                                    <Navbar.Brand  style={{color:"white", textAlign:"right", 
+                                        fontWeight: 300, fontSize: 18, width: 'fit-content'}}>
+                                        {
+                                        SimulatedUser ? 
+                                            SimulatedUser.monday.name + ' (Simulated)': 
+                                                User ? User.displayName : ''}
+                                    </Navbar.Brand>
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu variant="dark">
+                                    <Dropdown.Item onClick={() => SetCurrentRoute('/SignOut')}>Sign Out</Dropdown.Item>
+                                </Dropdown.Menu>
+                            </Dropdown>
+                            
                             {
                                 SimulatedUser && SimulateUser !== SUSPENSE? 
                                     (
@@ -291,6 +301,7 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                                     ) :
                                         Photo && Photo !== SUSPENSE? 
                                             <img src={Photo} className="pm-avatar-image" /> :
+                                            
                                             <Avatar 
                                                 label={User?.displayName?.split(' ')?.map(u => u[0])?.join('')} shape="circle" size="large" />
                             } 

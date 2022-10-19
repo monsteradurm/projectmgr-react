@@ -10,13 +10,13 @@ export const NoticeItem = ({notice}) => {
     const NoticeContextMenu = useNoticeContextMenu(notice.id);
     if (!notice) return <></>
 return (
-    <Stack direction="vertical" gap={2} className="pm-notice" key={notice.id} 
+    <Stack direction="vertical" gap={2} className="pm-notice" key={notice.id} style={{marginTop: -10, position:'relative'}}
         onContextMenu={
             (e) => NoticeContextMenuRef?.current?.show(e) 
         }>
             <ContextMenu model={NoticeContextMenu} 
                 ref={NoticeContextMenuRef} className="pm-notice-context"></ContextMenu>
-            <Stack direction="horizontal">
+            <Stack direction="horizontal" style={{position: 'absolute',top: 10, right: 0}}>
                 <div className="mx-auto"></div>
                 <div style={{color: '#aaa'}}>{moment(notice.updated_at).format('MMM DD, YYYY HH:mm')}</div>
             </Stack>

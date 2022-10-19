@@ -22,13 +22,14 @@ import { NewTicketDialog } from './Components/Support/NewTicket.component';
 import { UsersComponent } from './Components/Users/Users.component';
 import { ApplicationsComponent } from './Components/Applications/Applications.component';
 import { GalleryComponent } from './Components/Gallery/Gallery.component';
+import { SignOutComponent } from './Components/Signout/Signout';
 
 const preventMouseProps = (evt) => {
   evt.stopPropagation();
   evt.preventDefault();
 } 
 
-const App_TID = 'PM_ACCESS_TOKEN'
+export const App_TID = 'PM_ACCESS_TOKEN'
 const RefreshLogin = (instance, authRequest, setAccessToken) => {
   instance.acquireTokenSilent(authRequest).then((response) => {
     sessionStorage.setItem(App_TID, JSON.stringify(response));
@@ -45,11 +46,11 @@ export const APP_QID = '/Application'
 function App() {
   const CurrentRoute = useCurrentRoute();
   const Titles = useTitles();
-  const isAuthenticated = useIsAuthenticated();
   const BusyMessage = useBusyMessage(APP_QID)
   const User = useLoggedInUser();
   const SimulatedUser = useSimulatedUser();
   const AllUsers = useAllUsers() // pre-fetch observable for sharing;
+  const isAuthenticated = useIsAuthenticated();
   const { instance, accounts, inProgress } = useMsal();
   const [accessToken, setAccessToken] = useState(null);
   const appHeaderRef = useRef();
@@ -81,26 +82,27 @@ function App() {
   }, [URL, NavigationHandler])
 
   useEffect(() => {
-    const stored = sessionStorage.getItem(App_TID);
-    if (stored) {
-      try {
-        const response = JSON.parse(stored);
-        const expired = moment(response.expiresOn).isBefore();
+    if (account) {
+      const stored = sessionStorage.getItem(App_TID);
+      if (stored) {
+        try {
+          const response = JSON.parse(stored);
+          const expired = moment(response.expiresOn).isBefore();
 
-        if (!expired && accessToken !== response.accessToken) {
-          console.log("Using Cached access token...");
-          setAccessToken(response.accessToken)
-          return;
+          if (!expired && accessToken !== response.accessToken) {
+            console.log("Using Cached access token...");
+            setAccessToken(response.accessToken)
+            return;
+          }
+
+          else if (!expired)
+            return;
+          
+          console.log("Cached Token has expired, Refreshing...");
         }
-
-        else if (!expired)
-          return;
-        
-        console.log("Cached Token has expired, Refreshing...");
+        catch { }
       }
-      catch { }
     }
-
     RefreshLogin(instance, authRequest, setAccessToken);
   }, [instance, authRequest, isAuthenticated])
 
@@ -135,10 +137,11 @@ function App() {
                 <Route path="/" element={<HomeComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
                 <Route path="/Applications" element={<ApplicationsComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
                 <Route path="/Gallery" element={<GalleryComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
-                <Route path="Home" element={<HomeComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
-                <Route path="Users" element={<UsersComponent  headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
-                <Route path="Support" element={<SupportComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
-                <Route path="Projects" element={<Project 
+                <Route path="/Home" element={<HomeComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
+                <Route path="/Users" element={<UsersComponent  headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
+                <Route path="/Support" element={<SupportComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
+                <Route path="/SignOut" element={<SignOutComponent />} />
+                <Route path="/Projects" element={<Project 
                   headerHeight={appHeaderRef.current?.clientHeight ?? 0} />} />
               </Routes>
             </> : null

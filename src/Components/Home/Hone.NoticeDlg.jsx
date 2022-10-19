@@ -10,6 +10,7 @@ import { ScrollingPage } from '../General/ScrollingPage.component';
 import { ScrollPanel } from 'primereact/scrollpanel';
 import { isNaN } from 'underscore';
 import "./Home.Notices.scss";
+import { Checkbox } from 'primereact';
 
 const NoticeDlgHeader = React.forwardRef((props, ref) => (
     <div className="pm-dialogHeader" style={{position: 'relative', background: 'rgb(0, 156, 194)'}} ref={ref}>
@@ -31,6 +32,9 @@ export const EditNoticeDlg = ({}) => {
     const editNoticeRef = useRef();
     const [qWidth, setQWidth] = useState(150);
     const [qHeight, setQHeight] = useState(100);
+
+    const [updateDate, setUpdateDate] = useState(true);
+
     const headerRef = React.createRef();
     const containerRef = useRef();
     useEffect(() => {
@@ -62,7 +66,14 @@ export const EditNoticeDlg = ({}) => {
             <ReactQuill theme="snow" value={editorState} onChange={setEditorState} 
                 style={{height: 'calc(100% - 60px)', width: qWidth}}/>
         </Stack>
-        <Button label="Submit" onClick={() => StoreNotice({...notice, content: editorState}) }
-        style={{width: 100, position: 'absolute', bottom: 20, right: 20}}/>
+        <Stack direction="horizontal" gap={3} style={{marginRight: 20}}>
+            <div className="mx-auto"></div>
+            <div>
+                <Checkbox onChange={e => setUpdateDate(!updateDate)} checked={updateDate}></Checkbox>
+                <label htmlFor="cb1" className="p-checkbox-label" style={{marginLeft: 10}}>Set Date as Now</label>
+            </div>
+            <Button label="Submit" onClick={() => StoreNotice({...notice, content: editorState}, updateDate) } style={{width: 100}}/>
+        </Stack>
+       
     </Dialog>)
 }

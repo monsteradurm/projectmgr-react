@@ -24,6 +24,7 @@ const Authentication$ = bind(
 
 const AuthToken$ = bind(
     Authentication$.pipe(
+        tap(console.log),
         map(auth => auth?.token ? auth.token : null)
     ), null
 ).pop()

@@ -291,10 +291,11 @@ export class FirebaseService {
         return result;
     }
 
-    static StoreNotice$ = (notice) => {
+    static StoreNotice$ = (notice, updateDate) => {
         const docRef = fsDoc(FirebaseService.db, 'Noticeboard/' + notice.id);
         const result = from(setDoc(docRef, 
-            {id: notice.id, content: notice.content, updated_at: moment(moment.now()).format('YYYY-MM-DD HH:mm')}
+            {id: notice.id, content: notice.content, updated_at: updateDate ? 
+                moment(moment.now()).format('YYYY-MM-DD HH:mm') : notice.updated_at}
             )
         )
 

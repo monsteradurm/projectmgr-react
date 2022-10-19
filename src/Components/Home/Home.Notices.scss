@@ -4,6 +4,12 @@
 }
 
 #pm-notice-dlg {
+    
+    .p-checkbox .p-checkbox-box.p-highlight {
+        border-color: rgb(0, 156, 194);
+        background: rgb(0, 156, 194);
+    }
+
     height: 100%;
     .p-dialog-header {
         padding: 0px;
