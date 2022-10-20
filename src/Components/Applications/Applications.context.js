@@ -97,9 +97,12 @@ export const [, FetchApplicationResponseData$] = bind(
 export const [useApplicationResponses, ApplicationResponses$] = bind(
     merge(combineLatest([FetchApplicationResponses$, FetchApplicationResponseData$]).pipe(
         map(([responses, data]) => {
-            if ([responses, data].indexOf(SUSPENSE) >= 0)
-                return SUSPENSE;
+                if (responses === SUSPENSE)
+                    return SUSPENSE;
 
+            if (data === SUSPENSE)
+                data = {}
+            
             return responses.map(r => {
                 if (!data[r.response_id])
                     return {...r, ratings: {}, notes: []}

@@ -43,6 +43,7 @@ export const [RequestorsChanged$, SetRequestors] = createSignal(r => {
    console.log("Setting Requestors", r);
    return r;
 });
+
 const supportSearchMap = (val, searchParams, setSearchParams) => {
     if (setSearchParams && searchParams) {
         searchParams.set('Search', val);
@@ -80,6 +81,11 @@ export const [useNewTicketName, NewTicketName$] = bind(
 export const [MachineNameChanged$, SetMachineName] = createSignal(n => n);
 export const [useMachineName, MachineName$] = bind(
     MachineNameChanged$, ''
+)
+
+export const [FollowersChanged$, SetFollowers] = createSignal(n => n);
+export const [useFollowers, Followers$] = bind(
+    FollowersChanged$, ''
 )
 
 export const [MachineIPChanged$, SetMachineIP] = createSignal(n => n);
@@ -338,6 +344,12 @@ export const useTicketPriority = (ticket) => {
 export const useTicketMachineName = (ticket) => {
     if (!ticket) return ''
     const col = useTicketColumn(ticket, 'Machine Name');
+    if (!col) return '';
+    return col?.text;
+}
+export const useTicketFollowers = (ticket) => {
+    if (!ticket) return ''
+    const col = useTicketColumn(ticket, 'Followers');
     if (!col) return '';
     return col?.text;
 }

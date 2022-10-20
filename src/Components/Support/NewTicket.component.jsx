@@ -179,7 +179,7 @@ export const NewTicketDialog = ({}) => {
                         <div className="mx-auto"></div>
                         <Button label="Submit" onClick={() => CreateTicket(Board, {
                             TicketName, MachineName, Priority: priority, Description: editorState,
-                            Group: group, MachineIP, Requestors
+                            Group: group, MachineIP, Requestors, Type: type
                         }) }
                             style={{width: 100}}/>
                     </Stack>

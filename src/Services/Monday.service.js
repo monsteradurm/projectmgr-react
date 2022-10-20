@@ -262,6 +262,7 @@ export class MondayService {
           let values = {};
           values[column_ids['Priority']] = ticket.Priority.index;
           values[column_ids['Machine IP']] = ticket.MachineIP;
+          values[column_ids['Type']] = ticket.Type;
           values[column_ids['Machine Name']] = ticket.MachineName;
           values[column_ids['Requestor']] = { 
             personsAndTeams: ticket.Requestors.map(a => ({id: a.id, kind: "person"}))

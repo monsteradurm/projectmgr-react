@@ -142,10 +142,17 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                                             ApplicationGroups.map(a => 
                                                 <NestedDropdown key={"ApplicationFormGroup_" + a.group} title={a.group}>
                                                 {
-                                                    a.forms.map(f => <Dropdown.Item key={"ApplicationForm_" + f.id}
-                                                        onClick={() => SetCurrentRoute('/Applications?Form=' + f.id)}>
-                                                            {f.nesting[1]}
-                                                        </Dropdown.Item>
+                                                    a.forms.map(f => <NestedDropdown key={"ApplicationForm_" + f.id} title={f.nesting[1]}>
+                                                            <Dropdown.Item 
+                                                                    onClick={() => SetCurrentRoute('/Applications?Form=' + f.id)}>
+                                                                Responses
+                                                            </Dropdown.Item>
+                                                            <Dropdown.Divider />
+                                                            <Dropdown.Item 
+                                                                    onClick={() => onTabOpen("https://liquidanimation.typeform.com/to/" + f.id)}>
+                                                                Application
+                                                            </Dropdown.Item>
+                                                        </NestedDropdown>
                                                     )
                                                 }
                                                 </NestedDropdown>
