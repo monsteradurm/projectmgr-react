@@ -23,6 +23,7 @@ import { UsersComponent } from './Components/Users/Users.component';
 import { ApplicationsComponent } from './Components/Applications/Applications.component';
 import { GalleryComponent } from './Components/Gallery/Gallery.component';
 import { SignOutComponent } from './Components/Signout/Signout';
+import { AllocationsComponent } from './Components/Allocations/Allocations';
 
 const preventMouseProps = (evt) => {
   evt.stopPropagation();
@@ -135,6 +136,7 @@ function App() {
               <Toast ref={toastRef} position="bottom-right"/>
               <Routes>
                 <Route path="/" element={<HomeComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
+                <Route path="/Allocations" element={<AllocationsComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
                 <Route path="/Applications" element={<ApplicationsComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
                 <Route path="/Gallery" element={<GalleryComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
                 <Route path="/Home" element={<HomeComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />

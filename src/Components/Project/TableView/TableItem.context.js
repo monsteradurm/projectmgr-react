@@ -16,7 +16,7 @@ import { ShowEditTagsDialog } from "./TableItemDlgs/TableItem.EditTags.context";
 import { ShowEditDescriptionDialog } from "./TableItemDlgs/TableItem.EditDescription.context";
 import { ShowEditTimelineDialog } from "./TableItemDlgs/TableItem.EditTimeline.context";
 import { AutoCloseReviewItemContext, ShowReviewContextMenu } from "./TableItemControls/TableItem.Review.Context";
-import { BoardId$ } from "../Context/Project.Params.context";
+import { BoardId$, GroupId$ } from "../Context/Project.Params.context";
 import { MondayService } from "../../../Services/Monday.service";
 import { IntegrationsService } from "../../../Services/Integrations.service";
 
@@ -296,7 +296,8 @@ const [useTableItemContextMenu, TableItemContextMenu] = bind(
             if (isAdmin) {
                 menu.push({ separator: true})
                 menu.push({ label: 'Admin', items: [
-                    {label: 'Force Status Update', command: () => ForceStatusUpdate(BoardItemId)}
+                    {label: 'Force Status Update', command: () => ForceStatusUpdate(BoardItemId)},
+                    {label: 'Force Artist Update', command: () => ForceArtistUpdate(BoardItemId)}
                 ]})
             }
             return menu;
@@ -307,7 +308,7 @@ const ForceStatusUpdate = (id) => {
     BoardId$.pipe(
         withLatestFrom(StatusOptions$),
         withLatestFrom(BoardItemStatus$(id)),
-        tap(t => console.log("ForcedUpdate", t)),
+        tap(t => console.log("Forced Status Update", t)),
         take(1)
     ).subscribe(([[BoardId, Options], Status]) => {
         const thisStatus = _.find(Options, o => o.label === Status.text);
@@ -330,7 +331,15 @@ const ForceStatusUpdate = (id) => {
         IntegrationsService.BoardItem_ForceStatusUpdate(id, BoardId, status);
     })
 }
-
+//pulseId, groupId, boardId
+const ForceArtistUpdate = (id) => {
+    combineLatest([BoardId$, GroupId$]).pipe(
+        tap(t => console.log("Forced Artist Update", t)),
+        take(1)
+    ).subscribe(([BoardId, GroupId]) => {
+        IntegrationsService.BoardItem_ForceArtistUpdate(id, GroupId, BoardId);
+    })
+}
 
 const [AutoCloseBoardItemContext,] = bind(
     visibleContextMenusChanged$.pipe(

@@ -20,4 +20,16 @@ export class IntegrationsService {
             take(1),
         ).subscribe((res) => {console.log("/integrations/monday/StoreBoardItemStatus => Result: ", res)})
     }
+    static BoardItem_ForceArtistUpdate(pulseId, groupId, boardId) {
+        
+        const event = {
+            pulseId, groupId, boardId
+        }
+
+        console.log(event);
+
+        ajax.post('/integrations/monday/PersonColumnUpdated', {event, challenge: false}).pipe(
+            take(1),
+        ).subscribe((res) => {console.log("/integrations/monday/PersonColumnUpdated => Result: ", res)})
+    }
 }

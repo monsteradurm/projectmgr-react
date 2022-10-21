@@ -126,7 +126,8 @@ const [useSyncsketchProjectReviews, SyncsketchProjectReviews$] = bind(
             return acc;
         },{}),
         map(map => Object.entries(map)),
-        concatMap(entries => from(entries))
+        concatMap(entries => from(entries)),
+        tap(T => console.log("SYNCSKETCH PROJECT REVIEWS", T))
     ), SUSPENSE
 )
 
@@ -139,17 +140,19 @@ const [SyncsketchReviewsByElement, SyncReviewElements$] = partitionByKey(
 const [useSyncsketchReviewsFromElement, SyncsketchReviewsByElement$] = bind(
     element => 
     SyncReviewElements$.pipe(
+        switchMap(elements => element === SUSPENSE ? EMPTY : of(elements)),
         switchMap(elements => elements === SUSPENSE ? EMPTY : of(elements)),
         map(elements => _.filter(elements, e => !!e && e != SUSPENSE)),
-        switchMap(elements => elements?.indexOf(element) >= 0 ? 
-            SyncsketchReviewsByElement(element).pipe(
+        switchMap(elements => elements?.indexOf(element.replace(/\s/g, '')) >= 0 ? 
+            SyncsketchReviewsByElement(element.replace(/\s/g, '')).pipe(
                 map(reviews => {
                     if (reviews === SUSPENSE)
                         return SUSPENSE;
                     return reviews;
                 }),
             ) : of(null)
-        )
+        ),
+        tap(t => console.log("SYNCSKETCH REVIEWS FROM ELEMENT", element, t))
     ), SUSPENSE
 )
 
@@ -164,6 +167,8 @@ const [useSyncsketchReview, SyncsketchReview$] = bind(
     (element, feedbackDepartment) =>  
     SyncsketchReviewsByElement(element).pipe(
         map(reviews => {
+            if (element === SUSPENSE)
+                return SUSPENSE;
             if(reviews === SUSPENSE)
                 return SUSPENSE;
 

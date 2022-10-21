@@ -12,6 +12,7 @@ import { ReadyOrSuspend$ } from "../../Helpers/Context.helper";
 import { SyncsketchService } from "../../Services/Syncsketch.service";
 import { SetCurrentRoute } from "../../Application.context";
 import { SendToastError, SendToastSuccess } from "../../App.Toasts.context";
+import { AllocationsMenu$ } from "../Allocations/Allocations.context";
 
 const _boardItemStatusMap = (boardItemId, text, color, index, column_id) => ({boardItemId, text, color, index, column_id});
 const [ItemStatusChanged$, SetItemStatus] = createSignal(_boardItemStatusMap)
@@ -75,6 +76,8 @@ const [, MyStatusItems$] = bind(
         }),
     ), SUSPENSE
 )
+
+
 
 export const [useProjectsByStatus, ProjectsByStatus$] = bind(
     Status =>
@@ -165,8 +168,8 @@ const InitialAssistanceMenu = BuildInitialStatusMenu('Assistance', 'Loading...')
 const InitialHomeMenu = [
     InitialReviewMenu, 
     InitialFeedbackMenu, 
-    InitialProgressMenu,
     InitialAssistanceMenu,
+    InitialProgressMenu,
     <Dropdown.Divider key="HomeMenu_Divider"/>,
     <Dropdown.Item key={NoticesURL} onClick={() => SetHomeNavigation(NoticesURL)}>Notices</Dropdown.Item>]
 
@@ -380,10 +383,11 @@ export const [LastHomeNavigationEvent, ] = bind(
 
 export const [useHomeMenu, HomeMenu$] = bind(
     combineLatest([
-        ReviewMenu$, FeedbackMenu$, ProgressMenu$, Assistance$
+        ReviewMenu$, FeedbackMenu$, ProgressMenu$, Assistance$, AllocationsMenu$
     ]).pipe(
-        map(([review, feedback, progress, assistance]) => 
-        [   
+        map(([review, feedback, progress, assistance, allocations]) => 
+        [   allocations,
+            <Dropdown.Divider key="Allocations_Divider" />,
             review, feedback, progress, assistance,
             <Dropdown.Divider key="HomeMenu_Divider"/>,
             <Dropdown.Item key={NoticesURL} onClick={() => SetCurrentRoute(NoticesURL)}>Notices</Dropdown.Item>

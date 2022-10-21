@@ -49,7 +49,6 @@ export class FirebaseService {
         )
     }
 
-
     static DeleteSyncsketchItem(item) {
         const docRef = fsDoc(FirebaseService.db, 
             `SyncsketchItems/${item.project}/groups/${item.group}/reviews/${item.sketchId}/items/${item.id}`);
@@ -179,6 +178,21 @@ export class FirebaseService {
         )
     }
 
+    static AllocationsChanged$ = (name) => {
+        const col = 'Allocations/' + name + '/items';
+        return FirebaseService.SubscribeToCollection$(col).pipe(
+            concatMap(changes => from(changes).pipe(
+                concatMap(change => FirebaseService.GetDocument$(col, change.doc.id).pipe(
+                    map(d => ({...d.data(), action: change.type}))
+                    ),
+                ),
+                take(changes.length),
+                toArray()
+                )
+            )
+        )
+    }
+    
     static BoardItemsChanged$(projectId, boardId, groupId) {
         if (!projectId || !boardId || !groupId) return EMPTY;
         const collection = `ProjectManager/${projectId}/Boards/${boardId}/Groups/${groupId}/Items`;

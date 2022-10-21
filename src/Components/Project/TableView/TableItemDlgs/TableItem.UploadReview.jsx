@@ -29,6 +29,8 @@ export const TableItemUploadReview = ({}) => {
     const BoardItemId = useUploadReviewDlg();
     const Department = useBoardItemDepartment(BoardItemId);
     const [Element, Task] = useBoardItemName(BoardItemId);
+
+    console.log("TABLEITEM REVIEW", Element, Task);
     const Status = useBoardItemStatus(BoardItemId)
     const Group = useGroup();
 

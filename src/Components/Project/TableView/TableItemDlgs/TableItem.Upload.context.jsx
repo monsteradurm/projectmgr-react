@@ -98,7 +98,7 @@ export const [, ReviewDlgElement$] = bind(
                     else if (name === null)
                         return null;
 
-                    return name[0] // [Element, Task]
+                    return name[0].replace(/\s/g, '') // [Element, Task]
                 })
             )
         )
@@ -108,7 +108,7 @@ export const [useSyncsketchReviewName, SyncsketchReviewName$] = bind(
     combineLatest([Group$, ReviewDlgElement$,  UploadReviewGroup$]).pipe(
         switchMap(([group, element, reviewGroup]) => 
             [group, element, reviewGroup].indexOf(SUSPENSE) < 0 ?
-            of(`${group?.title}/${element} (${reviewGroup})`)
+            of(`${group?.title}/${element ? element.replace(/\s/g, '') : null} (${reviewGroup})`)
             : EMPTY
         ),
     ), null
