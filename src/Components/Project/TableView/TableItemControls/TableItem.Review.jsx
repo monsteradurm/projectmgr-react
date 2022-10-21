@@ -134,11 +134,13 @@ const ReviewDelivered = ({Delivered, primary}) => {
 }
 
 export const TableItemReview = ({ReviewId, ActiveDepartment, primary}) => {
-    const { BoardItemId, CurrentReviewId, Status, Element, Task, Department } = useContext(BoardItemContext);
+    const { BoardItemId, CurrentReviewId, Status, Element, Task, Department, SyncElementName } = useContext(BoardItemContext);
     const ReviewDepartment = useReviewDepartment(ReviewId);
     const SiblingDepartments = useSiblingReviewDepartments(Element, ReviewDepartment);
 
-    const SyncsketchReview = useSyncsketchReview(Element, ReviewDepartment);
+    const SyncsketchReview = useSyncsketchReview(SyncElementName, ReviewDepartment);
+    console.log("SYNC REVIEW", SyncElementName, SyncsketchReview);
+
     const Name = useReviewName(ReviewId);
     const Index = useReviewIndex(ReviewId);
     const ReviewItems = useSyncsketchItems(SyncsketchReview?.uuid, Department, Index);

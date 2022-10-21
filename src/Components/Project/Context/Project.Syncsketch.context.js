@@ -152,7 +152,6 @@ const [useSyncsketchReviewsFromElement, SyncsketchReviewsByElement$] = bind(
                 }),
             ) : of(null)
         ),
-        tap(t => console.log("SYNCSKETCH REVIEWS FROM ELEMENT", element, t))
     ), SUSPENSE
 )
 
@@ -166,6 +165,7 @@ const [useSyncsketchReviewDepartments, syncsketchReviewDepartments$] = bind(
 const [useSyncsketchReview, SyncsketchReview$] = bind(
     (element, feedbackDepartment) =>  
     SyncsketchReviewsByElement(element).pipe(
+        switchMap(t => element === SUSPENSE ? EMPTY : of(t)),
         map(reviews => {
             if (element === SUSPENSE)
                 return SUSPENSE;

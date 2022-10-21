@@ -168,6 +168,7 @@ const DefaultBoardItemState = {
         Task: SUSPENSE,
         Department: SUSPENSE,
         ReferenceFolder: SUSPENSE,
+        SyncElementName: SUSPENSE
 }
 
 // store boarditem id and current reivew id as context in provider across children
@@ -182,7 +183,9 @@ const BoardItemProvider = ({BoardItemId, children}) => {
     const Status = useBoardItemStatus(BoardItemId);
     const ReferenceFolder = useElementReference(Element);
 
+
     useEffect(() => {
+        if (Element === SUSPENSE) return;
         const result = { 
             BoardItemId, 
             Status,
@@ -192,6 +195,7 @@ const BoardItemProvider = ({BoardItemId, children}) => {
             Task,
             Department,
             ReferenceFolder,
+            SyncElementName: Element.replace(/\s/g, '')
         };
 
         if (JSON.stringify(result) !== JSON.stringify(state))
