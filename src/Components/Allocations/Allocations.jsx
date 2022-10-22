@@ -5,7 +5,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { MondayUser$ } from "../../App.Users.context"
 import { SetNavigationHandler, SetTitles } from "../../Application.context";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { SetAllocationNesting, useAllocatedFeedbackDepartment, useAllocatedReviewLink, useAllocatedReviewName, useAllocatedTags, useAllocationsByProject, useMyAllocations } from "./Allocations.context";
+import { SetAllocationNesting, useAllocatedFeedbackDepartment, useAllocatedReviewLink, useAllocatedReviewName, useAllocatedTags, useAllocationsByProject, useAllocationsSearchFilter, useAllocationsSortBy, useAllocationsSortReversed, useMyAllocations } from "./Allocations.context";
 import { Loading } from "../General/Loading";
 import { ScrollingPage } from "../General/ScrollingPage.component";
 import { faArrowDownAZ, faList } from "@fortawesome/free-solid-svg-icons";
@@ -17,6 +17,8 @@ import { SyncsketchService } from "../../Services/Syncsketch.service";
 import { take } from "rxjs";
 import { AllocationsFilterBar } from "./Allocations.FilterBar";
 import * as _ from 'underscore';
+import { sortBy } from "underscore";
+import { toggleArrFilter, toggleStatusFilter } from "../Project/Overview.filters";
 
 const onClickHandler = (e, url) => {
     if (!url)
@@ -30,7 +32,6 @@ const AllocatedThumbnail = React.memo(({URL}) => {
     const [Thumbnail, setThumbnail] = useState(SUSPENSE);
 
     useEffect(() => {
-        console.log("URL", URL);
         if (URL === SUSPENSE)
             return;
         
@@ -43,7 +44,6 @@ const AllocatedThumbnail = React.memo(({URL}) => {
         SyncsketchService.ThumbnailFromId$(id).pipe(
             take(1)
         ).subscribe(res => {
-            console.log("HERE", res);
             setThumbnail(res);
         });
 
@@ -67,13 +67,8 @@ const TaskTemplate = (item) => {
 }
 
 const BoardTemplate = (item) => {
-    console.log(item);
     return <span onClick={(e) => onClickHandler(e, `Projects?ProjectId=${projectId}&BoardId=${item.board.id}&GroupId=${item.group.id}`)}>
         {item.board.name.replace('/', ' / ') + ", " + item.group.name}</span>;
-}
-
-const  DepartmentTemplate = (item) => {
-    return item.Department?.text;
 }
 
 const TimelineTemplate = (item) => {
@@ -82,16 +77,7 @@ const TimelineTemplate = (item) => {
     return <span style={{opacity: 0.5, fontStyle: 'italic'}}>'No Timeline..'</span>;
 }
 
-const StatusTemplate = (item) => {
-    const department = useAllocatedFeedbackDepartment(item);
-    const status = item?.Status?.text  || 'Not Started';
-    return <div className="allocation-status" style={{background: item?.Status?.info?.color || 'black'}}>
-        {status}
-        {
-            (status.includes('Review') || status.includes('Feedback')) && <span style={{marginLeft: 10}}>({department})</span>
-        }
-        </div>;
-}
+
 
 const ReviewTemplate = (item) => {
     const name = useAllocatedReviewName(item);
@@ -102,23 +88,21 @@ const ThumbnailTemplate = (item) => {
     const link = useAllocatedReviewLink(item);
     return <AllocatedThumbnail URL={link} />
 }
-const TagsTemplate = (item) => {
-    const [itemTags, reviewTags] = useAllocatedTags(item);
-    return <Stack direction="horizontal" gap={1} style={{justifyContent: 'center'}}>
-    {
-        itemTags.map(t => <div key={"ItemTag_" + item.id + t}>#{t}</div>)
-    }
-    {
-        reviewTags.map(t => <div style={{color: item?.Status?.info?.color || 'black'}} 
-            key={"ItemTag_" + item.id + t}>#{t}</div>)
-    }
-    </Stack>
-}
+
 
 export const AllocationsComponent = ({headerHeight}) => {
     const allocations = useAllocationsByProject();
+    const [filteredAllocations, setFilteredAllocations] = useState(SUSPENSE);
     const [searchParams, setSearchParams] = useSearchParams();
+    const SortBy = useAllocationsSortBy();
+    const SortByReversed = useAllocationsSortReversed();
+    const Search = useAllocationsSearchFilter();
+    const [statusFilter, setStatusFilter] = useState(null);
+    const [departmentFilter, setDepartmentFilter] = useState(null);
+    const [tagsFilter, setTagsFilter] = useState(null);
     SetNavigationHandler(useNavigate());
+
+
     useEffect(() => {
         let titles = ['Home', 'Allocations'];
 
@@ -136,15 +120,151 @@ export const AllocationsComponent = ({headerHeight}) => {
 
     }, [])
 
+    useEffect(() => {
+        let d = searchParams.get('Department');
+        let t = searchParams.get('Tags');
+        if (t?.indexOf(',') >= 0)
+            t = t.split(',')
+        else if (!!t) t = [t];
 
-    if (allocations === SUSPENSE)
+        let s = searchParams.get('Status');
+
+        if (s && statusFilter !== s)
+            setStatusFilter(s);
+        else if (!s && !!statusFilter)
+            setStatusFilter(null);
+
+        if (d && departmentFilter !== d)
+            setDepartmentFilter(d);
+        else if (!d && !!departmentFilter)
+            setDepartmentFilter(null);
+        
+        if (t?.length && JSON.stringify(t) !== JSON.stringify(tagsFilter))
+            setTagsFilter(t)
+        else if ((!t || t.length < 1) && tagsFilter?.length)
+            setTagsFilter(null);
+    }, [searchParams])
+
+    useEffect(() => {
+        if (allocations === SUSPENSE)
+            return;
+
+        if (!allocations || allocations.length < 1) {
+            if (!Array.isArray(filteredAllocations) || filteredAllocations.length > 0)
+                setFilteredAllocations([]);
+            return;
+        }
+
+        let result = [...allocations];
+
+        if (Search?.length > 0) {
+            let s = Search.toLowerCase();
+            result = result.filter(a => [a.board.name, a.group.name, a.name, a.Department?.text, 
+                a.Status?.text, useAllocatedReviewName(a)].join(' ').toLowerCase().indexOf(s) >= 0)
+        }
+        if (statusFilter?.length) {
+            result = result.filter(a => a.Status?.text?.replace(/\s/g, '') == statusFilter)
+        }
+
+        if (departmentFilter?.length) {
+            result = result.filter(a => a.Department?.text == departmentFilter)
+        }
+
+        if (tagsFilter?.length) {
+            result = result.filter(a => {
+                let tagGroups = useAllocatedTags(a).filter(t => t?.length > 0)
+                if (tagGroups?.length < 1)
+                    return false;
+                return tagGroups.filter(tags => tagsFilter.filter(t => tags.indexOf(t) >= 0).length).length > 0;
+            })
+        }
+
+        result = _.sortBy(result, a => {
+            switch(SortBy) {
+                case 'Item': return a.name + "/" + a.group.name + "/" + a.board.name;
+                case 'Board': return a.board.name + "/" + a.group.name + "/" + a.name;
+                case 'Review': {
+                    let review = useAllocatedReviewName(a);
+                    return review && review.length > 0 ? review : 'zzzzzz'
+                }
+                case 'Department': return a.Department?.text;
+                case 'Status': return a.Status?.text;
+                case 'Timeline': return a.Timeline?.text;
+            }
+        });
+        setFilteredAllocations(SortByReversed ? result.reverse() : result);
+    }, [allocations, Search, SortBy, SortByReversed, statusFilter, tagsFilter, departmentFilter])
+
+
+    const TagsTemplate = (item) => {
+        const [itemTags, reviewTags] = useAllocatedTags(item);
+        return <Stack direction="horizontal" gap={1} style={{justifyContent: 'center'}}>
+        {
+            itemTags.map(t => <div key={"ItemTag_" + item.id + t}
+            onClick={(e) => toggleArrFilter(t, 'Tags', searchParams, setSearchParams)}>#{t}</div>)
+        }
+        {
+            reviewTags.map(t => <div style={{color: item?.Status?.info?.color || 'black'}} 
+                key={"ItemTag_" + item.id + t}
+                onClick={(e) => toggleArrFilter(t, 'Tags', searchParams, setSearchParams)}>#{t}</div>)
+        }
+        </Stack>
+    }
+
+    const  DepartmentTemplate = (item) => {
+        let d = item.Department?.text;
+        if (d?.length)
+            return <span onClick={(e) => toggleStatusFilter(d, searchParams, setSearchParams, 'Department')}>{d}</span>;
+        return
+    }
+
+    const StatusTemplate = (item) => {
+        const department = useAllocatedFeedbackDepartment(item);
+        const status = item?.Status?.text  || 'Not Started';
+        return <div className="allocation-status" style={{background: item?.Status?.info?.color || 'black'}}>
+            <span onClick={(e) => toggleStatusFilter(status, searchParams, setSearchParams, 'Status')}>
+            {status}
+            {
+                (status.includes('Review') || status.includes('Feedback')) && <span style={{marginLeft: 10}}>({department})</span>
+            }
+            </span>
+            </div>;
+    }
+
+    if (filteredAllocations === SUSPENSE)
         return <></>
 
     return <>
             <AllocationsFilterBar />
             <ScrollingPage key="page_scroll" offsetY={headerHeight}>
-                
-                <DataTable value={allocations}  className="pm-allocations">
+                <Stack direction="horizontal" gap={3}>
+                    <div className="pm-tag-filter" style={{color: '#888', fontWeight: 400, fontSize: 20}}>
+                        {filteredAllocations?.length} Items...
+                    </div>
+                    {
+                        departmentFilter?.length &&
+                        <div key="DepartmentFilter" className="pm-tag-filter"
+                        onClick={(evt) => toggleStatusFilter(departmentFilter, searchParams, setSearchParams, 'Department')}
+                            style={{color: '#888', fontWeight: 400, fontSize: 20}}>#{departmentFilter}
+                        </div>
+                    }
+
+                    {
+                        statusFilter?.length &&
+                        <div key="DepartmentFilter" className="pm-tag-filter"
+                        onClick={(evt) => toggleStatusFilter(departmentFilter, searchParams, setSearchParams, 'Status')}
+                            style={{color: '#888', fontWeight: 400, fontSize: 20}}>#{statusFilter}
+                        </div> 
+                    }
+                    {
+                        tagsFilter?.length &&
+                        tagsFilter.map(t => <div key={"TagFilter_" + t} className="pm-tag-filter"
+                        onClick={(evt) => toggleArrFilter(t, 'Tags', searchParams, setSearchParams)}
+                            style={{color: '#888', fontWeight: 400, fontSize: 20}}>#{t}
+                        </div>)    
+                    }
+                </Stack>
+                <DataTable value={filteredAllocations}  className="pm-allocations">
                 
                 <Column body={BoardTemplate} className="allocation-board"></Column>
                 <Column header="Task" body={TaskTemplate} className="allocation-task"></Column>

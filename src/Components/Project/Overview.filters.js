@@ -19,13 +19,13 @@ export const toggleArrFilter = (t, key, searchParams, setSearchParams) => {
     setSearchParams(searchParams);
 }
 
-export const toggleStatusFilter = (status, searchParams, setSearchParams) => {
-    let current = searchParams.get('BoardStatusFilter');
+export const toggleStatusFilter = (status, searchParams, setSearchParams, key='BoardStatusFilter') => {
+    let current = searchParams.get(key);
 
     if (current !== null && current.length > 0)
-        searchParams.set('BoardStatusFilter', '')
+        searchParams.delete(key);
     else 
-        searchParams.set('BoardStatusFilter', status.replace(/\s+/g, ''))
+        searchParams.set(key, status.replace(/\s+/g, ''))
 
     setSearchParams(searchParams);
 }

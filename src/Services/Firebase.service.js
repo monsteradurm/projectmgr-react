@@ -216,19 +216,14 @@ export class FirebaseService {
                     `ProjectManager`, projectId).pipe(
                         map(d => d.data()),
                 )
-                console.log("HERE A: ", a);
+
                 return item$.pipe(
-                    tap(console.log),
                     withLatestFrom(group$),
-                    tap(console.log),
                     map(([item, group]) => ({...item, group})),
                     withLatestFrom(board$),
-                    tap(console.log),
                     map(([item, board]) => ({...item, board})),
                     withLatestFrom(project$),
-                    tap(console.log),
                     map(([item, project]) => ({...item, project})),
-                    tap(t => console.log("HEEEERE", a, t))
                 )
             }),
             take(allocations.length),

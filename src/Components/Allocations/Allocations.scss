@@ -58,7 +58,7 @@
     tr > td.allocation-review {
         min-width: 15rem;
     }
-    tr > td.allocation-department:hover, tr > td.allocation-task:hover, tr > td.allocation-review:hover, tr > td.allocation-tags > div > div:hover {
+    tr > td.allocation-department:hover, tr > td.allocation-tags > div > div:hover {
         font-weight: 700;
         color: #aaa;
     }
@@ -71,7 +71,7 @@
     }
 
     tr > td > div.allocation-status:hover::before, tr > td.allocation-department:hover::before,
-    tr > td.allocation-department:hover::before, tr > td.allocation-review:hover::before {
+    tr > td.allocation-department:hover::before {
         content: '#'
     }
 }
