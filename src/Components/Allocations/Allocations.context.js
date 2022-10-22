@@ -9,6 +9,32 @@ import { Badge } from "primereact";
 import { SetCurrentRoute } from '../../Application.context';
 import { createSignal } from "@react-rxjs/utils";
 
+const allocationsSearchMap = (val, searchParams, setSearchParams) => {
+    if (setSearchParams && searchParams) {
+        searchParams.set('Search', val);
+        setSearchParams(searchParams);
+    }
+    return val;
+}
+
+export const [AllocationsSearchFilterChanged$, SetAllocationsSearchFilter] = createSignal(allocationsSearchMap);
+export const [useAllocationsSearchFilter, AllocationsSearchFilter$] = bind(
+    AllocationsSearchFilterChanged$, ''
+)
+
+
+export const AllocationsSortByOptions = ['Board', 'Item', 'Review', 'Department', 'Status', 'Timeline']
+
+export const [AllocationsSortByChanged$, SetAllocationsSortBy] = createSignal(n => n);
+export const [useAllocationsSortBy, ] = bind(
+    AllocationsSortByChanged$, 'Item'
+)
+
+export const [AllocationsSortReversedChanged$, SetAllocationsSortReversed] = createSignal(n => n);
+export const [useAllocationsSortReversed, ] = bind(
+    AllocationsSortReversedChanged$, false
+)
+
 export const [AllocationNestingChanged$, SetAllocationNesting] = createSignal(nesting => nesting);
 
 export const [useAllocationNesting, AllocationNesting$] = bind(
@@ -41,7 +67,6 @@ export const [useMyAllocations, MyAllocations$] = bind(
 
 export const [useAllocationsByProject, AllocationsByProject$] = bind(
     combineLatest([MyAllocations$, AllocationNesting$]).pipe(
-        tap(console.log),
         map(([allocations, nesting]) => {
             let group = allocations['Other'];
             if (nesting.length > 0)
@@ -53,7 +78,8 @@ export const [useAllocationsByProject, AllocationsByProject$] = bind(
             const items = group[nesting[1]];
             
             return items ? items : [];
-        })
+        }),
+        concatMap(allocations => FirebaseService.ItemsByAllocations$(allocations))
     ), SUSPENSE
 )
 
@@ -77,6 +103,38 @@ export const [useAllocationsMenu, AllocationsMenu$] = bind(
             </NestedDropdown>
         )),
         map(menu => <NestedDropdown title="Allocations" key="Allocations">{menu}</NestedDropdown>),
-        tap(t => console.log("AllocationsMenu: ", t))
     ), defaultAllocationsMenu
 )
+
+export const useAllocatedReview = (item) => {
+    if (!item?.subitems?.length)
+        return null;
+
+    const subitems = _.sortBy(item.subitems, s=> s?.Index?.text || -1).reverse();
+    return subitems[0];
+}
+
+export const useAllocatedReviewName = (item) => {
+    const review = useAllocatedReview(item);
+    return review?.name;
+}
+export const useAllocatedReviewLink = (item) => {
+    const review = useAllocatedReview(item);
+    if (!review?.Link?.text || review.Link.text.length < 1)
+        return null;
+
+    return review?.Link?.text;
+}
+export const useAllocatedFeedbackDepartment = (item) => {
+    const review = useAllocatedReview(item);
+    if (!review) return 'Internal';
+    let col = review['Feedback Department'];
+    if (!col?.text || col.text.length < 1) return 'Internal';
+    return col.text;
+}
+
+
+export const useAllocatedTags = (item) => {
+    const review = useAllocatedReview(item);
+    return [item?.Tags?.value || [], review?.Tags?.value || []]
+}

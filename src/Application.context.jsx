@@ -24,7 +24,18 @@ const PrimaryColors = {
 const [TitlesChanged$, SetTitles] = createSignal();
 const [useTitles, Titles$] = bind(TitlesChanged$, [])
 
-const [RouteChangedEvent$, SetCurrentRoute] = createSignal(location => location);
+const [RouteChangedEvent$, SetCurrentRoute] = createSignal((location, searchParams) => {
+    console.log(location, searchParams);
+    let url = location;
+    if (searchParams?.get('Simulating')) {
+        if (url.indexOf('?') < 0)
+            url += '?'
+        else url += '&'
+        url += 'Simulating=' + searchParams.get('Simulating');
+    }
+    return url;
+});
+
 const [useCurrentRoute, currentRoute$] = bind(
     RouteChangedEvent$, null
 )
@@ -32,7 +43,8 @@ const [useCurrentRoute, currentRoute$] = bind(
 const [NavigationHandlerChanged$, SetNavigationHandler] = createSignal(navigate => navigate);
 const [useNavigationHandler, NavigationHandler$] = bind(
     RouteChangedEvent$.pipe(
-        withLatestFrom(NavigationHandlerChanged$)
+        withLatestFrom(NavigationHandlerChanged$),
+        tap(console.log)
     ), [SUSPENSE, SUSPENSE]
 )
 

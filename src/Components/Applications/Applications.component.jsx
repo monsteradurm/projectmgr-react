@@ -231,7 +231,7 @@ export const ApplicationsComponent = ({headerHeight}) => {
     return (
     <>
         <ApplicationsFilterBar />
-        <ScrollingPage key="page_scroll" offsetY={headerHeight}>
+        <ScrollingPage key="page_scroll" offsetY={headerHeight} >
             <Sidebar visible={!!SelectedResponse} position="right" style={{width:'50%'}} className="pm-response-sidebar"
             showCloseIcon={false}
             onHide={() => SetSelectedResponseId(null, searchParams, setSearchParams)}>

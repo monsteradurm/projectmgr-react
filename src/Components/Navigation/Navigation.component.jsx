@@ -11,8 +11,8 @@ import { ApplicationContext } from '../../Application.component';
 import { Avatar } from 'primereact/avatar';
 import { SetCurrentRoute, useAllUsers, useMyAvatar, useMyBoards, usePrimaryColor, useTitles } from '../../Application.context';
 import { DelayBy } from '../General/DelayBy';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { refreshUsersCache, SimulateUser, useCanReviewApplications, useGroupedUsers, useIsAdmin, useManagers, useMyWorkspaces, useUserPhotoByName } from '../../App.Users.context';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { refreshUsersCache, SimulateUser, useCanReviewApplications, useGroupedUsers, useIsAdmin, useManagers, useMyWorkspaces, useSimulatedUser, useUserPhotoByName } from '../../App.Users.context';
 import { SUSPENSE } from '@react-rxjs/core';
 import { useHomeMenu } from '../Home/Home.context';
 import { SendToastSuccess, SendToastWarning } from '../../App.Toasts.context';
@@ -34,6 +34,7 @@ const ClearSyncsketchProjectCache = () => {
 }
 
 export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
+    const [searchParams, setSearchParams] = useSearchParams();
     const PrimaryColor = usePrimaryColor();
     const [workspaces, setWorkspaces] = useState([]);
     const navRef = useRef();
@@ -50,6 +51,13 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
     const isReviewer = useCanReviewApplications();
     const ApplicationGroups = useApplicationGroups();
     const SupportOptions = useSupportOptions();
+
+    useEffect(() => {
+        if (searchParams.get('Simulating') && !SimulatedUser)
+          SimulateUser(searchParams.get('Simulating'))
+    
+      }, [searchParams, SimulatedUser])
+
     useEffect(() => {
         if (MyWorkspaces === SUSPENSE || !MyWorkspaces)
             return;
@@ -131,9 +139,9 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                             <Dropdown.Toggle style={{fontSize:'20px'}}><FontAwesomeIcon icon={faUsers} /></Dropdown.Toggle>
                             <Dropdown.Menu variant="dark">
                                 <Dropdown.Item key="users" 
-                                    onClick={() => SetCurrentRoute('/Users?View=Users')}>Users</Dropdown.Item>
+                                    onClick={() => SetCurrentRoute('/Users?View=Users', searchParams)}>Users</Dropdown.Item>
                                 <Dropdown.Item key="teams" 
-                                    onClick={() => SetCurrentRoute('/Users?View=Teams')}>Teams</Dropdown.Item>
+                                    onClick={() => SetCurrentRoute('/Users?View=Teams', searchParams)}>Teams</Dropdown.Item>
                                 
                                 {
                                     isReviewer && <>
@@ -145,7 +153,7 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                                                 {
                                                     a.forms.map(f => <NestedDropdown key={"ApplicationForm_" + f.id} title={f.nesting[1]}>
                                                             <Dropdown.Item 
-                                                                    onClick={() => SetCurrentRoute('/Applications?Form=' + f.id)}>
+                                                                    onClick={() => SetCurrentRoute('/Applications?Form=' + f.id, searchParams)}>
                                                                 Responses
                                                             </Dropdown.Item>
                                                             <Dropdown.Divider />
@@ -181,14 +189,14 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                                             <NestedDropdown title={option.label} key={"Support_" + option.label}>
                                                 <Dropdown.Item key={"Support_" + option.label + "_All"} 
                                                        onClick={() => SetCurrentRoute(
-                                                        `/Support?Board=${option.label}&Group=All Groups&View=Tickets`)
+                                                        `/Support?Board=${option.label}&Group=All Groups&View=Tickets`, searchParams)
                                                     }>All {option.label}</Dropdown.Item>
                                                 <Dropdown.Divider />
                                                 {
                                                     option.groups.map(g => (
                                                     <Dropdown.Item key={"Support_" + option.label + "_" + g.title} 
                                                         onClick={() => SetCurrentRoute(
-                                                            `/Support?Board=${option.label}&Group=${g.title}&View=Tickets`)
+                                                            `/Support?Board=${option.label}&Group=${g.title}&View=Tickets`, searchParams)
                                                         }>{g.title}</Dropdown.Item>
                                                     ))
                                                 }
@@ -261,7 +269,7 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                                                             u .users.map(
                                                                 user => 
                                                                 <Dropdown.Item key={"sim_" + user.monday.name}  
-                                                                onClick={() => SimulateUser(user.monday.name)}>{user.monday.name}</Dropdown.Item>
+                                                                onClick={() => SimulateUser(user.monday.name, searchParams, setSearchParams)}>{user.monday.name}</Dropdown.Item>
                                                             ) :
                                                             <Dropdown.Item key={"sim_" + u.label + "_NO_USERS"}></Dropdown.Item>
                                                         }
@@ -270,7 +278,7 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                                             }
                                             <Dropdown.Divider />
                                                         <Dropdown.Item key={"sim_CLEAR"}
-                                                            onClick={() => SimulateUser(null)}>Clear</Dropdown.Item>
+                                                            onClick={() => SimulateUser(null, searchParams, setSearchParams)}>Clear</Dropdown.Item>
                                         </NestedDropdown>
                                     
                                     }

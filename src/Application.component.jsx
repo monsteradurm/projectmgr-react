@@ -5,13 +5,13 @@ import './Application.component.scss';
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 import React, { useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { NavigationComponent } from '@Components/Navigation/Navigation.component';
-import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Toast } from 'primereact/toast';
 import { AtomSpinner, BreedingRhombusSpinner, SemipolarSpinner } from 'react-epic-spinners';
 import { Stack } from 'react-bootstrap';
 import { Project } from './Components/Project/Project.component';
 import { RefreshTags, RefreshBadges } from "./Components/Project/Context/Project.Objects.context";
-import { useAllUsers, useSimulatedUser } from './App.Users.context';
+import { SimulateUser, useAllUsers, useSimulatedUser } from './App.Users.context';
 import { HomeComponent } from './Components/Home/Home.component';
 import { useToaster } from './App.Toasts.context';
 import { AddQueueMessage, CreateMessageQueue, RemoveQueueMessage, useBusyMessage } from './App.MessageQueue.context';
@@ -57,7 +57,6 @@ function App() {
   const appHeaderRef = useRef();
   const toastRef = useRef();
   const Toaster = useToaster(toastRef);
-
   const [URL, NavigationHandler] = useNavigationHandler()
 
   const authRequest = useMemo(() => ({

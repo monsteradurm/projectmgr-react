@@ -102,7 +102,7 @@ export function ProjectDropdown({projectId, MyBoards, children}) {
     const [displayHTML, setDisplayHTML] = useState(loadingProjectHTML);
     const isAdmin = useIsAdmin();
     const SimulatedUser = useSimulatedUser();
-
+    
     const showDropdown = (e)=>{
         if (!projectId) setBoards(null);
         const boards = _.filter(MyBoards, b => b.projectId === projectId).map(b => b.data);

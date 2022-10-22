@@ -1,0 +1,77 @@
+.pm-allocations {
+    tr > td {
+        padding: 0rem 1rem !important;
+    }
+    th.allocation-board > div{
+        justify-content: end;
+    }
+
+    th.allocation-task  > div {
+        justify-content: start;
+    }
+    
+
+    tr > td.allocation-board{
+        text-align: right;
+        font-weight: 700;
+        text-decoration: underline;
+       
+    }
+    tr > td.allocation-icon {
+        text-align: center;
+    }
+    tr > td.allocation-icon > svg {
+        cursor: pointer;
+        text-align:center;
+        color: #bbb;
+        padding-top: 5px;
+    }
+    tr > td.allocation-board > span:hover {
+        color: #009cc2;
+        cursor: pointer;
+    }
+    tr > td.allocation-icon > svg:hover {
+        color: #009cc2;
+
+    }
+    tr > td.allocation-task, tr > td.allocation-feedback-department {
+        text-align: left;
+        font-weight: 700
+    }
+    tr > td.allocation-review, td > td.allocation-tags  {
+        text-align: center;
+        font-weight: 600;
+    }
+    tr > td.allocation-department, tr > td.allocation-timeline {
+        text-align: center;
+        font-weight: 600;
+    }
+    tr > td > div.allocation-status {
+        padding: 10px 5px;
+        color: white;
+        text-align: center;
+        font-weight: 600;
+        border: solid 1px black;
+        border-radius: 5px;
+        min-width: 16rem;
+    }
+    tr > td.allocation-review {
+        min-width: 15rem;
+    }
+    tr > td.allocation-department:hover, tr > td.allocation-task:hover, tr > td.allocation-review:hover, tr > td.allocation-tags > div > div:hover {
+        font-weight: 700;
+        color: #aaa;
+    }
+    tr > td.allocation-tags {
+        min-width: 21rem;
+    }
+    tr > td > div.allocation-status:hover {
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    tr > td > div.allocation-status:hover::before, tr > td.allocation-department:hover::before,
+    tr > td.allocation-department:hover::before, tr > td.allocation-review:hover::before {
+        content: '#'
+    }
+}

@@ -239,8 +239,17 @@ const [useMyAvatar, MyAvatar$] = bind(
     ), null
 );
 
-const [simulatedUserEvent$, SimulateUser] = createSignal(name => 
-    name ? name.toLowerCase() : null);
+const [simulatedUserEvent$, SimulateUser] = createSignal((name, searchParams, setSearchParams) => {
+    const result = name ? name.toLowerCase() : null;
+    if (searchParams && setSearchParams) {
+        if (!result)
+            searchParams.delete('Simulating');
+        else 
+            searchParams.set('Simulating', name);
+        setSearchParams(searchParams);
+    }
+    return result;
+});
 
 const [useSimulatedUser, SimulatedUser$] = bind(
     combineLatest([simulatedUserEvent$, AllUsers$]).pipe(

@@ -4,7 +4,7 @@ import { getFirestore, collection as fsCollection, doc as fsDoc, query, runTrans
     deleteDoc, QuerySnapshot   } from 'firebase/firestore';
 import { collectionChanges, doc, collection } from 'rxfire/firestore';
 import * as _ from 'underscore';
-import { BehaviorSubject, concatAll, concatMap, EMPTY, expand, scan, firstValueFrom, from, map,debounceTime, mergeMap, reduce, skip, switchMap, take, tap, toArray } from "rxjs";
+import { BehaviorSubject, concatAll, concatMap, EMPTY, expand, scan, firstValueFrom, from, map,debounceTime, mergeMap, reduce, skip, switchMap, take, tap, toArray, withLatestFrom } from "rxjs";
 import { ajax } from "rxjs/ajax";
 import { ReverseProxy } from "../Environment/proxy.environment";
 import moment from 'moment';
@@ -192,6 +192,48 @@ export class FirebaseService {
             )
         )
     }
+
+    static ItemsByAllocations$ = (allocations) => from(allocations).pipe(
+            concatMap(a => {
+                const b = a.boardId.toString();
+                const g = a.groupId.toString();
+                const id = a.id.toString();
+                const projectId = a.board_description.split('/')[1]
+                console.log(`ProjectManager/${projectId}/Boards/${b}/Groups/${g}/Items`);
+                const item$ = FirebaseService.GetDocument$(
+                `ProjectManager/${projectId}/Boards/${b}/Groups/${g}/Items`, id).pipe(
+                    map(d => d.data()),
+                )
+                const group$ = FirebaseService.GetDocument$(
+                    `ProjectManager/${projectId}/Boards/${b}/Groups`, g).pipe(
+                        map(d => d.data()),
+                )
+                const board$ = FirebaseService.GetDocument$(
+                    `ProjectManager/${projectId}/Boards`, b).pipe(
+                        map(d => d.data()),
+                )
+                const project$ = FirebaseService.GetDocument$(
+                    `ProjectManager`, projectId).pipe(
+                        map(d => d.data()),
+                )
+                console.log("HERE A: ", a);
+                return item$.pipe(
+                    tap(console.log),
+                    withLatestFrom(group$),
+                    tap(console.log),
+                    map(([item, group]) => ({...item, group})),
+                    withLatestFrom(board$),
+                    tap(console.log),
+                    map(([item, board]) => ({...item, board})),
+                    withLatestFrom(project$),
+                    tap(console.log),
+                    map(([item, project]) => ({...item, project})),
+                    tap(t => console.log("HEEEERE", a, t))
+                )
+            }),
+            take(allocations.length),
+            toArray(),
+        )
     
     static BoardItemsChanged$(projectId, boardId, groupId) {
         if (!projectId || !boardId || !groupId) return EMPTY;
