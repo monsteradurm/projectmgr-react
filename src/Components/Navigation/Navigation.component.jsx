@@ -20,7 +20,7 @@ import { UserAvatar } from '../General/UserAvatar';
 import { ShowNewTicketDialog, useSupportOptions } from '../Support/Support.context';
 import { useApplicationForms, useApplicationGroups } from '../Applications/Applications.context';
 import { useAllocationsMenu, useMyAllocations } from '../Allocations/Allocations.context';
-
+import { useGalleryFolders } from '../Gallery/Gallery.context';
 
 const ClearSyncsketchProjectCache = () => {
     const key = "Syncsketch/Project/"
@@ -51,7 +51,7 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
     const isReviewer = useCanReviewApplications();
     const ApplicationGroups = useApplicationGroups();
     const SupportOptions = useSupportOptions();
-
+    const GalleryMenu = useGalleryFolders();
     useEffect(() => {
         if (searchParams.get('Simulating') && !SimulatedUser)
           SimulateUser(searchParams.get('Simulating'))

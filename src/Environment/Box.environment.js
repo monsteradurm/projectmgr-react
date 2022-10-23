@@ -9,8 +9,9 @@ export const BoxEndPoints = {
 
     Thumbnail: (id) => `/liquidanimation-box/thumbnail?id=` + id,
 
-    SharedFile: (id) => `/liquidanimation-box/sharedfile?id=` + id
+    SharedFile: (id) => `/liquidanimation-box/sharedfile?id=` + id,
 
+    GalleryFolder: 135589920910
     /*
     Subfolder: (root, folder) => ReverseProxy + 'liquidanimation.live/box-rest/subfolder?root=' + 
         root + '&folder=' + folder,

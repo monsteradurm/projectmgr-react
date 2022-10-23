@@ -8,6 +8,11 @@ const BufferToBase64 = (buffer) => {
     return btoa(String.fromCharCode(...new Uint8Array(buffer)));
   }
 
+const Headers = {
+    'Accept': 'application/json, text/plain, */*',
+    'Content-Type': 'application/json',
+}
+
 export class BoxService {
    
       static SubFolder$ = (root, folder) => {
@@ -41,11 +46,11 @@ export class BoxService {
       }
 
       static FolderContents$ = (folderId) => {
-          //("Fetching Box Contents: ", folderId);
+          
           if (!folderId)
             return of(null);
 
-        return ajax.get(BoxEndPoints.FolderContents(folderId)).pipe(
+        return ajax.get(BoxEndPoints.FolderContents(folderId), Headers).pipe(
             map(result => result?.response ? result.response : null),
             take(1)
         )
@@ -76,6 +81,10 @@ export class BoxService {
             })
         )
       }
+
+      static GalleryFolders$ = BoxService.FolderContents$(BoxEndPoints.GalleryFolder).pipe(
+          tap(t => console.log("GALLERY FOLDERS$". t))
+      )
 
     
 }
