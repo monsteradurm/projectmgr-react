@@ -6,6 +6,7 @@ import { SetCurrentRoute, useMyBoards } from "../../Application.context";
 import { FirebaseService } from "../../Services/Firebase.service";
 import { NestedDropdown } from "../General/NestedDropDown.component";
 import * as _ from 'underscore';
+import { useSearchParams } from "react-router-dom";
 
 const loadingProjectHTML = <Dropdown.Item>Loading Project...</Dropdown.Item>
 const emptyProjectHTML = <Dropdown.Item>Empty Project...</Dropdown.Item>
@@ -44,7 +45,7 @@ function NestHierarchyFromName(board, nested) {
     return nested;
 }
 
-function NestedHierarchyToMenu(items, projectId, boardIds) {
+function NestedHierarchyToMenu(items, projectId, boardIds, searchParams, setSearchParams) {
     let result = [];
     _.sortBy(items, i => i[0]).forEach( entry => {
         let [title, val] = entry;
@@ -53,7 +54,7 @@ function NestedHierarchyToMenu(items, projectId, boardIds) {
             result.push(
                 <NestedDropdown title={title} key={title}>
                     {
-                        NestedHierarchyToMenu(Object.entries(children), projectId)
+                        NestedHierarchyToMenu(Object.entries(children), projectId, boardIds, searchParams, setSearchParams)
                     }
                 </NestedDropdown>
             )
@@ -76,8 +77,7 @@ function NestedHierarchyToMenu(items, projectId, boardIds) {
                                             onClick={
                                                 (e) =>
                                                     SetCurrentRoute(
-                                                        `Projects?ProjectId=${projectId}&BoardId=${b.id}&GroupId=${g.id}`
-                                                    )}> {g.title}
+                                                        `Projects?ProjectId=${projectId}&BoardId=${b.id}&GroupId=${g.id}`, searchParams, setSearchParams)}> {g.title}
                                             </Dropdown.Item>)
                                         : emptyGroupHTML
                                     : loadingGroupHTML
@@ -85,7 +85,7 @@ function NestedHierarchyToMenu(items, projectId, boardIds) {
                         </NestedDropdown>
                     : <Dropdown.Item key={b.id} 
                         onClick={(e) => SetCurrentRoute(
-                            `Projects?ProjectId=${projectId}&BoardId=${b.id}&GroupId=${b.groups[0].id}`
+                            `Projects?ProjectId=${projectId}&BoardId=${b.id}&GroupId=${b.groups[0].id}`, searchParams, setSearchParams
                         )}>{name}</Dropdown.Item>
                 )
             })
@@ -102,7 +102,8 @@ export function ProjectDropdown({projectId, MyBoards, children}) {
     const [displayHTML, setDisplayHTML] = useState(loadingProjectHTML);
     const isAdmin = useIsAdmin();
     const SimulatedUser = useSimulatedUser();
-    
+    const [searchParams, setSearchParams] = useSearchParams();
+
     const showDropdown = (e)=>{
         if (!projectId) setBoards(null);
         const boards = _.filter(MyBoards, b => b.projectId === projectId).map(b => b.data);
@@ -112,7 +113,7 @@ export function ProjectDropdown({projectId, MyBoards, children}) {
             result = NestHierarchyFromName(b, result);
         });
 
-        const html = NestedHierarchyToMenu(Object.entries(result), projectId);
+        const html = NestedHierarchyToMenu(Object.entries(result), projectId, searchParams, setSearchParams);
         setDisplayHTML(html);
 
         setShow(!show);

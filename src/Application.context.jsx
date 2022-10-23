@@ -24,15 +24,35 @@ const PrimaryColors = {
 const [TitlesChanged$, SetTitles] = createSignal();
 const [useTitles, Titles$] = bind(TitlesChanged$, [])
 
+const findGetParameter = (parameterName) => {
+    var result = null,
+        tmp = [];
+    location.search
+        .substr(1)
+        .split("&")
+        .forEach(function (item) {
+          tmp = item.split("=");
+          if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+        });
+    return result;
+}
+
 const [RouteChangedEvent$, SetCurrentRoute] = createSignal((location, searchParams) => {
-    console.log(location, searchParams);
     let url = location;
-    if (searchParams?.get('Simulating')) {
+    let simulating = null;
+
+    if (searchParams?.get && searchParams?.get('Simulating')) {
+        simulating = searchParams.get('Simulating')
+    } else {
+        simulating = findGetParameter('Simulating');
+    }
+    if (simulating) {
         if (url.indexOf('?') < 0)
             url += '?'
         else url += '&'
-        url += 'Simulating=' + searchParams.get('Simulating');
+        url += 'Simulating=' + simulating;
     }
+
     return url;
 });
 
