@@ -20,7 +20,7 @@ import { UserAvatar } from '../General/UserAvatar';
 import { ShowNewTicketDialog, useSupportOptions } from '../Support/Support.context';
 import { useApplicationForms, useApplicationGroups } from '../Applications/Applications.context';
 import { useAllocationsMenu, useMyAllocations } from '../Allocations/Allocations.context';
-import { useGalleryFolders } from '../Gallery/Gallery.context';
+import { useGalleryMenu } from '../Gallery/Gallery.context';
 
 const ClearSyncsketchProjectCache = () => {
     const key = "Syncsketch/Project/"
@@ -51,7 +51,8 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
     const isReviewer = useCanReviewApplications();
     const ApplicationGroups = useApplicationGroups();
     const SupportOptions = useSupportOptions();
-    const GalleryMenu = useGalleryFolders();
+    const GalleryMenu = useGalleryMenu();
+    
     useEffect(() => {
         if (searchParams.get('Simulating') && !SimulatedUser)
           SimulateUser(searchParams.get('Simulating'))
@@ -85,7 +86,6 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                     <>
                         <Dropdown autoClose="outside">
                             <Dropdown.Toggle style={{fontSize:'20px'}}><FontAwesomeIcon icon={faHome} /></Dropdown.Toggle>
-                        
                             <Dropdown.Menu variant="dark">
                             {
                                 HomeMenuOptions
@@ -177,7 +177,7 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                         <Dropdown autoClose="outside">
                             <Dropdown.Toggle style={{fontSize:'20px'}}><FontAwesomeIcon icon={faFilm} /></Dropdown.Toggle>
                             <Dropdown.Menu variant="dark">
-                                <Dropdown.Item key="placeholder"  onClick={() => SendToastWarning("not Yet Implemented..")}>NYI</Dropdown.Item>
+                                { GalleryMenu }
                             </Dropdown.Menu>
                         </Dropdown>
                         <Dropdown autoClose="outside">

@@ -193,6 +193,16 @@ export class FirebaseService {
         )
     }
 
+    static GalleryItems$ = FirebaseService.AllDocsFromCollection$('Gallery').pipe(
+        map(items => _.map(items, i => {
+                const entries = i.path_collection.entries;
+                let nesting = _.pluck(entries.splice(2, entries.length - 1), 'name');
+                return { ...i, nesting}
+            }),
+        ),
+        take(1)
+    )
+
     static ItemsByAllocations$ = (allocations) => from(allocations).pipe(
             concatMap(a => {
                 const b = a.boardId.toString();
