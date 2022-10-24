@@ -51,6 +51,7 @@ export class BoxService {
             return of(null);
 
         return ajax.get(BoxEndPoints.FolderContents(folderId), Headers).pipe(
+            tap(console.log),
             map(result => result?.response ? result.response : null),
             take(1)
         )

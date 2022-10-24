@@ -67,6 +67,7 @@ const TaskTemplate = (item) => {
 }
 
 const BoardTemplate = (item) => {
+    let projectId = _.last(item.project.nesting);
     return <span onClick={(e) => onClickHandler(e, `Projects?ProjectId=${projectId}&BoardId=${item.board.id}&GroupId=${item.group.id}`)}>
         {item.board.name.replace('/', ' / ') + ", " + item.group.name}</span>;
 }
@@ -118,7 +119,7 @@ export const AllocationsComponent = ({headerHeight}) => {
         SetAllocationNesting(nesting.filter(n => !!n));
         SetTitles(titles);
 
-    }, [])
+    }, [searchParams])
 
     useEffect(() => {
         let d = searchParams.get('Department');
