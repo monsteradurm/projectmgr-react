@@ -6,6 +6,7 @@ import { ScrollingPage } from "../General/ScrollingPage.component";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { SetNavigationHandler, SetTitles } from "../../Application.context";
 import * as _ from 'underscore';
+import { Stack } from "react-bootstrap";
 
 export const GalleryComponent = ({headerHeight}) => {
     const [item, setItem] = useState(SUSPENSE);
@@ -13,6 +14,8 @@ export const GalleryComponent = ({headerHeight}) => {
     const [id, setId] = useState(SUSPENSE);
     const items = useGalleryItems();
     const [searchParams, setSearchParams] = useSearchParams();
+    const [url, setUrl] = useState(null);
+
     SetNavigationHandler(useNavigate());
 
     useEffect(() => {
@@ -24,17 +27,23 @@ export const GalleryComponent = ({headerHeight}) => {
         if (items === SUSPENSE || id === SUSPENSE || id === null || items === null)
             return;
 
-        setItem(
-            _.find(items, i => i.id.toString() === id.toString())
-        )
+        const result = _.find(items, i => i.id.toString() === id.toString());
+        if (result)
+            setItem(
+                result
+            )
     }, [items, id])
 
     useEffect(() => {
         let titles = ['Gallery'];
 
-        if (item.nesting) {
+        if (item?.nesting) {
             titles = titles.concat(item.nesting);
         } 
+        if (item?.shared_link?.download_url) {
+            setUrl(item.shared_link.download_url);
+        }
+
         if (title) {
             titles.push(title);
         }
@@ -45,6 +54,7 @@ export const GalleryComponent = ({headerHeight}) => {
     if ([item, id].indexOf(SUSPENSE) >= 0)
         return <Loading text="Retrieving Gallery Item..." />
 
-    console.log(item);
-    return <pre style={{textAlign: "left", padding: 20}}>{ JSON.stringify(item, null, 4)}</pre>
+    return <Stack direction="horizontal" style={{justifyContent: 'center', height: 'calc(100vh - 150px)', marginTop: 25}}>
+        <video src={url} style={{objectFit: 'fill', height: '100%', width: 'auto'}} controls />
+    </Stack>
 }
