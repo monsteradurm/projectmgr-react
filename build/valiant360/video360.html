@@ -44,19 +44,35 @@
 				};
 			})();
 
-			$(document).ready(function() {
-
-				var OPTIONS = {
+			const OPTIONS = {
                     fov: 35,
                     clickAndDrag: true,
                     //lat: 45,
                     //lon: 90,
-					autoplay: false,
-					muted: false,
+					autoplay: true,
+					muted: true,
                     hideControls: false,
                     keyboardControls: false,
 					flatProjection: false
-                }
+			}
+
+			let initialized = false;
+			$('#viewer').on('DOMSubtreeModified', function(){
+				const videos = document.getElementsByTagName('video');
+				if (videos.length > 0 && !initialized) {
+					initialized = true;
+					videos[0].addEventListener('loadeddata', () => {
+						delay(() => {
+							$('#viewer').trigger('click')
+							$('#viewer').find('.playButton').trigger('click')
+							$('#viewer').Valiant360('unmute')
+						}, 100)
+						
+					})
+				}
+			});
+			
+			$(document).ready(function() {
 				$('#viewer').Valiant360(OPTIONS);
 			});
 		</script>
