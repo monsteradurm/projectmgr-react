@@ -62,8 +62,14 @@ export const GalleryComponent = ({headerHeight}) => {
 
     return <Stack direction="horizontal" style={{justifyContent: 'center', height: 'calc(100vh - 150px)', marginTop: 25}}>
         {
-            item?.tags?.includes('360Video') ? <iframe src={"/video360?id=" + id} style={{width: '100%', height: '100%', paddingLeft: 25, paddingRight: 25}}></iframe> 
-            : <video src={item?.shared_link?.download_url} style={{objectFit: 'fill', height: '100%', width: 'auto'}} controls />
+            item?.tags?.includes('360Video') ? 
+                <iframe src={"/video360?id=" + id} style={{width: '100%', height: '100%', paddingLeft: 25, paddingRight: 25}}></iframe>
+
+                : (
+                    item?.tags?.includes('360Image') ? 
+                    <iframe src={"/image360?id=" + id} style={{width: '100%', height: '100%', paddingLeft: 25, paddingRight: 25}}></iframe>
+                    : <video src={item?.shared_link?.download_url} style={{objectFit: 'fill', height: '100%', width: 'auto'}} controls />
+                )
         }
         
     </Stack>
