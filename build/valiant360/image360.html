@@ -15,7 +15,7 @@
 		object-fit: fill;
 		border: solid 4px black !important;
 		overflow: hidden !important;" 
-		
+        
 		data-photo-src="__REVIEW_URL__"></div> 
 		<script type="text/javascript" src="valiant360/js/jquery-1.7.2.min.js"></script>
 		<script type="text/javascript" src="valiant360/js/three.min.js"></script>
@@ -24,19 +24,8 @@
 		<script type="text/javascript" src="valiant360/jquery.valiant360.js"></script>
 
 		<script type="text/javascript">
-			var OPTIONS = {
-                    fov: 60,
-                    clickAndDrag: true,
-                    //lat: 45,
-                    //lon: 90,
-					autoplay: false,
-					muted: false,
-                    hideControls: false,
-                    keyboardControls: false,
-					flatProjection: false
-                }
 			$(document).ready(function() {
-				$('#viewer').Valiant360(OPTIONS);
+				$('#viewer').Valiant360();
 			});
 		
 		</script>

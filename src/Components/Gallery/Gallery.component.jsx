@@ -2,12 +2,10 @@ import { useGalleryItems } from "./Gallery.context";
 import { useState, useEffect } from "react";
 import { SUSPENSE } from "@react-rxjs/core";
 import { Loading } from "../General/Loading";
-import { ScrollingPage } from "../General/ScrollingPage.component";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { SetNavigationHandler, SetTitles } from "../../Application.context";
 import * as _ from 'underscore';
 import { Stack } from "react-bootstrap";
-import { PanoramicVideo } from "./PanoramicVideo.component";
 import { BoxService } from "../../Services/Box.service";
 import { take } from "rxjs";
 

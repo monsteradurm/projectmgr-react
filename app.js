@@ -98,12 +98,14 @@ fs.readFile('proxy.conf.json', (err, data) => {
       });
       
     app.use(express.static(__dirname+'/build'));
-    
+
     app.get('/video360', function(req, res) {
         const id = req.query.id;
         const SDK = require('box-node-sdk').getPreconfiguredInstance(environment);
         const client = SDK.getAppAuthClient('enterprise', environment.enterpriseID);
+        console.log("HERE: " + id.toString());
         client.files.getDownloadURL(id?.toString()).then(downloadURL => {
+            console.log("Download URL: " + downloadURL);
             fs.readFile(path.join(__dirname+'/build/valiant360/video360.html'), 'utf-8', (err, html) => {
                 res.send(ejs.render(html.replace('__REVIEW_URL__', downloadURL)))
             });
@@ -114,7 +116,9 @@ fs.readFile('proxy.conf.json', (err, data) => {
         const id = req.query.id;
         const SDK = require('box-node-sdk').getPreconfiguredInstance(environment);
         const client = SDK.getAppAuthClient('enterprise', environment.enterpriseID);
+        console.log("HERE: " + id.toString());
         client.files.getDownloadURL(id?.toString()).then(downloadURL => {
+            console.log("Download URL: " + downloadURL);
             fs.readFile(path.join(__dirname+'/build/valiant360/image360.html'), 'utf-8', (err, html) => {
                 res.send(ejs.render(html.replace('__REVIEW_URL__', downloadURL)))
             });
