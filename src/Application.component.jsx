@@ -24,6 +24,7 @@ import { ApplicationsComponent } from './Components/Applications/Applications.co
 import { GalleryComponent } from './Components/Gallery/Gallery.component';
 import { SignOutComponent } from './Components/Signout/Signout';
 import { AllocationsComponent } from './Components/Allocations/Allocations';
+import { GalleryUpdateComponent } from './System/GalleryUpdate';
 
 const preventMouseProps = (evt) => {
   evt.stopPropagation();
@@ -143,6 +144,8 @@ function App() {
                 <Route path="/Support" element={<SupportComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
                 <Route path="/SignOut" element={<SignOutComponent />} />
                 <Route path="/Projects" element={<Project 
+                  headerHeight={appHeaderRef.current?.clientHeight ?? 0} />} />
+                <Route path="/GalleryUpdate" element={<GalleryUpdateComponent 
                   headerHeight={appHeaderRef.current?.clientHeight ?? 0} />} />
               </Routes>
             </> : null

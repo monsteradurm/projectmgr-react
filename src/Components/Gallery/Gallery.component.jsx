@@ -7,6 +7,9 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { SetNavigationHandler, SetTitles } from "../../Application.context";
 import * as _ from 'underscore';
 import { Stack } from "react-bootstrap";
+import { PanoramicVideo } from "./PanoramicVideo.component";
+import { BoxService } from "../../Services/Box.service";
+import { take } from "rxjs";
 
 export const GalleryComponent = ({headerHeight}) => {
     const [item, setItem] = useState(SUSPENSE);
@@ -14,7 +17,6 @@ export const GalleryComponent = ({headerHeight}) => {
     const [id, setId] = useState(SUSPENSE);
     const items = useGalleryItems();
     const [searchParams, setSearchParams] = useSearchParams();
-    const [url, setUrl] = useState(null);
 
     SetNavigationHandler(useNavigate());
 
@@ -27,11 +29,18 @@ export const GalleryComponent = ({headerHeight}) => {
         if (items === SUSPENSE || id === SUSPENSE || id === null || items === null)
             return;
 
-        const result = _.find(items, i => i.id.toString() === id.toString());
-        if (result)
-            setItem(
-                result
-            )
+        const entry = _.find(items, i => i.id.toString() === id.toString());
+        const parent = entry?.parent?.id;
+        if (parent) {
+            BoxService.FolderContents$(parent).pipe(take(1)).subscribe((contents) => {
+                const entries = contents?.entries;
+                if (!entries)
+                    return;
+                const result = _.find(entries, i => i.id.toString() === id.toString());
+                if (result)
+                    setItem({...result, nesting: entry.nesting});
+            })
+        }
     }, [items, id])
 
     useEffect(() => {
@@ -40,9 +49,6 @@ export const GalleryComponent = ({headerHeight}) => {
         if (item?.nesting) {
             titles = titles.concat(item.nesting);
         } 
-        if (item?.shared_link?.download_url) {
-            setUrl(item.shared_link.download_url);
-        }
 
         if (title) {
             titles.push(title);
@@ -55,6 +61,10 @@ export const GalleryComponent = ({headerHeight}) => {
         return <Loading text="Retrieving Gallery Item..." />
 
     return <Stack direction="horizontal" style={{justifyContent: 'center', height: 'calc(100vh - 150px)', marginTop: 25}}>
-        <video src={url} style={{objectFit: 'fill', height: '100%', width: 'auto'}} controls />
+        {
+            item?.tags?.includes('360Video') ? <iframe src={"/video360?id=" + id} style={{width: '100%', height: '100%', paddingLeft: 25, paddingRight: 25}}></iframe> 
+            : <video src={item?.shared_link?.download_url} style={{objectFit: 'fill', height: '100%', width: 'auto'}} controls />
+        }
+        
     </Stack>
 }

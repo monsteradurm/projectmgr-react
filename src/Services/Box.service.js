@@ -15,6 +15,12 @@ const Headers = {
 
 export class BoxService {
    
+      static StreamDownload$ = (url) => {
+          return ajax.get(url).pipe(
+              tap(console.log)
+          )
+      }
+      
       static SubFolder$ = (root, folder) => {
         /*  root should be box id for this folder, eg. 0 (for the root)
             folder should be the folder name, ie. LADUS_DisneyUS */

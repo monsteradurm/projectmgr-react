@@ -62,6 +62,17 @@
             "^/admin-atlassian/*": ""
         }
     },
+    "/liquid-box-shared/*": {
+        "target": "https://liquidanimation.box.com/shared/static/",
+        "secure": false,
+        "changeOrigin": true,
+        "loglevel": "debug",
+        "followRedirects": true,
+        "onProxyReq": true,
+        "pathRewrite": {
+            "^/liquid-box-shared/*": ""
+        }
+    },
     "/box/*": {
         "target": "https://api.box.com/2.0/",
         "secure": false,
