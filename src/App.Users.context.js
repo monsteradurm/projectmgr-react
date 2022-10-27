@@ -279,11 +279,11 @@ const [useMondayUser, MondayUser$] = bind(
 
 
 const [useManagers, Managers$] = bind(
-    MondayService.ApplicationsTeam$, []
+    MondayService.ManagementTeam$, []
 )
 
 const [useApplicationTeam, ApplicationTeam$] = bind(
-    MondayService.ManagementTeam$, []
+    MondayService.ApplicationsTeam$, []
 )
 
 const [useCanReviewApplications, ] = bind(
@@ -335,7 +335,8 @@ const [useMyBoards, MyBoards$] = bind(
             return userIsAdmin$(user.name).pipe(
                 switchMap(isAdmin => isAdmin ? FirebaseService.AllBoards$().pipe(take(1)) : 
                     FirebaseService.MyBoards$(user.id)
-                )
+                ),
+                tap(T => console.log("MY BOARDS", T))
             );
         }),
         tap(t => RemoveQueueMessage(APP_QID, M_GET_BOARD_SUBSCRIPTIONS[0])),

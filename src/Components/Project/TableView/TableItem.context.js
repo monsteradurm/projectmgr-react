@@ -16,9 +16,10 @@ import { ShowEditTagsDialog } from "./TableItemDlgs/TableItem.EditTags.context";
 import { ShowEditDescriptionDialog } from "./TableItemDlgs/TableItem.EditDescription.context";
 import { ShowEditTimelineDialog } from "./TableItemDlgs/TableItem.EditTimeline.context";
 import { AutoCloseReviewItemContext, ShowReviewContextMenu } from "./TableItemControls/TableItem.Review.Context";
-import { BoardId$, GroupId$ } from "../Context/Project.Params.context";
+import { BoardId$, GroupId$, ProjectId$ } from "../Context/Project.Params.context";
 import { MondayService } from "../../../Services/Monday.service";
 import { IntegrationsService } from "../../../Services/Integrations.service";
+import { SetTimelineDialogParameters, ShowTimelogDialog } from "../../Timesheet/Timesheet.context";
 
 // current tabs stored according to boarditem
 const _activeTabMap = (BoardItemId, ActiveTab) => ({BoardItemId, ActiveTab});
@@ -265,16 +266,22 @@ const [visibleContextMenusChanged$, ShowContextMenu] = createSignal(_showContext
 
 const [, TableItemDependencies$] = bind(
     (BoardItemId, CurrentReviewId) => 
-    combineLatest([StatusMenu$(BoardItemId), BadgeMenu$(BoardItemId), ArtistMenu$(BoardItemId, CurrentReviewId), IsAdmin$]).pipe(
+    combineLatest([
+        StatusMenu$(BoardItemId), 
+        BadgeMenu$(BoardItemId),
+        ArtistMenu$(BoardItemId, CurrentReviewId), 
+        ProjectId$, BoardId$, GroupId$,
+        IsAdmin$]).pipe(
         switchMap(params => params.indexOf(SUSPENSE) >= 0 ? EMPTY : of(params)),
-        map(([Status, Badges, Artists, isAdmin]) => ({Status, Badges, Artists, isAdmin}))
+        map(([Status, Badges, Artists, ProjectId, BoardId, GroupId, isAdmin]) => 
+            ({Status, Badges, Artists, ProjectId, BoardId, GroupId, isAdmin}))
     ), SUSPENSE
 )
 
 const [useTableItemContextMenu, TableItemContextMenu] = bind(
     (BoardItemId, CurrentReviewId) =>
     TableItemDependencies$(BoardItemId, CurrentReviewId).pipe(
-        map(({Status, Badges, Artists, isAdmin}) => {
+        map(({Status, Badges, Artists, ProjectId, BoardId, GroupId, isAdmin}) => {
             const menu = ([
                 {   label: 'Status',
                     items: Status
@@ -287,6 +294,9 @@ const [useTableItemContextMenu, TableItemContextMenu] = bind(
                 {label: 'Description', command: () => ShowEditDescriptionDialog(BoardItemId)},
                 {label: 'Tags', command: () => ShowEditTagsDialog(BoardItemId, CurrentReviewId)},  
                 { label: 'Timeline', command: () => ShowEditTimelineDialog(BoardItemId, CurrentReviewId)},
+                { separator: true},
+                { label: 'Timesheet Entry', command: () => 
+                    SetTimelineDialogParameters(ProjectId, BoardId, GroupId, BoardItemId, CurrentReviewId, true)},
                 { separator: true},
                 { label: 'Upload New Review', 
                 command: (evt) => ShowUploadReviewDialog(BoardItemId)

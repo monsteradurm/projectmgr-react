@@ -13,6 +13,7 @@ import { TableItemEditTimeline } from "./TableItemDlgs/TableItem.EditTimeline";
 import { TableItemEditDeliveredDate } from "./TableItemDlgs/TableItem.EditDeliveredDate";
 import { TableItemAddToReview } from "./TableItemDlgs/TableItem.AddToReview";
 import { TableItemCopyToReview } from "./TableItemDlgs/TableItem.CopyToReview";
+import { TimelogDlg } from "../../Timesheet/TimelogDlg.component";
 
 // hold boarditem id for when a mouse is over a boarditem row
 const [MouseOverRowChanged$, SetMouseOverRow] = createSignal()
@@ -33,6 +34,7 @@ export const TableView = () => {
         <TableItemEditDeliveredDate />
         <TableItemAddToReview />
         <TableItemCopyToReview />
+        <TimelogDlg />
         {
             GroupedBoardItems.map(([group, ids]) => {
                 

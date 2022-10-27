@@ -26,7 +26,7 @@ const BuildNestedMenu = ([title, items], key=null) => {
                 title = titleArr.join('.');
             }
             return <Dropdown.Item key={key + '_' + i.id} onClick={
-                () => SetCurrentRoute('/Gallery?id=' + i.id + '&title=' + title)
+                () => SetCurrentRoute('/Gallery?id=' + i.id + '&title=' + title.replace('&', 'AND'))
             }>{title}</Dropdown.Item>
         })
 

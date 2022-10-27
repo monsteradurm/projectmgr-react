@@ -1,6 +1,6 @@
 import { bind, SUSPENSE } from "@react-rxjs/core";
 import { BehaviorSubject, combineLatest, concat, concatAll, concatMap, toArray,
-    concatWith, debounceTime, EMPTY, filter, from, map, merge, of, reduce, scan, switchMap, take, tap, withLatestFrom } from "rxjs";
+    concatWith, debounceTime, EMPTY, filter, from, map, merge, of, reduce, scan, switchMap, take, tap, withLatestFrom, catchError } from "rxjs";
 import { SyncsketchService } from "@Services/Syncsketch.service";
 import { Board$, Group$, Project$ } from "./Project.Objects.context";
 import { ReviewById, ReviewLink$ } from "./Project.Review.context";
@@ -307,7 +307,13 @@ const [useLatestThumbnail, LatestThumbnail$] = bind(
             else if (!link) return of(null);
             
             const id = ItemIdFromSyncLink(link);
-            return SyncsketchService.ThumbnailFromId$(id);
+            console.log("HERE", id);
+            return SyncsketchService.ThumbnailFromId$(id).pipe(
+                catchError(err => {
+                    console.log("Could not retrieve Thumbnail from ItemId: " + id)
+                    return of(null);
+                })
+            );
         }),
         
     ), SUSPENSE

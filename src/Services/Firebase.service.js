@@ -4,7 +4,7 @@ import { getFirestore, collection as fsCollection, doc as fsDoc, query, runTrans
     deleteDoc, QuerySnapshot   } from 'firebase/firestore';
 import { collectionChanges, doc, collection } from 'rxfire/firestore';
 import * as _ from 'underscore';
-import { BehaviorSubject, concatAll, concatMap, EMPTY, expand, scan, firstValueFrom, from, map,debounceTime, mergeMap, reduce, skip, switchMap, take, tap, toArray, withLatestFrom } from "rxjs";
+import { BehaviorSubject, concatAll, concatMap, EMPTY, expand, scan, firstValueFrom, from, map,debounceTime, mergeMap, reduce, skip, switchMap, take, tap, toArray, withLatestFrom, of, catchError } from "rxjs";
 import { ajax } from "rxjs/ajax";
 import { ReverseProxy } from "../Environment/proxy.environment";
 import moment from 'moment';
@@ -132,6 +132,58 @@ export class FirebaseService {
             take(1),
         )
    }
+   static GetTimesheet$(artist, date) {
+       console.log("Retrieving timesheet", artist, date)
+        if (!artist || !date || artist.length < 1 || date.length < 1)
+            return of(null);
+        
+        const sheetExists$ = FirebaseService.DocumentExists$('Timesheets/' + artist + '/Sheets/' + date).pipe(
+            tap(t => console.log("Date Exists", t))
+        );
+        
+        console.log("SheetPath: /" + 'Timesheets/' + artist + '/Sheets/' + date)
+        return sheetExists$.pipe(
+            switchMap(exists => exists ? FirebaseService.GetDocument$('Timesheets/' + artist + '/Sheets', date).pipe(
+                map(d => d.data())
+            ) : of(null))
+        )
+   }
+
+   static StoreTimesheet$(sheet) {
+       console.log("Storing sheet: ", sheet);
+
+        if (!sheet)
+            return of(null);
+
+        const docRef = fsDoc(FirebaseService.db, `Timesheets/${sheet.artist}/Sheets/` + sheet.date);
+        return from(setDoc(docRef, sheet)).pipe(
+            map(res => sheet),
+            catchError(err => {
+                console.log(err);
+                return of(null);
+            })
+        )
+   }
+
+   static AllProjects$ = FirebaseService.AllDocsFromCollection$('ProjectManager').pipe(
+       tap(t => console.log("All Projects", t))
+   )
+
+   static AllBoardsFromProject$ = (projectId) => FirebaseService.AllDocsFromCollection$('ProjectManager/' + projectId + '/Boards');
+   static AllGroups$ = (projectId, boardId) => FirebaseService.AllDocsFromCollection$(
+       `ProjectManager/${projectId}/Boards/${boardId}/Groups`
+   )
+   static AllItems$ = (projectId, boardId, groupId) => FirebaseService.AllDocsFromCollection$(
+    `ProjectManager/${projectId}/Boards/${boardId}/Groups/${groupId}/Items`
+)
+
+   static GetBoardItem$({projectId, boardId, groupId, itemId}) {
+        if (!projectId || !boardId || !groupId || !itemId) return of(null);
+        const col = `ProjectManager/${projectId}/Boards/${boardId}/Groups/${groupId}/Items`;
+        return FirebaseService.GetDocument$(col, itemId).pipe(
+            map(d => d.data())
+        )
+   } 
 
    static MyBoards$(mondayId) {
        return FirebaseService.Collection$('ProjectManager').pipe(
@@ -276,6 +328,35 @@ export class FirebaseService {
             map(doc => doc.exists()),
             take(1)
         )
+    }
+
+    static GetTimesheets$(artist, range) {
+        console.log("Retrieving tmesheets", artist, range)
+        if (!artist || !range || range.length < 1)
+            return of([]);
+            
+        const fs = getFirestore();
+        const references = [];
+
+        range.forEach(d => {
+            const path = `Timesheets/${artist}/Sheets/${d}`;
+            const ref = fsDoc(FirebaseService.db, path)
+            references.push(ref);
+        })
+
+        return runTransaction(FirebaseService.db, async (t) => {
+            const results = []
+            for(var i=0; i < references.length; i++) {
+                const sfDoc = await t.get(references[i]);
+                if (sfDoc.exists()) {
+                    results.push(sfDoc.data())
+                } else {
+                    results.push({date: references[i].id})
+                }
+            }
+
+            return Promise.all(results);
+        })
     }
 
     static GetBatchedMondayItems(items) {

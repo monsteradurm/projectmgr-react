@@ -45,11 +45,11 @@ export const GalleryComponent = ({headerHeight}) => {
         let titles = ['Gallery'];
 
         if (item?.nesting) {
-            titles = titles.concat(item.nesting);
+            titles = titles.concat(item.nesting.map(t => t.replace('AND', '&')));
         } 
 
         if (title) {
-            titles.push(title);
+            titles.push(title.replace('AND', '&'));
         }
 
         SetTitles(titles);

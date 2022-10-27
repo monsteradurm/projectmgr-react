@@ -119,9 +119,9 @@ three.js r65 or higher
             lon: 0,
             lat: 0,
             loop: "loop",
-            muted: false,
+            muted: true,
 			volume: 0.5,
-            debug: true,
+            debug: false,
             flatProjection: false,
             autoplay: true
         };
@@ -712,14 +712,9 @@ three.js r65 or higher
         },
 
         // Video specific functions, exposed to controller
-        unmute: function() {
-            this._video.muted = false;
-        },
-        
         play: function() {
             //code to play media
             this._video.play();
-            
         },
 
         pause: function() {

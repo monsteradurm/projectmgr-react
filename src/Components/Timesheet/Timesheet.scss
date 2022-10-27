@@ -1,0 +1,301 @@
+.pm-timesheet-range {
+    td > span.p-highlight {
+        color: #ffffff !important;
+        background: #009cc2 !important;
+    }
+    td.p-datepicker-today > span:not(.p-highlight) {
+        background: gray !important;
+        color: #ffffff !important;
+        border: none !important;
+    }
+    td > span {
+        font-weight: 600 !important;
+    }
+}
+.pm-filterbar {
+    .p-calendar {
+        height: 37px !important;
+        .p-button {
+            background: #777;
+            box-shadow:none !important;
+            outline: none !important;
+            border: none !important;
+            border-top-right-radius: 0px;
+            border-bottom-right-radius: 0px;
+        }
+        .p-button:hover {
+            background: #999;
+        }
+        .p-inputtext {
+            box-shadow: none !important;
+            border: inherit;
+            font-weight: 600;
+            font-size: 18px;
+            border-radius: 0px
+        }
+        .p-inputtext:focus {
+            border-bottom: solid 2px black !important;
+        }
+    }
+}
+.pm-timesheet-logs {
+    background:transparent;
+    font-size: 15px;
+    /*
+    tbody > tr:not(:last-child):not(:first-child) {
+        box-shadow: none !important;
+        border-bottom: solid 1px gray;
+    }*/
+    .p-datatable-emptymessage {
+        font-size: 16px !important;
+    }
+    .p-datatable .p-datatable-tbody > tr, tr, th, .p-datatable .p-datatable-thead > tr > th {
+        background: transparent !important;
+    }
+    .p-datatable-wrapper {
+        border:none !important;
+        thead {
+            border-bottom-width: 2px !important;
+            border-color: inherit !important;
+        }
+    }
+    .p-rowgroup-header > td {
+        justify-content: start;
+        font-weight: 600;
+        padding-bottom: 0px !important;
+    }
+}
+
+.pm-timesheet {
+    .p-datatable-emptymessage {
+        font-style: italic;
+    }
+    th.log-item {
+        justify-content: end;
+    }
+    .p-datatable-row-expansion {
+        box-shadow: inset 0px 5px 20px -10px !important;
+        background: #f0f0f0 !important;
+        td {
+            background: transparent !important;
+        }
+    }
+    .p-button {
+        background: black;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+    .p-button:hover {
+        background: #444;
+    }
+    padding: 50px 100px;
+    thead {
+        border-bottom: solid 1px #aaa !important;
+        
+    }
+    .p-column-title{
+        font-size: 18px !important;
+    }
+    tr {
+        th.log-approved > div {
+           text-align: left;
+           justify-content: start;
+           padding-left: 0px;
+       } 
+       th.log-projects, th.log-departments {
+           justify-content: center;
+       }
+       th.log-date {
+           justify-content: end;
+           display: flex;
+           text-align: right;
+       }
+       th.log-hours, th.log-tasks, th.log-submitted, th.log-tomorrow {
+           justify-content: center;
+       }
+    }
+    
+
+    .p-datatable-wrapper {
+        border: solid 1px;
+        border-radius: 5px;
+    }
+    .log-project-tag{
+        font-size: 18px;
+        padding-left: 12px;
+        text-align:center;
+        color: gray;
+    }
+    .log-project-tag:not(:last-child)::after {
+        content: ','
+    }
+    .log-project-tag:hover {
+        cursor: pointer;
+        color: black;
+        padding-left: 0px;
+        -webkit-text-stroke-width: 0.25px;
+    }
+    .log-project-tag:hover::before {
+        content: '#'
+    }
+
+    .log-expander, td.log-expander, .p-row-toggler {
+        width: 50px !important;
+    }
+    .log-date {
+        width: 100px !important;
+        padding-right: 40px;
+    }
+    .log-projects {
+        padding-left: 30px !important;
+    }
+
+    tbody > tr {
+        td.log-date {
+            text-align: right;
+            justify-content: end;
+        }
+        td.log-projects {
+            text-align: left;
+            font-weight: 600;
+        }
+        td.log-tasks {
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        td.log-hours {
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        td.log-submitted {
+            text-align: center;
+        }
+        td.log-ribbon {
+            width: 15px !important;
+            background: #aaa;
+            padding: 0 !important;
+        }
+    }
+
+    
+    .p-datatable .p-datatable-tbody > tr {
+        font-size: 18px;
+        font-weight: 400;
+    }
+
+    .log-tick {
+        font-size: 35px;
+        color: rgb(0, 133, 119);
+    }
+}
+
+#pm-new-timelog {
+    height: fit-content;
+    #Project.p-dropdown, #Board.p-dropdown, #Group.p-dropdown {
+        width: 250px;
+    }
+    #Item.p-dropdown, #Review.p-dropdown{
+        width: 540px;
+    }
+    .p-dialog-header {
+        padding: 0px;
+    }
+
+    .p-dialog-title {
+        padding: 15px 20px !important;
+        background: black;
+    }
+    .p-button-icon-only {
+        height: 100% ;
+    }
+    .pm-dialogHeader > span > span > span {
+        margin-right: 50px !important;
+    }
+    .p-component.p-inputtext {
+        border:none;
+        border-bottom: solid 1px black !important;
+        box-shadow:none;
+        border-radius: 0;
+        width: 100%;
+        font-size: 20px;
+    }
+    .p-component.p-inputtext:focus {
+        border-color: black !important;
+    }
+
+    .p-float-label > label{
+        margin-top: -0.7rem;
+        margin-left: -0.8rem;
+        top: 0;
+        font-size: 14px;
+    }
+    .p-float-label > label{
+        margin-top: -0.7rem;
+        margin-left: -0.8rem;
+        top: 0;
+        font-size: 14px;
+    }
+    .p-button {
+        background: black !important;
+    }
+
+    .p-button:hover {
+        background: #444 !important;
+    }
+
+    .p-calendar > input, .p-calendar > button, .p-inputnumber > input, 
+    .p-inputnumber > .p-inputnumber-button-group {
+        height: 45px;
+    }
+
+    .p-dropdown {
+        box-shadow: none !important;
+        border:none;
+        border-bottom: solid 2px #ccc;
+        border-radius: 0;
+        width: 500px;
+        height: 45px;
+    }
+
+    .p-dropdown.p-focus {
+        border-color: black;
+    }
+    .p-dropdown-label.p-inputtext {
+        border: none !important;
+    }
+
+    .p-dialog-footer {
+        padding: 1.5rem !important;
+    }
+
+    .p-fieldset .p-fieldset-legend {
+        padding: 0.5rem 1rem;
+        width: 200px !important;
+        text-align:center;
+        margin: 0;
+        border: 1px solid #000000;
+        color: #ffffff;
+        background: #262626;
+        font-weight: 700;
+        border-radius: 6px;
+        border-bottom: none;
+        width: fit-content;
+        border-radius: 5px;
+        text-align: left;
+        border-bottom-left-radius: 0px;
+        border-bottom-right-radius: 0px;
+    }
+    .p-fieldset-legend-text {
+        font-weight: 600;
+        font-size: 20px;
+    }
+    .p-toggleable-content {
+        border: solid 1px black;
+        border-radius: 5px;
+        padding: 1rem 1rem 0.5rem 1rem;
+        border-top-left-radius: 0px;
+    }
+}
+

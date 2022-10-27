@@ -387,6 +387,7 @@ export const [useHomeMenu, HomeMenu$] = bind(
     ]).pipe(
         map(([review, feedback, progress, assistance, allocations]) => 
         [   allocations,
+            <Dropdown.Item key="Timesheets" onClick={() => SetCurrentRoute("/Timesheets")}>Timesheets</Dropdown.Item>,
             <Dropdown.Divider key="Allocations_Divider" />,
             review, feedback, progress, assistance,
             <Dropdown.Divider key="HomeMenu_Divider"/>,

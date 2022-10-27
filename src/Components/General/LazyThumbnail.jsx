@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useState } from "react"
-import { take } from "rxjs";
+import { catchError, of, take } from "rxjs";
 import { DeferredContent } from "primereact/deferredcontent";
 import { Skeleton } from "primereact/skeleton";
 import { NavigationService } from "../../Services/Navigation.service";
@@ -20,7 +20,9 @@ export const LazyThumbnail = ({thumbnail$, width, height, url, borderRadius, bor
         if (!visible || !thumbnail$)
             return;
 
-        const sub = thumbnail$.subscribe((thumb) => {
+        const sub = thumbnail$.pipe(
+            catchError((err) => of(null))
+        ).subscribe((thumb) => {
             if (thumb && thumb !== SUSPENSE) {
                 console.log("SETTING THUMBNAIL: " + thumb)
                 setObservedThumbnail(thumb);
