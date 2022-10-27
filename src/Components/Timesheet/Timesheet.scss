@@ -66,6 +66,18 @@
     }
 }
 
+.pm-tag-filters {
+    .pm-tag {
+        cursor: pointer;
+        color: gray;
+        margin-right: 20px;
+        font-weight: 500;
+    }
+    .pm-tag:hover {
+        color: black;
+    }
+}
+
 .pm-timesheet {
     .p-datatable-emptymessage {
         font-style: italic;
