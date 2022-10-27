@@ -92,7 +92,7 @@ export const TimesheetComponent = ({}) => {
         let dep = searchParams.get("Department");
         if (!dep?.length)
             dep = null;
-        let fb = searchParams.get("FeedbackDepartment");
+        let fb = searchParams.get("Feedback");
         if (!fb?.length)
             fb = null;
 
@@ -125,7 +125,7 @@ export const TimesheetComponent = ({}) => {
         if (fb !== feedbackFilter)
             setFeedbackFilter(fb);
 
-        if(!fb === null && searchParams.has('Feedback')) {
+        if(fb === null && searchParams.has('Feedback')) {
             searchParams.delete('Feedback');
             searchChanged = true;
         }
@@ -141,6 +141,7 @@ export const TimesheetComponent = ({}) => {
         if (searchChanged)
             setSearchParams(searchParams);
         
+        console.log({fb})
         setForcedRefresh(forcedRefresh  + 1);
     }, [searchParams])
 
