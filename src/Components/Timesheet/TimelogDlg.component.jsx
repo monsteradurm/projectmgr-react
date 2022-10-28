@@ -1,6 +1,6 @@
 import { Button, Calendar, Dialog, Fieldset, InputNumber, InputTextarea } from "primereact"
 import { Stack } from "react-bootstrap";
-import { useState, useRef, useEffect, useId } from "react";
+import { useState, useRef, useEffect, useId, useMemo, memo } from "react";
 import { useLoggedInUser, useMondayUser } from "../../Application.context";
 import { SetTimelogBoardId, SetTimelogGroupId, SetTimelogItemId, SetTimelogProjectId, 
     SetTimelogReviewId, SetTimesheetDate, ShowTimelogDialog, SubmitTimeEntry, useTimelogBoardId, 
@@ -9,7 +9,7 @@ import { SetTimelogBoardId, SetTimelogGroupId, SetTimelogItemId, SetTimelogProje
     useTimelogItemDepartment, 
     useTimelogItemId, useTimelogItemOptions, useTimelogProjectId, useTimelogProjectOptions, useTimelogReviewId, 
     useTimelogReviewName, 
-    useTimelogReviewOptions, useTimeLogReviews, useTimesheet, useTimesheetArtist, useTimesheetDate } from "./Timesheet.context"
+    useTimelogReviewOptions, useTimeLogReviews, useTimesheet, useTimesheetArtist, useTimesheetDate, useTimelogElementTask } from "./Timesheet.context"
 import moment from 'moment';
 import * as _ from 'underscore';
 
@@ -18,6 +18,19 @@ import { useBoardItemName } from "../Project/Context/Project.Item.context";
 import { DialogHeader } from "../General/DialogHeader";
 import { Dropdown } from "primereact/dropdown";
 import { GenerateUUID } from "../../Helpers/UUID";
+import { SetProjectId } from "../Project/Context/Project.Params.context";
+
+
+
+const DlgDropdown = ({value, options, onChange, title, optionLabel, optionValue, width}) => {
+    return (
+        <span className="p-float-label" style={{width: width ? width : null}}>
+            <Dropdown id={title} value={value} options={options} onChange={(e) => onChange(e.value)} 
+            optionLabel={optionLabel} optionValue={optionValue} panelClassName="log-dropdown-panel"></Dropdown>
+            <label htmlFor={title}>{title}</label> 
+        </span>
+    )
+}
 
 export const TimelogDlg = ({}) => {
     const visible = useTimelogDlg();
@@ -40,7 +53,6 @@ export const TimelogDlg = ({}) => {
     const ReviewName = useTimelogReviewName();
     const ReviewId = useTimelogReviewId();
     const Item = useTimelogItem();
-    const [Element, Task] = useBoardItemName(ItemId);
     const [hours, setHours] = useState(1);
     const [notes, setNotes] = useState('');
     const [entry, setEntry] = useState(null);
@@ -84,61 +96,44 @@ export const TimelogDlg = ({}) => {
 
     }, [Sheet, BoardId, ProjectId, GroupId, ItemId, ReviewId])
 
-    const header = (
-        <DialogHeader color="black"
-            HeaderRight={([Element, Task, Item].indexOf(SUSPENSE) < 0) && Element + ", " + Task}
-            Header="New Timesheet Entry" onClose={() => ShowTimelogDialog(false)}/>
-    )
+    const header = useMemo(() => 
+        <DialogHeader color="black" Header="New Timesheet Entry" onClose={() => ShowTimelogDialog(false)}/>
+    , [])
+
+
+    if (!visible)
+        return <></>
 
     return (
         <Dialog id="pm-new-timelog" showHeader={true} visible={visible} style={{overflowY: 'hidden'}}
             header={header} closable={false}
             className="pm-dialog" ref={dialogRef} onHide={() => ShowTimelogDialog(false)}>
-
                 <Stack id="timelog-container" gap={3} style={{padding: 30, height: '100%'}}>
                 <Fieldset legend="Item">
                     <Stack direction="horizontal" gap={3}>
-                        <span className="p-float-label">
-                            <Dropdown id="Project" value={ProjectId} options={ProjectOptions} onChange={(e) => SetTimelogProjectId(e.value)}
-                            placeholder="Select A Project" optionLabel="name" optionValue="name"></Dropdown>
-                            <label htmlFor="Project">Project</label> 
-                        </span>
                         {
-                            BoardOptions &&
-                            <span className="p-float-label" style={{marginLeft: 20}}>
-                                <Dropdown id="Board" value={BoardId} options={BoardOptions} onChange={(e) => SetTimelogBoardId(e.value)}
-                                    placeholder="Select A Board" optionLabel="name" optionValue="id"></Dropdown>
-                                <label htmlFor="Board">Board</label> 
-                            </span>
+                            ProjectOptions ? <DlgDropdown options={ProjectOptions} value={ProjectId} optionLabel="label" optionValue="value"
+                            onChange={SetTimelogProjectId} title="Project"/> : null
                         }
                         {
-                            GroupOptions &&
-                            <span className="p-float-label" style={{marginLeft: 20}}>
-                                <Dropdown id="Group" value={GroupId} options={GroupOptions} onChange={(e) => SetTimelogGroupId(e.value)}
-                                    placeholder="Select A Group" optionLabel="name" optionValue="id"></Dropdown>
-                                <label htmlFor="Group">Group</label> 
-                            </span>
+                            BoardOptions && <DlgDropdown options={BoardOptions} value={BoardId} optionLabel="name" optionValue="id"
+                            onChange={SetTimelogBoardId} title="Board" />
                         }
-                        
+                        {
+                            GroupOptions && <DlgDropdown options={GroupOptions} value={GroupId} optionLabel="name" optionValue="id"
+                            onChange={SetTimelogGroupId} title="Group"/>
+                        }
                     </Stack>
                     <Stack direction="horizontal" gap={3} style={{marginTop: 40}}>
                         {
-                            ItemOptions &&
-                            <span className="p-float-label">
-                                <Dropdown id="Item" value={ItemId} options={ItemOptions} onChange={(e) => SetTimelogItemId(e.value)}
-                                    placeholder="Select An Item" optionLabel="name" optionValue="id"></Dropdown>
-                                <label htmlFor="Item">Item</label> 
-                            </span>
+                            ItemOptions && <DlgDropdown options={ItemOptions} value={ItemId} optionLabel="name" optionValue="id"
+                            onChange={SetTimelogItemId} title="Item"/>
                         }
 
                         {
-                        ReviewOptions &&
-                            <span className="p-float-label" style={{marginLeft: 20}}>
-                                <Dropdown id="Review" value={ReviewId} options={ReviewOptions} onChange={(e) => SetTimelogReviewId(e.value)}
-                                placeholder="Select A Review" optionLabel="name" optionValue="id"></Dropdown>
-                                <label htmlFor="Review">Review</label> 
-                            </span>
-                    }
+                            ReviewOptions && <DlgDropdown options={ReviewOptions} value={ReviewId} optionLabel="name" optionValue="id"
+                            onChange={SetTimelogReviewId} title="Review" />
+                        }
                     </Stack>
                 </Fieldset>
                 
@@ -146,7 +141,7 @@ export const TimelogDlg = ({}) => {
                     <Stack direction="horizontal" gap={3} style={{marginTop: 20}}>
                         <span className="p-float-label" style={{width: 250}}>
                             <label htmlFor="icon">Date</label>
-                            <Calendar id="icon" value={Date} dateFormat="yy-mm-dd"
+                            <Calendar id="icon" value={Date} dateFormat="yy-mm-dd" panelClassName="pm-timesheet-date"
                                 onChange={(e) => SetTimesheetDate(e.value)} showIcon/>
                         </span>
 
@@ -191,6 +186,5 @@ export const TimelogDlg = ({}) => {
                             }}>Save Entry</Button>
                     </Stack>
             </Stack>
-                
         </Dialog>)
 }

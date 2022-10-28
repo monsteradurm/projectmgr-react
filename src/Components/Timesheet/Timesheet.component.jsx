@@ -1,11 +1,11 @@
-import { faCheck, faCircleCheck } from "@fortawesome/free-solid-svg-icons";
+import { faCheck, faCircleCheck, faChevronCircleRight, faChevronDown, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, Column, DataTable } from "primereact"
-import { useEffect, useId, useState } from "react"
+import { Button, Column, ContextMenu, DataTable } from "primereact"
+import { useEffect, useId, useRef, useState } from "react"
 import { Stack } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { SetNavigationHandler, SetTitles } from "../../Application.context";
-import { SheetRibbonColor, TimesheetData, useTimesheetArtist, useTimesheets } from "./Timesheet.context";
+import { SetSelectedLog, SetSelectedSheet, SheetRibbonColor, TimesheetData, useLogContextMenu, useSelectedLog, useSelectedSheet, useSheetContextMenu, useTimesheetArtist, useTimesheets } from "./Timesheet.context";
 import moment from 'moment';
 import * as _ from 'underscore';
 
@@ -17,6 +17,8 @@ import { Loading } from "../General/Loading";
 import { SUSPENSE } from "@react-rxjs/core";
 import { TimesheetLogs } from "./Timesheet.Logs";
 import { toggleStatusFilter } from "../Project/Overview.filters";
+import { TimelogDlg } from "./TimelogDlg.component";
+import { TimesheetFollowing } from "./Timesheet.FollowingDlg";
 
 const DateTemplate = (sheet) => {
     const date = sheet?.date;
@@ -67,6 +69,14 @@ const ApprovedTemplate = (log) => {
 }
 
 export const TimesheetComponent = ({}) => {
+    const LogContextMenu = useLogContextMenu();
+    const SelectedLog = useSelectedLog();
+    const logContextRef = useRef();
+    
+    const SheetContextMenu = useSheetContextMenu();
+    const SelectedSheet = useSelectedSheet();
+    const sheetContextRef = useRef();
+
     const [logs, setLogs] = useState([]);
     const [searchParams, setSearchParams] = useSearchParams();
     const [header, setHeader] = useState('This Week');
@@ -85,6 +95,7 @@ export const TimesheetComponent = ({}) => {
     const [expandedRows, setExpandedRows] = useState([]); 
 
     const [forcedRefresh, setForcedRefresh] = useState(0);
+    
 
     SetNavigationHandler(useNavigate());
     
@@ -141,7 +152,6 @@ export const TimesheetComponent = ({}) => {
         if (searchChanged)
             setSearchParams(searchParams);
         
-        console.log({fb})
         setForcedRefresh(forcedRefresh  + 1);
     }, [searchParams])
 
@@ -150,10 +160,10 @@ export const TimesheetComponent = ({}) => {
         if (Timesheets === SUSPENSE)
             return;
 
+        console.log("HERE", Timesheets);
         let result = [...Timesheets];
         if (projectFilter?.length || feedbackFilter?.length || departmentFilter?.length || approversFilter?.length) {
             result = result.filter(r => r?.logs?.length);
-            console.log("filtering: ", {projectFilter, departmentFilter, feedbackFilter, approversFilter});
             if (projectFilter?.length) {
                 result = result.filter(r => r?.logs?.filter(l => l.ProjectId.startsWith(projectFilter))?.length)
             }
@@ -182,7 +192,7 @@ export const TimesheetComponent = ({}) => {
 
         const sheets = result?.filter(l => !!l.artist);
         setSheetCount(sheets.length);
-        const entries = _.flatten(_.pluck(logs, 'logs').filter(l => !!l && l.length));
+        const entries = _.flatten(_.pluck(result, 'logs').filter(l => !!l && l.length));
 
         setHourCount(_.reduce(entries, (acc, e) => acc += e.hours || 0, 0));
         setTaskCount(_.uniq(_.pluck(entries, 'ItemId')).length);
@@ -253,21 +263,50 @@ export const TimesheetComponent = ({}) => {
         return <TagComponent tags={departments} searchKey="Department"/>
     }
 
+    const expanderTemplate = (sheet) => {
+        const canExpand = sheet?.logs?.length || sheet?.tomorrow;
+        const isExpanded = !!expandedRows[sheet?.date]
+        const dates = Object.keys(expandedRows);
+        if (!canExpand) return <></>
+    
+        return <FontAwesomeIcon icon={isExpanded ? faChevronDown : faChevronRight} className="sheet-expander"
+        style={{cursor: 'pointer', fontSize: 20, color: '#bbb'}} 
+            onClick={() => {
+                if (isExpanded) {
+                    
+                    let entries = dates.filter(d => d !== sheet.date).map(d => [d, true])
+                    setExpandedRows(Object.fromEntries(entries));
+                } else {
+                    let expanded = {...expandedRows};
+                    expanded[sheet.date] = true;
+                    setExpandedRows(
+                        expanded
+                    )
+                }
+            }} />
+    }
+
     if (Timesheets === SUSPENSE)
         return <Loading text="Retrieving Timesheets..." />
 
-    console.log("TIMESHEETS", Timesheets?.length)
     return (
         <>
+        <TimelogDlg />
+        <TimesheetFollowing />
         <TimeSheetFilterBar />
+        <ContextMenu model={SheetContextMenu} ref={sheetContextRef} onHide={() => SetSelectedSheet(null)} className="pm-sheet-context"/>
+        <ContextMenu model={LogContextMenu} ref={logContextRef} onHide={() => SetSelectedLog(null)} className="pm-sheet-context"/>
         <Stack direction="vertical">
             <div style={{fontSize: 30, marginBottom: 10, marginTop: 10, fontWeight: 700, color: '#555',
                 textAlign: 'left', paddingLeft: 100}}>{header}</div>
             <DataTable value={logs} className="pm-timesheet" style={{paddingTop: 0}} scrollable scrollHeight="calc(100vh - 250px)" 
-                onRowToggle={(e) => setExpandedRows(e.data)}
-                rowExpansionTemplate={TimesheetLogs} dataKey="date" expandedRows={expandedRows}>
+                onRowToggle={(e) => setExpandedRows(e.data)} contextMenuSelection={SelectedSheet}
+                onContextMenuSelectionChange={e => SetSelectedSheet(e.value)}
+                onContextMenu={e => sheetContextRef.current.show(e.originalEvent)}
+                rowExpansionTemplate={(e) => <TimesheetLogs sheet={e} logContextRef={logContextRef} SelectedLog={SelectedLog} />} 
+                    dataKey="date" expandedRows={expandedRows}>
                 <Column body={RibbonTemplate} style={{width: 15, maxWidth: 15}} className="log-ribbon" />
-                <Column expander style={{ width: 50, maxWidth: 50 }} className="log-expander" />
+                <Column body={expanderTemplate} style={{ width: 50, maxWidth: 50 }} className="log-expander" />
                 <Column header="Date" body={DateTemplate} className="log-date" style={{width: 180, maxWidth: 180}}></Column>
                 <Column header="Projects" body={ProjectsTemplate} className="log-projects"></Column>
                 <Column header="Departments" body={DepartmentsTemplate} className="log-projects"></Column>
