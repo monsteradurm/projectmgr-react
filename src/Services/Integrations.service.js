@@ -22,9 +22,9 @@ export class IntegrationsService {
                     html += `<div style="margin-left:45px;margin-top:10px">${GroupName}, ${ItemName}`; 
                     
                     if (ReviewName) {
-                        html += '(' + ReviewName
+                        html += ', ' + ReviewName
                         if (FeedbackDepartment)
-                            html += ' - ' + FeedbackDepartment
+                            html += ' (' + FeedbackDepartment
                         html += ')'
                     }
                     html += '</div>'
