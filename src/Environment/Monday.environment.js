@@ -142,12 +142,14 @@ export const MondayGraphQL = {
         name
       }
     }}`,
+    
     ManagementTeam: `query{ teams (ids:434736) {
       id
       name
       users {
         id
         name
+        email
       }
     }}`,
 

@@ -19,7 +19,7 @@ import { AutoCloseReviewItemContext, ShowReviewContextMenu } from "./TableItemCo
 import { BoardId$, GroupId$, ProjectId$ } from "../Context/Project.Params.context";
 import { MondayService } from "../../../Services/Monday.service";
 import { IntegrationsService } from "../../../Services/Integrations.service";
-import { SetTimelineDialogParameters, ShowTimelogDialog } from "../../Timesheet/Timesheet.context";
+import { SetTimelineDialogParameters, SetTimesheetDate, ShowTimelogDialog } from "../../Timesheet/Timesheet.context";
 
 // current tabs stored according to boarditem
 const _activeTabMap = (BoardItemId, ActiveTab) => ({BoardItemId, ActiveTab});
@@ -295,8 +295,10 @@ const [useTableItemContextMenu, TableItemContextMenu] = bind(
                 {label: 'Tags', command: () => ShowEditTagsDialog(BoardItemId, CurrentReviewId)},  
                 { label: 'Timeline', command: () => ShowEditTimelineDialog(BoardItemId, CurrentReviewId)},
                 { separator: true},
-                { label: 'Timesheet Entry', command: () => 
-                    SetTimelineDialogParameters(ProjectId, BoardId, GroupId, BoardItemId, CurrentReviewId, true)},
+                { label: 'Timesheet Entry', command: () => {
+                    SetTimesheetDate(new Date());
+                    SetTimelineDialogParameters(ProjectId, BoardId, GroupId, BoardItemId, CurrentReviewId, true)}
+                },
                 { separator: true},
                 { label: 'Upload New Review', 
                 command: (evt) => ShowUploadReviewDialog(BoardItemId)

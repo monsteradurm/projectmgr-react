@@ -2,10 +2,11 @@ import { bind, SUSPENSE } from "@react-rxjs/core";
 import { createSignal } from "@react-rxjs/utils";
 import { combineLatest, concatMap, EMPTY, map, merge, of, shareReplay, switchMap, take, tap, withLatestFrom } from "rxjs";
 import { SendToastError, SendToastSuccess } from "../../App.Toasts.context";
-import { IsAdmin$, LoggedInUser$, MondayUser$ } from "../../App.Users.context";
+import { IsAdmin$, LoggedInUser$, Managers$, MondayUser$ } from "../../App.Users.context";
 import { FirebaseService } from "../../Services/Firebase.service";
 import moment from 'moment';
 import * as _ from 'underscore';
+import { IntegrationsService } from "../../Services/Integrations.service";
 
 export const [TimelogProjectIdChanged$, SetTimelogProjectId] = createSignal(id => id);
 export const [TimelogBoardIdChanged$, SetTimelogBoardId] = createSignal(id => id);
@@ -268,14 +269,15 @@ export const SubmitTimeEntry = (entry) => {
             result.updated = moment(moment.now()).format('YYYY-MM-DD HH:mm:ss')
             return result;
         }),
-        switchMap(sheet => FirebaseService.StoreTimesheet$(sheet))
+        switchMap(sheet => FirebaseService.StoreTimesheet$(sheet)),
+        take(1)
     ).subscribe(res => {
         if (!res) {
             SendToastError("Error Saving Timesheet");
         } else {
 
             TimeSheets$.pipe(take(1)).subscribe((sheets) => {
-                const result = [...sheets.filter(s => s.date !== update.date), res]
+                const result = [...sheets.filter(s => s.date !== res.date), res]
                 UpdateTimeSheets(result);
             })
 
@@ -293,7 +295,8 @@ export const SubmitFollowing = (following) => {
             result.tomorrow = following;
             return result;
         }),
-        switchMap(sheet => FirebaseService.StoreTimesheet$(sheet))
+        switchMap(sheet => FirebaseService.StoreTimesheet$(sheet)),
+        take(1)
     ).subscribe(res => {
         if (!res) {
             SendToastError("Error Saving Timesheet");
@@ -305,7 +308,7 @@ export const SubmitFollowing = (following) => {
             })
 
             SendToastSuccess("Timesheet: " + res.date + " Updated!");
-            ShowTimelogDialog(false);
+            ShowTimesheetFollowingDlg(false);
         }
     })
 }
@@ -340,9 +343,12 @@ export const [useSheetContextMenu, SheetContextMenu$] = bind(
                         {label: 'Entry', command: () => {
                                 ShowTimelogDialog(true)}},
                         {label: 'Next Day', command: () => ShowTimesheetFollowingDlg(true)}
-                ]},
-                {separator: true},
-                {label: 'Submit For Review'}]
+                ]}]
+            if (sheet?.tomorrow || sheet?.logs?.length)
+                menu = menu.concat([,
+                    {separator: true},
+                    {label: 'Submit For Review', command: () => SubmitTimesheetForReview(sheet)}])
+
             return menu;
         })
     ), [{label: 'Loading...'}]
@@ -352,7 +358,7 @@ export const [SelectedLogChanged$, SetSelectedLog] = createSignal((sheet, log) =
 export const [useSelectedLog, SelectedLog$] = bind(
     SelectedLogChanged$, {log: null, sheet: null}
 )
-export const [SheetsUpdatedEvent$, UpdateTimeSheets] = createSignal((sheet, action) => ({sheet, action}));
+export const [SheetsUpdatedEvent$, UpdateTimeSheets] = createSignal(sheets => sheets);
 
 export const [useLogContextMenu, SheetLogMenu$] = bind(
     SelectedLog$.pipe(
@@ -394,6 +400,8 @@ export const RemoveLogEntry = (sheet, log) => {
         }
 
         const result = {...sheet, logs: sheet.logs.filter(l => l.id !== log.id)};
+        const now = moment(moment.now()).format('YYYY-MM-DD HH:mm:ss');
+        result.updated = now;
         return FirebaseService.StoreTimesheet$(result).pipe(
             take(1)
         ).subscribe((update) => { 
@@ -419,6 +427,36 @@ const FetchTimeSheets$ = RangeArray$.pipe(
 export const [useTimesheets, TimeSheets$] = bind(
     merge(FetchTimeSheets$, SheetsUpdatedEvent$), SUSPENSE
 ) 
+
+export const SubmitTimesheetForReview = (sheet) => {
+    const emails$ = Managers$.pipe(
+        map(users => _.pluck(users, 'email')),
+        map(emails => emails.join('; ')),
+        take(1)
+    );
+
+    emails$.pipe(
+        switchMap(emails => IntegrationsService.Email_EndOfDay$(sheet, emails))
+    ).pipe(
+        take(1)
+    ).subscribe(res => {
+        if (res.status === 200) {
+            SendToastSuccess("Timmesheet " + sheet.date + " Submitted for Review!");
+            const now = moment(moment.now()).format('YYYY-MM-DD HH:mm:ss');
+            sheet.submitted = now;
+            sheet.updated = now;
+            FirebaseService.StoreTimesheet$(sheet).pipe(take(1)).subscribe((res) => { 
+                if (!res) SendToastError("Error Updating Timesheet \"Submission Status\"");
+                else {
+                    TimeSheets$.pipe(take(1)).subscribe((sheets) => {
+                        const result = [...sheets.filter(s => s.date !== sheet.date)]
+                        UpdateTimeSheets(result);
+                    })
+                }
+            })
+        }
+    });
+}
 
 export const SheetRibbonColor = (sheet) => {
     const date = sheet?.date;

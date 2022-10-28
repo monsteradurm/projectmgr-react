@@ -416,6 +416,7 @@ export {
     MondayUser$,
     LoggedInUser$,
     MyBoards$,
+    Managers$,
     useMyBoards,
     useAllUsers,
     useGroupedUsers,
