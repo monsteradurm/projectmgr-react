@@ -10,6 +10,7 @@ import { useMyBoards, useAllUsers, useMondayUser, SetAuthentication, useMyAvatar
 
 const PrimaryColors = {
     'Projects' : '#008577',
+    'Project' : '#008577',
     'Timesheets' : '#009cc2',
     'Home' : '#009cc2',
     'Allocations' : '#009cc2',
@@ -23,6 +24,7 @@ const PrimaryColors = {
 
 const Icons = {
     'Projects' : 'green.ico',
+    'Project' : 'green.ico',
     'Timesheets' : 'blue.ico',
     'Home' : 'blue.ico',
     'Allocations' : 'blue.ico',
