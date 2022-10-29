@@ -1,7 +1,7 @@
 import { bind, SUSPENSE } from "@react-rxjs/core";
 import { createSignal } from "@react-rxjs/utils";
 import { combineLatest, concatMap, EMPTY, map, merge, of, shareReplay, switchMap, take, tap, withLatestFrom } from "rxjs";
-import { SendToastError, SendToastSuccess } from "../../App.Toasts.context";
+import { SendToastError, SendToastSuccess, SendToastWarning } from "../../App.Toasts.context";
 import { IsAdmin$, LoggedInUser$, Managers$, MondayUser$ } from "../../App.Users.context";
 import { FirebaseService } from "../../Services/Firebase.service";
 import moment from 'moment';
@@ -363,15 +363,20 @@ export const [useSelectedSheet, SelectedSheet$] = bind(
 
 export const [useSheetContextMenu, SheetContextMenu$] = bind(
     SelectedSheet$.pipe(
-        map((sheet) => {
+        withLatestFrom(TimesheetView$),
+        withLatestFrom(TimesheetArtist$),
+        map(([[sheet, view], user]) => {
             if (sheet?.date)
                 SetTimesheetDate(moment(sheet.date).toDate());
             
+            if (view === 'Submissions')
+                return [{label: 'Approve', command: () => ApproveTimesheet(sheet, user) }];
+
             let menu = [{label: 'Add', items: [
                         {label: 'Entry', command: () => {
                                 ShowTimelogDialog(true)}},
                         {label: 'Next Day', command: () => ShowTimesheetFollowingDlg(true)}
-                ]}]
+            ]}]
             if (sheet?.tomorrow || sheet?.logs?.length)
                 menu = menu.concat([,
                     {separator: true},
@@ -459,14 +464,38 @@ const FetchTimeSheetSubmissions$ = SubmissionRangeArray$.pipe(
 
 export const [useTimesheetSubmissions, TimeSheetSubmissions$] = bind(
     merge(FetchTimeSheetSubmissions$, SheetsUpdatedEvent$).pipe(
-        tap(console.log)
+        map(sheets => _.sortBy(sheets, s => s.date).reverse())
     ), SUSPENSE
 ) 
 
 export const [useTimesheets, TimeSheets$] = bind(
-    merge(FetchTimeSheets$, SheetsUpdatedEvent$), SUSPENSE
+    merge(FetchTimeSheets$, SheetsUpdatedEvent$).pipe(
+        map(sheets => _.sortBy(sheets, s => s.date).reverse())
+    ), SUSPENSE
 ) 
 
+export const ApproveTimesheet = (sheet, user) => {
+    let result = {...sheet};
+    let approved = sheet.approved || [];
+    if (approved.indexOf(user) >= 0) {
+        SendToastWarning("You have already approved this Timesheet!");
+        return;
+    }
+    approved.push(user);
+    result.approved = approved;
+
+    FirebaseService.StoreTimesheet$(result).pipe(take(1)).subscribe((res) => { 
+        if (!res) SendToastError("Error Updating Timesheet \"Submission Status\"");
+        else {
+            TimeSheetSubmissions$.pipe(take(1)).subscribe((sheets) => {
+                const updated = [...sheets.filter(s => s.date !== sheet.date || s.artist !== sheet.artist), result]
+                UpdateTimeSheets(updated);
+                console.log("UPDATED TIME SHEETS", updated);
+                SendToastSuccess("Timesheet Approved");
+            })
+        }
+    })
+}
 export const SubmitTimesheetForReview = (sheet) => {
     const emails$ = Managers$.pipe(
         map(users => _.pluck(users, 'email')),
@@ -488,7 +517,7 @@ export const SubmitTimesheetForReview = (sheet) => {
                 if (!res) SendToastError("Error Updating Timesheet \"Submission Status\"");
                 else {
                     TimeSheets$.pipe(take(1)).subscribe((sheets) => {
-                        const result = [...sheets.filter(s => s.date !== sheet.date)]
+                        const result = [...sheets.filter(s => s.date !== sheet.date), sheet]
                         UpdateTimeSheets(result);
                     })
                 }

@@ -1,5 +1,5 @@
 
-import { useAppMessageQueue, SetAuthentication, useLoggedInUser, UpdateLocation, useCurrentRoute, SetCurrentRoute, useTitles, useNavigationHandler } from './Application.context';
+import { useAppMessageQueue, SetAuthentication, useLoggedInUser, UpdateLocation, useCurrentRoute, SetCurrentRoute, useTitles, useNavigationHandler, useFavIcon } from './Application.context';
 import { OAuthScopes } from '@Environment/Graph.environment';
 import './Application.component.scss';
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
@@ -27,6 +27,7 @@ import { AllocationsComponent } from './Components/Allocations/Allocations';
 import { GalleryUpdateComponent } from './System/GalleryUpdate';
 import { TimesheetComponent } from './Components/Timesheet/Timesheet.component';
 import { TimesheetSubmissions } from './Components/Timesheet/Timesheet.Submissions';
+import { Helmet } from 'react-helmet';
 
 const preventMouseProps = (evt) => {
   evt.stopPropagation();
@@ -61,6 +62,7 @@ function App() {
   const toastRef = useRef();
   const Toaster = useToaster(toastRef);
   const [URL, NavigationHandler] = useNavigationHandler()
+  const FavIcon = useFavIcon();
 
   const authRequest = useMemo(() => ({
     ...OAuthScopes,
@@ -117,6 +119,13 @@ function App() {
   }, [account, accessToken, inProgress])
 
   return (
+    <>
+      <Helmet>
+        <link
+          rel="shortcut icon"
+          href={"./" + FavIcon}
+        />
+      </Helmet>
       <div className="App" onContextMenu={preventMouseProps}>
         <BrowserRouter>
         <header className="App-header" ref={appHeaderRef}>
@@ -156,6 +165,7 @@ function App() {
           }
           </BrowserRouter>
       </div>
+    </>
   )
 }
 

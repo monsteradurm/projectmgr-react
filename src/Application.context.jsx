@@ -11,7 +11,6 @@ import { useMyBoards, useAllUsers, useMondayUser, SetAuthentication, useMyAvatar
 const PrimaryColors = {
     'Projects' : '#008577',
     'Timesheets' : '#009cc2',
-    'TimesheetSubmissions' : '#009cc2',
     'Home' : '#009cc2',
     'Allocations' : '#009cc2',
     'Support' : '#86b64b',
@@ -22,6 +21,18 @@ const PrimaryColors = {
     'default' : 'gray'
 }
 
+const Icons = {
+    'Projects' : 'green.ico',
+    'Timesheets' : 'blue.ico',
+    'Home' : 'blue.ico',
+    'Allocations' : 'blue.ico',
+    'Support' : 'lime.ico',
+    'Users' : 'purple.ico',
+    'Applications' : 'purple.ico',
+    'Gallery' : 'orange.ico',
+    'GalleryUpdate' : 'orange.ico',
+    'default' : 'blue.ico'
+}
 
 // --- Header Display ---
 const [TitlesChanged$, SetTitles] = createSignal();
@@ -71,6 +82,24 @@ const [useNavigationHandler, NavigationHandler$] = bind(
     ), [SUSPENSE, SUSPENSE]
 )
 
+const [useFavIcon, FavIcon$] = bind(
+    RouteChangedEvent$.pipe(
+        map(location => {
+            if (location === '' || location === '/')
+                return 'Home'
+            let route = location;
+            if (location[0] === '/')
+                route = location.split('/')[1];
+
+            if (route.indexOf('?') >= 1)
+                route = route.split('?')[0]
+            return route;
+        }),
+        tap(t => console.log("Icon Changed: ", t)),
+        map(t => Icons[t] ? Icons[t] : Icons['default'])
+    ), EMPTY
+)
+
 const [usePrimaryColor, PrimaryColor$] = bind(
     RouteChangedEvent$.pipe(
         map(location => {
@@ -95,6 +124,7 @@ export {
     SetTitles,
     useTitles,
     usePrimaryColor,
+    useFavIcon,
     useNavigationHandler,
     SetNavigationHandler,
     SendToastError,
