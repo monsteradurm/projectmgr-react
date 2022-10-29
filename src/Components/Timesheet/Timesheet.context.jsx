@@ -14,7 +14,14 @@ export const [TimelogGroupIdChanged$, SetTimelogGroupId] = createSignal(id => id
 export const [TimelogItemIdChanged$, SetTimelogItemId] = createSignal(id => id);
 export const [TimelogReviewIdChanged$, SetTimelogReviewId] = createSignal(id => id);
 export const [TimesheetDateChanged$, SetTimesheetDate] = createSignal(id => id);
+
 export const [TimesheetRangeChanged$, SetTimesheetRange] = createSignal(id => id);
+export const [TimesheetSubmissionRangeChanged$, SetTimesheetSubmissionRange] = createSignal(id => id);
+
+export const [TimesheetViewChanged$, SetTimesheetView] = createSignal(v => v);
+export const [useTimesheetView, TimesheetView$] = bind(
+    TimesheetViewChanged$, SUSPENSE
+)
 
 export const [TimeSheetFollowingChanged$, ShowTimesheetFollowingDlg] = createSignal(vis => vis);
 export const [useTimesheetFollowingDlg, ] = bind (
@@ -24,11 +31,17 @@ export const [useTimesheetFollowingDlg, ] = bind (
 export const ThisWeek = [moment(moment.now()).startOf('week').toDate(),
     moment(moment.now()).endOf('week').toDate()];
 
+export const Today = [moment(moment.now()).startOf('day').toDate(),
+    moment(moment.now()).endOf('day').toDate()];
+
 export const ThisMonth = [moment(moment.now()).startOf('month').toDate(),
     moment(moment.now()).endOf('month').toDate()];
 
 export const [useTimesheetRange, TimesheetRange$] = bind(
     TimesheetRangeChanged$, ThisWeek
+)
+export const [useTimesheetSubmissionRange, TimesheetSubmissionRange$] = bind(
+    TimesheetSubmissionRangeChanged$, Today
 )
 
 export const [useTimesheetDate, TimeSheetDate$] = bind(
@@ -328,6 +341,21 @@ export const [, RangeArray$] = bind(
     ), []
 )
 
+export const [, SubmissionRangeArray$] = bind(
+    TimesheetSubmissionRange$.pipe(
+        map(range => range.map(d => moment(d))),
+        map(([startDate, endDate]) => {
+            let now = startDate.clone(), dates = [];
+        
+            while (now.isSameOrBefore(endDate)) {
+                dates.push(now.format('YYYY-MM-DD'));
+                now.add(1, 'days');
+            }
+            return dates.reverse();
+        })
+    ), []
+)
+
 export const [SelectedSheetChanged$, SetSelectedSheet] = createSignal(sheet => sheet);
 export const [useSelectedSheet, SelectedSheet$] = bind(
     SelectedSheetChanged$, null
@@ -423,6 +451,17 @@ const FetchTimeSheets$ = RangeArray$.pipe(
     withLatestFrom(TimesheetArtist$),
     switchMap(([range, artist]) => FirebaseService.GetTimesheets$(artist, range)),
 )
+
+const FetchTimeSheetSubmissions$ = SubmissionRangeArray$.pipe(
+    switchMap((range) => FirebaseService.GetTimesheetSubmissions$(range)),
+    map(sheets => sheets.filter(s => !!s.submitted)),
+)
+
+export const [useTimesheetSubmissions, TimeSheetSubmissions$] = bind(
+    merge(FetchTimeSheetSubmissions$, SheetsUpdatedEvent$).pipe(
+        tap(console.log)
+    ), SUSPENSE
+) 
 
 export const [useTimesheets, TimeSheets$] = bind(
     merge(FetchTimeSheets$, SheetsUpdatedEvent$), SUSPENSE

@@ -5,7 +5,7 @@ import { useEffect, useId, useRef, useState } from "react"
 import { Stack } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { SetNavigationHandler, SetTitles } from "../../Application.context";
-import { SetSelectedLog, SetSelectedSheet, SheetRibbonColor, TimesheetData, useLogContextMenu, useSelectedLog, useSelectedSheet, useSheetContextMenu, useTimesheetArtist, useTimesheets } from "./Timesheet.context";
+import { SetSelectedLog, SetSelectedSheet, SetTimesheetView, SheetRibbonColor, ThisMonth, TimesheetData, Today, useLogContextMenu, useSelectedLog, useSelectedSheet, useSheetContextMenu, useTimesheetArtist, useTimesheets, useTimesheetSubmissionRange, useTimesheetSubmissions, useTimesheetView } from "./Timesheet.context";
 import moment from 'moment';
 import * as _ from 'underscore';
 
@@ -19,6 +19,7 @@ import { TimesheetLogs } from "./Timesheet.Logs";
 import { toggleStatusFilter } from "../Project/Overview.filters";
 import { TimelogDlg } from "./TimelogDlg.component";
 import { TimesheetFollowing } from "./Timesheet.FollowingDlg";
+import { useIsAdmin } from "../../App.Users.context";
 
 const DateTemplate = (sheet) => {
     const date = sheet?.date;
@@ -68,31 +69,49 @@ const ApprovedTemplate = (log) => {
         color="rgb(0, 156, 194)" align="right"/>)
 }
 
+const ArtistTemplate = (log) => {
+    if (!log?.artist)
+        return <></>
+
+    return(
+        <Stack direction="horizontal" gap={3}>
+            <SupportUsers artists={[log.artist]} id={log.id} searchKey="Submitters"
+            color="rgb(0, 156, 194)" align="left" width={50}/>
+        </Stack>)
+}
+
 export const TimesheetComponent = ({}) => {
     const LogContextMenu = useLogContextMenu();
     const SelectedLog = useSelectedLog();
     const logContextRef = useRef();
-    
+    const isAdmin = useIsAdmin();
     const SheetContextMenu = useSheetContextMenu();
     const SelectedSheet = useSelectedSheet();
     const sheetContextRef = useRef();
-
+    const View = useTimesheetView();
     const [logs, setLogs] = useState([]);
     const [searchParams, setSearchParams] = useSearchParams();
     const [header, setHeader] = useState('This Week');
     const Range = useTimesheetRange();
+    const SubmissionRange = useTimesheetSubmissionRange();
+
     const Timesheets = useTimesheets();
+    const Submissions = useTimesheetSubmissions();
+
     const User = useTimesheetArtist();
     const [sheetCount, setSheetCount] = useState(null);
     const [hourCount, setHourCount] = useState(null);
     const [taskCount, setTaskCount] = useState(null);
     const [reviewCount, setReviewCount] = useState(null);
     const [projectCount, setProjectCount] = useState(null);
+    const [artistCount, setArtistCount] = useState(null);
+    const [submitCount, setSubmitCount] = useState(null);
     const [projectFilter, setProjectFilter] = useState(null);
     const [departmentFilter, setDepartmentFilter] = useState(null);
     const [feedbackFilter, setFeedbackFilter] = useState(null);
     const [approversFilter, setApproversFilter] = useState(null)
     const [expandedRows, setExpandedRows] = useState([]); 
+    const [submitterFilter, setSubmitterFilter] = useState(null);
 
     const [forcedRefresh, setForcedRefresh] = useState(0);
     
@@ -100,6 +119,12 @@ export const TimesheetComponent = ({}) => {
     SetNavigationHandler(useNavigate());
     
     useEffect(() => {
+        let view = searchParams.get("View");
+        if (!view?.length)
+            SetTimesheetView(isAdmin ? User : 'Submissions');
+        else if (view !== View)
+            SetTimesheetView(view);
+
         let dep = searchParams.get("Department");
         if (!dep?.length)
             dep = null;
@@ -114,6 +139,10 @@ export const TimesheetComponent = ({}) => {
         let proj = searchParams.get("Project");
         if (!proj?.length)
             proj = null;
+
+        let sub = searchParams.get("Submitters");
+        if (!sub?.length)
+            sub = null;
 
         let searchChanged = false;
 
@@ -149,6 +178,11 @@ export const TimesheetComponent = ({}) => {
             searchChanged = true;
         }
 
+        if(sub === null && searchParams.has('Submitters')) {
+            searchParams.delete('Submitters');
+            searchChanged = true;
+        }
+
         if (searchChanged)
             setSearchParams(searchParams);
         
@@ -157,11 +191,11 @@ export const TimesheetComponent = ({}) => {
 
     useEffect(() => {
         
-        if (Timesheets === SUSPENSE)
+        if (Timesheets === SUSPENSE || Submissions === SUSPENSE)
             return;
 
-        console.log("HERE", Timesheets);
-        let result = [...Timesheets];
+        let result = View === 'Submissions' ? [...Submissions] : [...Timesheets];
+
         if (projectFilter?.length || feedbackFilter?.length || departmentFilter?.length || approversFilter?.length) {
             result = result.filter(r => r?.logs?.length);
             if (projectFilter?.length) {
@@ -175,6 +209,11 @@ export const TimesheetComponent = ({}) => {
             if (feedbackFilter?.length) {
                 result = result.filter(r => r?.logs?.filter(l => l.FeedbackDepartment === feedbackFilter)?.length)
             }
+
+            if (submitterFilter?.length) {
+                result = result.filter(r => r?.artist.replace(/\s/g, '') === submitterFilter)
+            }
+
             if (approversFilter?.length) {
                 result = result.filter(r => {
                     
@@ -199,30 +238,49 @@ export const TimesheetComponent = ({}) => {
         setProjectCount(_.uniq(_.pluck(entries, 'ProjectId')).length);
         setReviewCount(_.uniq(_.pluck(entries, 'ReviewId').filter(r => !!r)).length);
         setHourCount(_.reduce(entries, (acc, e) => acc += e.hours || 0, 0));
+        setArtistCount(_.uniq(_.pluck(entries, 'artist')).length);
+        setSubmitCount(sheets.filter(e => !!e.submitted).length);
 
-    }, [Timesheets, feedbackFilter, departmentFilter, projectFilter, approversFilter, forcedRefresh])
+    }, [Timesheets, feedbackFilter, departmentFilter, projectFilter, approversFilter, forcedRefresh, View, Submissions])
 
     useEffect(() => {
-        const range_str = JSON.stringify(Range);
-        if (range_str === JSON.stringify(ThisWeek))
+
+        if (View === SUSPENSE)
+            return;
+
+        
+        const range = View === 'Submissions' ? SubmissionRange : Range;
+        const today_str = Today.map(d => moment(d).format('YYYY-MM-DD')).join(' - ');
+        const week_str = ThisWeek.map(d => moment(d).format('YYYY-MM-DD')).join(' - ');
+        const range_str = range.map(d => moment(d).format('YYYY-MM-DD')).join(' - ');
+        const isMonth = (moment(range[0]).startOf('month').format('YYYY-MM-DD') + ' - ' + moment(range[0]).endOf('month').format('YYYY-MM-DD')) === range_str;
+    
+        if (range_str === week_str)
             setHeader('This Week');
+        else if (isMonth)
+            setHeader(moment(range[0]).format('MMMM YYYY'))
+        else if (range_str === today_str)
+            setHeader('Today')
 
         else {
-            const years = Range.map(d => moment(d).format('YYYY'));
+            let range = View === 'Submissions' ? SubmissionRange : Range;
+            const years = range.map(d => moment(d).format('YYYY'));
             const sameYears = years[0] === years[1];
             if (sameYears)
-                setHeader(Range.map(d => moment(d).format('MMM Do')).join(' - ') + ', ' + years[0])
+                setHeader(range.map(d => moment(d).format('MMM Do')).join(' - ') + ', ' + years[0])
             else
-                setHeader(Range.map(d => moment(d).format('MMM Do YYYY')).join(' - '))
+                setHeader(range.map(d => moment(d).format('MMM Do YYYY')).join(' - '))
         }
-    }, [Range])
+    }, [Range, View, SubmissionRange])
 
     useEffect(() => {
         let titles = ['Home', 'Timesheets'];
-        if (User)
-            titles.push(User);
+
+        if (View !== SUSPENSE && !!User)
+            titles.push(View === 'Submissions' ? 'Submissions' : User);
         SetTitles(titles);
-    }, [User])
+
+    }, [User, View])
 
     
     const TagComponent = ({tags, searchKey}) => {
@@ -298,14 +356,17 @@ export const TimesheetComponent = ({}) => {
         <ContextMenu model={LogContextMenu} ref={logContextRef} onHide={() => SetSelectedLog(null)} className="pm-sheet-context"/>
         <Stack direction="vertical">
             <div style={{fontSize: 30, marginBottom: 10, marginTop: 10, fontWeight: 700, color: '#555',
-                textAlign: 'left', paddingLeft: 100}}>{header}</div>
-            <DataTable value={logs} className="pm-timesheet" style={{paddingTop: 0}} scrollable scrollHeight="calc(100vh - 250px)" 
+                textAlign: 'left', paddingLeft: 150}}>{header}</div>
+            <DataTable value={logs} className="pm-timesheet" style={{paddingTop: 0, marginLeft: 50, marginRight: 50}} scrollable scrollHeight="calc(100vh - 250px)" 
                 onRowToggle={(e) => setExpandedRows(e.data)} contextMenuSelection={SelectedSheet}
                 onContextMenuSelectionChange={e => SetSelectedSheet(e.value)}
                 onContextMenu={e => sheetContextRef.current.show(e.originalEvent)}
                 rowExpansionTemplate={(e) => <TimesheetLogs sheet={e} logContextRef={logContextRef} SelectedLog={SelectedLog} />} 
                     dataKey="date" expandedRows={expandedRows}>
-                <Column body={RibbonTemplate} style={{width: 15, maxWidth: 15}} className="log-ribbon" />
+                <Column body={ArtistTemplate} className="log-artists" 
+                    style={{position:'absolute', left: -80, padding:5, display: View !== 'Submissions' ? 'none' : null}}></Column>
+                <Column body={RibbonTemplate} style={{width: 15, maxWidth: 15, padding: 0, margin: 0}} className="log-ribbon" />
+
                 <Column body={expanderTemplate} style={{ width: 50, maxWidth: 50 }} className="log-expander" />
                 <Column header="Date" body={DateTemplate} className="log-date" style={{width: 180, maxWidth: 180}}></Column>
                 <Column header="Projects" body={ProjectsTemplate} className="log-projects"></Column>
@@ -313,13 +374,15 @@ export const TimesheetComponent = ({}) => {
                 <Column header="Feedback" body={FeedbackDepartmentsTemplate} className="log-projects"></Column>
                 <Column header="Tasks" body={TasksTemplate} className="log-tasks" style={{width: 150, maxWidth: 150}}></Column>
                 <Column header="Hours" body={HoursTemplate} className="log-hours" style={{width: 150, maxWidth: 150}}></Column>
-                <Column header="Tomorrow" body={TomorrowTemplate} className="log-hours" style={{width: 150, maxWidth: 150}}></Column>
-                <Column header="Submitted" body={SubmittedTemplate} className="log-submitted" style={{width: 150, maxWidth: 150}}></Column>
-                <Column header="Approved" body={ApprovedTemplate} className="log-approved" style={{width: 200, maxWidth: 200}}></Column>
+                <Column header="Next Day" body={TomorrowTemplate} className="log-hours" style={{width: 150, maxWidth: 150}}></Column>
+                <Column header="Submitted" body={SubmittedTemplate} className="log-submitted" 
+                    style={{width: 150, maxWidth: 150, display: View === 'Submissions' ? 'none' : null}}></Column>
                 <Column body={RibbonTemplate} style={{width: 15, maxWidth: 15}} className="log-ribbon" />
+                <Column body={ApprovedTemplate} className="log-approved" 
+                    style={{width: 200, maxWidth: 200, position:'absolute', right: -200, padding: 5}}></Column>
             </DataTable>
             <Stack direction="horizontal" gap={1} className="pm-tag-filters"
-                style={{fontSize: 18, marginRight: 100, marginLeft: 100, marginTop: -30, zIndex: 100}}>
+                style={{fontSize: 18, marginRight: 150, marginLeft: 150, marginTop: -30, zIndex: 100}}>
                 <div style={{marginRight: 20}}><span style={{fontWeight: 600}}>{sheetCount}</span> Timesheets...</div>
                 {
                     projectFilter &&
@@ -354,14 +417,33 @@ export const TimesheetComponent = ({}) => {
 
                 }
                 <div className="mx-auto"></div>
-                <div style={{fontWeight: 600}}>{projectCount}</div>
+                {
+                    View === 'Submissions' &&
+                    <>
+                        <div style={{fontWeight: 600}}>{artistCount}</div>
+                        <div>Artists, </div>
+                    </>
+                }
+                <div style={{fontWeight: 600, marginLeft: View === 'Submissions' ? 10 : 0}}>{projectCount}</div>
                 <div>Projects, </div>
                 <div style={{marginLeft: 10, fontWeight: 600}}>{taskCount}</div>
                 <div>Tasks, </div>
                 <div style={{marginLeft: 10, fontWeight: 600}}>{reviewCount}</div>
                 <div>Reviews, </div>
                 <div style={{marginLeft: 10, fontWeight: 600}}>{hourCount}</div>
-                <div>Hours </div>
+                <div>Hours 
+                {
+                       View !== 'Submissions' &&
+                       <span>,</span>
+                }
+                </div>
+                {
+                     View !== 'Submissions' &&
+                     <>
+                         <div style={{marginLeft: 10, fontWeight: 600}}>{submitCount}</div>
+                         <div>Submissions </div>
+                     </>
+                }
             </Stack>
         </Stack>
     </>)

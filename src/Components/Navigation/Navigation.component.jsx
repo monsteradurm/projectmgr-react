@@ -21,6 +21,7 @@ import { ShowNewTicketDialog, useSupportOptions } from '../Support/Support.conte
 import { useApplicationForms, useApplicationGroups } from '../Applications/Applications.context';
 import { useAllocationsMenu, useMyAllocations } from '../Allocations/Allocations.context';
 import { useGalleryMenu } from '../Gallery/Gallery.context';
+import { useTimesheetArtist } from '../Timesheet/Timesheet.context';
 
 const ClearSyncsketchProjectCache = () => {
     const key = "Syncsketch/Project/"

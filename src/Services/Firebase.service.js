@@ -31,6 +31,13 @@ export class FirebaseService {
             );
     }
 
+    static AllIdsFromCollection$(name) {   
+        return FirebaseService.Collection$(name)
+            .pipe(
+                map((docs) => _.map(docs, (d) => d.id)),
+                take(1)
+            );
+    }
 
     static AllDocsFromCollectionGroup$ (name, subcollection) {
         return FirebaseService.AllDocsFromCollection$(name).pipe(
@@ -155,8 +162,16 @@ export class FirebaseService {
         if (!sheet)
             return of(null);
 
+        const assertArtist$ = FirebaseService.DocumentExists$('Timesheets/' + sheet.artist).pipe(
+            switchMap(exists => exists ? of(true) : 
+                from(setDoc(artistRef, ({artist: sheet.artist})))
+            )
+        )
+
         const docRef = fsDoc(FirebaseService.db, `Timesheets/${sheet.artist}/Sheets/` + sheet.date);
-        return from(setDoc(docRef, sheet)).pipe(
+
+        return assertArtist$.pipe(
+            switchMap(() => from(setDoc(docRef, sheet))),
             map(res => sheet),
             catchError(err => {
                 console.log(err);
@@ -327,6 +342,47 @@ export class FirebaseService {
         return doc(fsDoc(FirebaseService.db, path)).pipe(
             map(doc => doc.exists()),
             take(1)
+        )
+    }
+
+    static GetTimesheetSubmissions$(range) {
+        console.log("Retrieving timesheet submissions", range)
+        if (!range || range.length < 1)
+            return of([]);  
+
+            
+        const col$ = FirebaseService.Collection$('Timesheets').pipe(
+            tap(console.log),
+        )
+        return col$.pipe(
+            take(1),
+            map(docs => _.pluck(docs, 'id')),
+            switchMap(artists => {
+                const fs = getFirestore();
+                const references = [];
+                console.log(artists);
+                artists.forEach(artist => {
+                    range.forEach(d => {
+                        const path = `Timesheets/${artist}/Sheets/${d}`;
+                        const ref = fsDoc(FirebaseService.db, path)
+                        references.push(ref);
+                    })
+                });
+
+                return runTransaction(FirebaseService.db, async (t) => {
+                    const results = []
+                    for(var i=0; i < references.length; i++) {
+                        const sfDoc = await t.get(references[i]);
+                        if (sfDoc.exists()) {
+                            results.push(sfDoc.data())
+                        } else {
+                            results.push({date: references[i].id})
+                        }
+                    }
+        
+                    return Promise.all(results);
+                })
+            })
         )
     }
 

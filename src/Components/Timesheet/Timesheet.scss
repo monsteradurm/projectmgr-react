@@ -111,12 +111,18 @@
     }
 }
 
+.pm-timesheet > .p-datatable-wrapper {
+    overflow: visible !important;
+}
 .pm-timesheet {
     .p-datatable-wrapper {
         z-index: 0;
     }
     td.log-expander > svg:hover {
         color: black !important;
+    }
+    th.log-expander {
+        padding: 0px !important;
     }
     .p-datatable-emptymessage {
         font-style: italic;
@@ -151,10 +157,15 @@
         td.log-approved {
             z-index: 0;
         }
+        th.log-artists, th.log-artists > div {
+            justify-content: center;
+            background: transparent !important;
+            background: transparent !important;
+            font-weight: 600;
+        }
         th.log-approved > div {
            text-align: left;
            justify-content: start;
-           padding-left: 0px;
        } 
        th.log-projects, th.log-departments {
            justify-content: center;
@@ -193,17 +204,6 @@
         content: '#'
     }
 
-    .log-expander, td.log-expander, .p-row-toggler {
-        width: 50px !important;
-    }
-    .log-date {
-        width: 100px !important;
-        padding-right: 40px;
-    }
-    .log-projects {
-        padding-left: 30px !important;
-    }
-
     tbody > tr {
         td.log-date {
             text-align: right;
@@ -225,11 +225,6 @@
         }
         td.log-submitted {
             text-align: center;
-        }
-        td.log-ribbon {
-            width: 15px !important;
-            background: #aaa;
-            padding: 0 !important;
         }
     }
 

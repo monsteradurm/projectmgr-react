@@ -16,7 +16,7 @@ const SuspendedArtists= () => {
     </Button>)
 }
 
-export const SupportUsers = ({artists, color, id, align, searchKey}) => {
+export const SupportUsers = ({artists, color, id, align, searchKey, width=150}) => {
     const [artistArr, setArtistArr] = useState(null);
     const AllUsers = useAllUsers();
 
@@ -30,7 +30,7 @@ export const SupportUsers = ({artists, color, id, align, searchKey}) => {
         return <></>
         
     return (
-        <Stack direction="horizontal" style={{width: 150}}>
+        <Stack direction="horizontal" style={{width: width}}>
             {
                 align === "left" && <div className="mx-auto"></div>
             }

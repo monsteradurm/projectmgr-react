@@ -1,6 +1,6 @@
 import { bind, SUSPENSE } from "@react-rxjs/core";
 import { combineLatest, concatMap, debounceTime, distinctUntilChanged, EMPTY, from, map, merge, of, scan, switchMap, take, tap, timeout, toArray, withLatestFrom } from "rxjs";
-import { AllUsers$, MyBoards$ } from "../../App.Users.context";
+import { AllUsers$, IsAdmin$, MyBoards$ } from "../../App.Users.context";
 import { FirebaseService } from "../../Services/Firebase.service";
 import * as _ from 'underscore';
 import { NestedDropdown } from "../General/NestedDropDown.component";
@@ -13,6 +13,7 @@ import { SyncsketchService } from "../../Services/Syncsketch.service";
 import { SetCurrentRoute } from "../../Application.context";
 import { SendToastError, SendToastSuccess } from "../../App.Toasts.context";
 import { AllocationsMenu$ } from "../Allocations/Allocations.context";
+import { TimesheetArtist$ } from "../Timesheet/Timesheet.context";
 
 const _boardItemStatusMap = (boardItemId, text, color, index, column_id) => ({boardItemId, text, color, index, column_id});
 const [ItemStatusChanged$, SetItemStatus] = createSignal(_boardItemStatusMap)
@@ -383,16 +384,36 @@ export const [LastHomeNavigationEvent, ] = bind(
 
 export const [useHomeMenu, HomeMenu$] = bind(
     combineLatest([
-        ReviewMenu$, FeedbackMenu$, ProgressMenu$, Assistance$, AllocationsMenu$
+        ReviewMenu$, FeedbackMenu$, ProgressMenu$, Assistance$, AllocationsMenu$, IsAdmin$, TimesheetArtist$
     ]).pipe(
-        map(([review, feedback, progress, assistance, allocations]) => 
-        [   allocations,
-            <Dropdown.Item key="Timesheets" onClick={() => SetCurrentRoute("/Timesheets")}>Timesheets</Dropdown.Item>,
-            <Dropdown.Divider key="Allocations_Divider" />,
-            review, feedback, progress, assistance,
-            <Dropdown.Divider key="HomeMenu_Divider"/>,
-            <Dropdown.Item key={NoticesURL} onClick={() => SetCurrentRoute(NoticesURL)}>Notices</Dropdown.Item>
-        ]),
+        map(([review, feedback, progress, assistance, allocations, isAdmin, artist]) => {
+            let menu = [allocations];
+
+            if (!isAdmin)
+                menu.push(
+                    <Dropdown.Item key="ArtistTimesheets" onClick={
+                        () => SetCurrentRoute("/Timesheets?View=" + artist)
+                    }>Timesheets</Dropdown.Item>
+                )
+            else menu.push(
+                <NestedDropdown title="Timesheets" key="Admin_Timesheets">
+                    <Dropdown.Item key="MyTimesheets" onClick={
+                        () => SetCurrentRoute("/Timesheets?View=" + artist)
+                    }>Personal</Dropdown.Item>
+                    <Dropdown.Item key="TimesheetSubmissions" onClick={
+                        () => SetCurrentRoute("/Timesheets?View=Submissions")
+                    }>Submissions</Dropdown.Item>
+                </NestedDropdown>
+            )
+            
+            menu = menu.concat([
+                <Dropdown.Divider key="Allocations_Divider" />,
+                review, feedback, progress, assistance,
+                <Dropdown.Divider key="HomeMenu_Divider"/>,
+                <Dropdown.Item key={NoticesURL} onClick={() => SetCurrentRoute(NoticesURL)}>Notices</Dropdown.Item>
+            ]);
+            return menu
+        }),
     ), InitialHomeMenu
 )
 export const [StatusNestingChanged$, SetStatusNesting] = createSignal(nesting => nesting);
