@@ -359,7 +359,7 @@ export const TimesheetComponent = ({headerHeight}) => {
             <Stack direction="vertical">
                 <div style={{fontSize: 30, marginBottom: 10, marginTop: 10, fontWeight: 700, color: '#555',
                     textAlign: 'left', paddingLeft: 150}}>{header}</div>
-                <DataTable value={logs} className="pm-timesheet" style={{paddingTop: 0, marginLeft: 50, marginRight: 50}} 
+                <DataTable value={logs} className="pm-timesheet" style={{paddingTop: 0, marginLeft: 0, marginRight: 50}} 
                     onRowToggle={(e) => setExpandedRows(e.data)} contextMenuSelection={SelectedSheet}
                     onContextMenuSelectionChange={e => SetSelectedSheet(e.value)}
                     onContextMenu={e => sheetContextRef.current.show(e.originalEvent)}
@@ -381,7 +381,7 @@ export const TimesheetComponent = ({headerHeight}) => {
                         style={{width: 150, maxWidth: 150, display: View === 'Submissions' ? 'none' : null}}></Column>
                     <Column body={RibbonTemplate} style={{width: 15, maxWidth: 15}} className="log-ribbon" />
                     <Column body={ApprovedTemplate} className="log-approved" 
-                        style={{width: 200, maxWidth: 200, position:'absolute', right: -200, padding: 5}}></Column>
+                        style={{width: 200, maxWidth: 200, position:'absolute', right: -140, padding: 5}}></Column>
                 </DataTable>
                 <Stack direction="horizontal" gap={1} className="pm-tag-filters"
                     style={{fontSize: 18, marginRight: 150, marginLeft: 150, marginTop: -30, zIndex: 100}}>
