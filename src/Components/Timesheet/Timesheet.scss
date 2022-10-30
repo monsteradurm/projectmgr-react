@@ -115,6 +115,9 @@
     overflow: visible !important;
 }
 .pm-timesheet {
+    tr > th {
+        border-bottom-width: 0px !important;
+    }
     .p-datatable-wrapper {
         z-index: 0;
     }
@@ -209,9 +212,10 @@
             text-align: right;
             justify-content: end;
         }
-        td.log-projects {
-            text-align: left;
+        td.log-projects > div {
+            text-align: center;
             font-weight: 600;
+            justify-content: center;
         }
         td.log-tasks {
             text-align: center;

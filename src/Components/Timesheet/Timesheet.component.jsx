@@ -359,14 +359,14 @@ export const TimesheetComponent = ({headerHeight}) => {
             <Stack direction="vertical">
                 <div style={{fontSize: 30, marginBottom: 10, marginTop: 10, fontWeight: 700, color: '#555',
                     textAlign: 'left', paddingLeft: 150}}>{header}</div>
-                <DataTable value={logs} className="pm-timesheet" style={{paddingTop: 0, marginLeft: 0, marginRight: 50}} 
+                <DataTable value={logs} className="pm-timesheet" style={{paddingTop: 0, marginLeft: 50, marginRight: 50}} 
                     onRowToggle={(e) => setExpandedRows(e.data)} contextMenuSelection={SelectedSheet}
                     onContextMenuSelectionChange={e => SetSelectedSheet(e.value)}
                     onContextMenu={e => sheetContextRef.current.show(e.originalEvent)}
                     rowExpansionTemplate={(e) => <TimesheetLogs sheet={e} logContextRef={logContextRef} SelectedLog={SelectedLog} />} 
                         dataKey="date" expandedRows={expandedRows}>
                     <Column body={ArtistTemplate} className="log-artists" 
-                        style={{position:'absolute', left: -80, padding:5, display: View !== 'Submissions' ? 'none' : null}}></Column>
+                        style={{position:'absolute', left: -0, padding:5, display: View !== 'Submissions' ? 'none' : null}}></Column>
                     <Column body={RibbonTemplate} style={{width: 15, maxWidth: 15, padding: 0, margin: 0}} className="log-ribbon" />
 
                     <Column body={expanderTemplate} style={{ width: 50, maxWidth: 50 }} className="log-expander" />
