@@ -37,7 +37,7 @@ const DateTemplate = (sheet) => {
 
 const RibbonTemplate = (sheet) => {
     const background = SheetRibbonColor(sheet);
-    return <div style={{background, width: '100%', minWidth:'100%', maxWidth: '100%', height:'100%'}}></div>
+    return <div style={{background, width: 'inherit', height:'inherit'}}></div>
 }
 
 
@@ -367,7 +367,7 @@ export const TimesheetComponent = ({headerHeight}) => {
                         dataKey="date" expandedRows={expandedRows}>
                     <Column body={ArtistTemplate} className="log-artists" 
                         style={{position:'absolute', left: -0, padding:5, display: View !== 'Submissions' ? 'none' : null}}></Column>
-                    <Column body={RibbonTemplate} style={{width: 15, maxWidth: 15, padding: 0, margin: 0}} className="log-ribbon" />
+                    <Column body={RibbonTemplate} style={{width: 15, maxWidth: 15, padding: 0, margin: 0, height: '64px'}} className="log-ribbon" />
 
                     <Column body={expanderTemplate} style={{ width: 50, maxWidth: 50 }} className="log-expander" />
                     <Column header="Date" body={DateTemplate} className="log-date" style={{width: 180, maxWidth: 180}}></Column>
@@ -379,7 +379,7 @@ export const TimesheetComponent = ({headerHeight}) => {
                     <Column header="Next Day" body={TomorrowTemplate} className="log-hours" style={{width: 150, maxWidth: 150}}></Column>
                     <Column header="Submitted" body={SubmittedTemplate} className="log-submitted" 
                         style={{width: 150, maxWidth: 150, display: View === 'Submissions' ? 'none' : null}}></Column>
-                    <Column body={RibbonTemplate} style={{width: 15, maxWidth: 15}} className="log-ribbon" />
+                    <Column body={RibbonTemplate} style={{width: 15, maxWidth: 15, padding: 0, margin: 0, height: '64px'}} className="log-ribbon" />
                     <Column body={ApprovedTemplate} className="log-approved" 
                         style={{width: 200, maxWidth: 200, position:'absolute', right: -140, padding: 5}}></Column>
                 </DataTable>
