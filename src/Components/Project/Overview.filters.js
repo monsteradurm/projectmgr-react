@@ -117,6 +117,11 @@ export const sortFilteredItems = (filtered, params) => {
         sorted = params.ReverseSorting === 'true' ? 
             unassigned.concat(result) : result.concat(unassigned); 
     }
+    else if (params.Sorting === 'Item Code') {
+        sorted = _.sortBy(filtered, (i) => 
+            i.ItemCode?.text || '' + i.name
+        )
+    }
     else if (params.Sorting === 'Status') { 
         sorted = _.sortBy(filtered, (i) => 
             i.Status && i.Status.text ? i.Status.text : 'Not Started'

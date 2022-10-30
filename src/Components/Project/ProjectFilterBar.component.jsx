@@ -77,6 +77,7 @@ export const ProjectFilterBar = ({Group, GroupOptions, DepartmentOptions, params
                 </Dropdown.Toggle>
                 <Dropdown.Menu variant="light" id="sortMenu">
                     <Dropdown.Item onClick={() => SetParameter('Name', 'Sorting')}>Name</Dropdown.Item>
+                    <Dropdown.Item onClick={() => SetParameter('Item Code', 'Sorting')}>Item Code</Dropdown.Item>
                     <Dropdown.Item onClick={() => SetParameter('Status', 'Sorting')}>Status</Dropdown.Item>
                     <Dropdown.Item onClick={() => SetParameter('Artist', 'Sorting')}>Artist</Dropdown.Item>
                     <Dropdown.Item onClick={() => SetParameter('Director', 'Sorting')}>Director</Dropdown.Item>
