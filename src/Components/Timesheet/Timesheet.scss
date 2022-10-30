@@ -133,6 +133,9 @@
     th.log-item {
         justify-content: end;
     }
+    td.log-item {
+        vertical-align: top;
+    }
     .p-datatable-row-expansion {
         box-shadow: inset 0px 5px 20px -10px !important;
         background: #f0f0f0 !important;

@@ -46,7 +46,7 @@ export const TimesheetLogs = ({sheet, logContextRef, SelectedLog, LogContextMenu
                     if (View !== 'Submissions')
                         logContextRef.current.show(e.originalEvent)
                 }}>
-                <Column body={ItemTemplate} style={{paddingLeft: 20}}/>
+                <Column body={ItemTemplate} style={{paddingLeft: 20}} className="log-item"/>
                 <Column body={ReviewTemplate} className="log-item" />
                 <Column header="Hours" field="hours" style={{width: 150, display: 'block', maxWidth: 150, textAlign:'center', fontWeight:600, fontSize: 16}}/>
                 <Column header="Notes" field="notes" style={{width: '50%', textAlign:'left', justifyContent: 'start', minWidth: '50%', fontSize: 16}} />
