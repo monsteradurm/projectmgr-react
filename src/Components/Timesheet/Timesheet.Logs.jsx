@@ -2,6 +2,8 @@ import { Column, DataTable } from "primereact"
 import { Stack } from "react-bootstrap"
 import { SetSelectedLog, SheetRibbonColor, useLogContextMenu, useSelectedLog, useTimesheetView } from "./Timesheet.context";
 import parse from 'html-react-parser'
+import * as _ from 'underscore';
+
 const BoardTemplate = (log) => {
     return <Stack direction="horizontal" style={{justifyContent: 'start', paddingTop: 10, fontSize: 18}} gap={2}>
         <div>{log?.ProjectId.replace('_', ' ')}, </div>
@@ -27,13 +29,17 @@ const ReviewTemplate = (log) => {
 }
 
 export const TimesheetLogs = ({sheet, logContextRef, SelectedLog, LogContextMenu}) => {
-    const logs = sheet?.logs || [];
+    const logs = _.sortBy(sheet?.logs || [], log => 
+            log.GroupName + ', ' + log.ItemName + (log.ReviewName ? log.ReviewName : ''))
+        .map(log => ({...log, grouping: log.ProjectId?.replace('_', ' ') + ', ' + log?.BoardName }));
     const primary = SheetRibbonColor(sheet);
     const View = useTimesheetView();
     return (
         <>
         <Stack direction="vertical" style={{padding: '10px 80px'}} className="pm-timesheet-logs">
-            <DataTable value={logs} tableStyle={{borderColor: primary, borderWidth: 0}} rowGroupMode="subheader" rowGroupHeaderTemplate={BoardTemplate}
+            <DataTable value={logs} tableStyle={{borderColor: primary, borderWidth: 0}} rowGroupMode="subheader" 
+                groupRowsBy="grouping"
+                rowGroupHeaderTemplate={BoardTemplate}
                 contextMenuSelection={SelectedLog}
                 onContextMenuSelectionChange={e => SetSelectedLog(sheet, e.value)}
                 onContextMenu={e => {

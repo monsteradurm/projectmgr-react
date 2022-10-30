@@ -1,56 +1,69 @@
 import { take, tap, map } from "rxjs";
 import { ajax } from "rxjs/ajax";
 import * as _ from 'underscore';
+import { EOD_Main } from "./EOD.main";
+import { EOD_Task } from "./EOD.Task";
+import { EOD_Tomorrow } from "./EOD.tomorrow";
+import moment from 'moment';
 
 export class IntegrationsService {
+
+    
     static Email_EndOfDay$(timesheet, emails) {
         //(toAddress, subject, text, html)
 
         const {artist, date, tomorrow, logs } = timesheet;
-        let html = `<div style="width: 100%">`
-        html += `<p style="font-size:14px"><strong>${artist} </strong>has submitted an EOD Report for <strong>${date}</strong></p>
-        <div style="width:100%;padding-bottom:5px;border-bottom:solid 2px rgb(0, 133, 119);margin-right:30px"><strong>Today</strong></div>`
+        const local = moment(date);
+        const YYYY = local.format('YYYY');
+        const Mo = local.format('MMM');
+        const Do = local.format("Do");
+        const tomorrow_html = EOD_Tomorrow(tomorrow, 'rgb(0, 156, 194)');
+        let today_html = ''
+        
         if (logs?.length) {
             const groups = _.groupBy(logs, l => l.ProjectId + ", " + l.BoardName);
-
-            Object.keys(groups).forEach(g => {
+            const grouped_keys = Object.keys(groups);
+            grouped_keys.forEach(g => {
+                
+                
                 const grouped = groups[g];
-                html += `<div style="font-weight: 600;margin-left:20px;margin-bottom:5px;margin-top:15px">${g}</div>`
+                
                 grouped.forEach(log => {
-                    const { ProjectId, BoardName, GroupName, ItemName, ReviewName, notes, FeedbackDepartment } = log;
-        
-                    html += `<div style="margin-left:45px;margin-top:10px">${GroupName}, ${ItemName}`; 
-                    
-                    if (ReviewName) {
-                        html += ', ' + ReviewName
-                        if (FeedbackDepartment)
-                            html += ' (' + FeedbackDepartment
-                        html += ')'
+
+                    const index = grouped.indexOf(log);
+                    const borderTop = grouped_keys.indexOf(g) !== 0 && index === 0;
+                    const { ProjectId, BoardName, BoardId, GroupId, GroupName, ItemName, ReviewName, notes, FeedbackDepartment, Status, Thumbnail, Link } = log;
+                    let Element = ItemName;
+                    let Task = '';
+                    if (Element.indexOf('/') >= 0){
+                        let arr = Element.split('/')
+                        Element = arr[0];
+                        Task = arr[1];
                     }
-                    html += '</div>'
-                    if (notes)
-                        html += `<div style="margin-left:70px; font-size: 14px; font-weight: 300">${notes}</div>`
-                    else 
-                        html += '<div style="padding-left:45px; font-size: 14px; font-weight: 300;font-style:italic">No Notes Provided...</div>'
+
+                    let subtitle2 = ReviewName;
+                    if (FeedbackDepartment)
+                        subtitle2 += ' (' + FeedbackDepartment + ')';
+
+                    const BoardURL = `https://projectmgr.live/Projects?ProjectId=${ProjectId}&BoardId=${BoardId}&GroupId=${GroupId}`;
+                    today_html += EOD_Task(BoardURL, ProjectId, BoardName, 
+                        (GroupName !== 'All' && BoardName.indexOf(GroupName) < 0 ? GroupName + ', ' : '') + Element, 
+                        Task, subtitle2, 
+                        '<span style="font-style: italic;font-weight:bold">' + Status + '</span> - ' + notes , Link, Thumbnail, index === 0, borderTop);
                 });
             })
-        } else {
-            html += '<div style="margin-left:20px; font-size: 14px; font-weight: 300;font-style:italic">No Notes Provided...</div>'
         }
-
-        html += `<p><div style="width:100%;padding-bottom:5px;border-bottom:solid 2px rgb(0, 133, 119);margin-top:10px;margin-right:30px"><strong>Tomorrow</strong></div></p><p style="padding-left:25px;font-size:14px">${tomorrow}</p>`
-        html += '</div>'
-
+        
         const payload = {
             toAddress: emails,
             subject: date + ', EOD Report (' + artist +')',
-            html
+            html: EOD_Main(artist, Do, Mo, YYYY, today_html, tomorrow_html, 'rgb(0, 156, 194)' )
         }
         
 
         return ajax.post('/integrations/email', payload).pipe(
             take(1),
-            tap(res => console.log("/integrations/emais", html, {result: res}))
+            tap(res => console.log("/integrations/emais", {result: res}))
         )
     }
 

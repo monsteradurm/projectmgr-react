@@ -152,7 +152,6 @@ function App() {
                 <Route path="/Gallery" element={<GalleryComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
                 <Route path="/Home" element={<HomeComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
                 <Route path="/Users" element={<UsersComponent  headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
-                <Route path="/TimesheetSubmissions" element={<TimesheetSubmissions headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
                 <Route path="/Timesheets" element={<TimesheetComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
                 <Route path="/Support" element={<SupportComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
                 <Route path="/SignOut" element={<SignOutComponent />} />

@@ -1,13 +1,13 @@
 import { bind, SUSPENSE } from "@react-rxjs/core";
 import { createSignal } from "@react-rxjs/utils";
-import { combineLatest, concatMap, EMPTY, map, merge, of, shareReplay, switchMap, take, tap, withLatestFrom } from "rxjs";
+import { catchError, combineLatest, concatMap, EMPTY, map, merge, of, shareReplay, switchMap, take, tap, withLatestFrom } from "rxjs";
 import { SendToastError, SendToastSuccess, SendToastWarning } from "../../App.Toasts.context";
 import { IsAdmin$, LoggedInUser$, Managers$, MondayUser$ } from "../../App.Users.context";
 import { FirebaseService } from "../../Services/Firebase.service";
 import moment from 'moment';
 import * as _ from 'underscore';
 import { IntegrationsService } from "../../Services/Integrations.service";
-
+import { SyncsketchService } from "../../Services/Syncsketch.service";
 export const [TimelogProjectIdChanged$, SetTimelogProjectId] = createSignal(id => id);
 export const [TimelogBoardIdChanged$, SetTimelogBoardId] = createSignal(id => id);
 export const [TimelogGroupIdChanged$, SetTimelogGroupId] = createSignal(id => id);
@@ -205,6 +205,33 @@ export const [useTimelogReviewName, TimelogReviewName$] = bind(
         map(review => review?.name || null)
     ), null
 )
+const ItemIdFromSyncLink = (link) => {
+    const linkArr = link.split('/#/').filter(x => x && x.length > 0);
+    return linkArr[1].indexOf('/') > 0 ? _.last(linkArr[1].split('/')) : linkArr[1];
+}
+
+export const [useTimelogReviewLink, TimelogReviewLink$] = bind(
+    TimelogReview$.pipe(
+        map(review => review?.Link?.text || null),
+    ), null
+)
+export const [useTimelogReviewThumbnail, TimelogReviewThumbnail$] = bind(
+    TimelogReview$.pipe(
+        map(review => review?.Link?.text || null),
+        map(link => link ? ItemIdFromSyncLink(link) : null),
+        switchMap(id => id ? SyncsketchService.ThumbnailFromId$(id) : of(null)),
+        catchError(err => {
+            console.log(err);
+            return of(null)
+        })
+    ), null
+)
+
+export const [useTimelogItemStatus, TimelogItemStatus$] = bind(
+    TimelogItem$.pipe(
+        map(item => item?.Status?.text || 'Not Started')
+    ), null
+)
 
 export const [useTimelogItemName, TimelogItemName$] = bind(
     TimelogItem$.pipe(
@@ -366,8 +393,16 @@ export const [useSheetContextMenu, SheetContextMenu$] = bind(
         withLatestFrom(TimesheetView$),
         withLatestFrom(TimesheetArtist$),
         map(([[sheet, view], user]) => {
+
+            const today = moment(new Date()).endOf('day');
+            const thisDate = moment(sheet?.date);
+
+            if (sheet?.date && thisDate.isAfter(today))  {
+                SendToastWarning('Cannot add timesheets for the future!');
+                return [] 
+            }
             if (sheet?.date)
-                SetTimesheetDate(moment(sheet.date).toDate());
+                SetTimesheetDate(thisDate.toDate());
             
             if (view === 'Submissions')
                 return [{label: 'Approve', command: () => ApproveTimesheet(sheet, user) }];
@@ -400,7 +435,7 @@ export const [useLogContextMenu, SheetLogMenu$] = bind(
             let menu = [
                         {label: 'Edit', items: [
                             {label: 'Entry', command: () => {
-                                SetTimesheetDate(sheet.date);
+                                SetTimesheetDate(moment(sheet.date).toDate());
                                 SetTimelogProjectId(log.ProjectId);
                                 SetTimelogBoardId(log.BoardId);
                                 SetTimelogGroupId(log.GroupId);
@@ -409,7 +444,7 @@ export const [useLogContextMenu, SheetLogMenu$] = bind(
                                 ShowTimelogDialog(true);
                             }},
                             {label: 'Next Day', command: () => {
-                                SetTimesheetDate(sheet.date);
+                                SetTimesheetDate(moment(sheet.date).toDate());
                                 ShowTimesheetFollowingDlg(true)
                             }}
                         ]},

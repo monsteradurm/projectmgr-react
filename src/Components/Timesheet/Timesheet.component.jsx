@@ -20,6 +20,7 @@ import { toggleStatusFilter } from "../Project/Overview.filters";
 import { TimelogDlg } from "./TimelogDlg.component";
 import { TimesheetFollowing } from "./Timesheet.FollowingDlg";
 import { useIsAdmin } from "../../App.Users.context";
+import { ScrollingPage } from "../General/ScrollingPage.component";
 
 const DateTemplate = (sheet) => {
     const date = sheet?.date;
@@ -80,7 +81,7 @@ const ArtistTemplate = (log) => {
         </Stack>)
 }
 
-export const TimesheetComponent = ({}) => {
+export const TimesheetComponent = ({headerHeight}) => {
     const LogContextMenu = useLogContextMenu();
     const SelectedLog = useSelectedLog();
     const logContextRef = useRef();
@@ -354,97 +355,99 @@ export const TimesheetComponent = ({}) => {
         <TimeSheetFilterBar />
         <ContextMenu model={SheetContextMenu} ref={sheetContextRef} onHide={() => SetSelectedSheet(null)} className="pm-sheet-context"/>
         <ContextMenu model={LogContextMenu} ref={logContextRef} onHide={() => SetSelectedLog(null)} className="pm-sheet-context"/>
-        <Stack direction="vertical">
-            <div style={{fontSize: 30, marginBottom: 10, marginTop: 10, fontWeight: 700, color: '#555',
-                textAlign: 'left', paddingLeft: 150}}>{header}</div>
-            <DataTable value={logs} className="pm-timesheet" style={{paddingTop: 0, marginLeft: 50, marginRight: 50}} scrollable scrollHeight="calc(100vh - 250px)" 
-                onRowToggle={(e) => setExpandedRows(e.data)} contextMenuSelection={SelectedSheet}
-                onContextMenuSelectionChange={e => SetSelectedSheet(e.value)}
-                onContextMenu={e => sheetContextRef.current.show(e.originalEvent)}
-                rowExpansionTemplate={(e) => <TimesheetLogs sheet={e} logContextRef={logContextRef} SelectedLog={SelectedLog} />} 
-                    dataKey="date" expandedRows={expandedRows}>
-                <Column body={ArtistTemplate} className="log-artists" 
-                    style={{position:'absolute', left: -80, padding:5, display: View !== 'Submissions' ? 'none' : null}}></Column>
-                <Column body={RibbonTemplate} style={{width: 15, maxWidth: 15, padding: 0, margin: 0}} className="log-ribbon" />
+        <ScrollingPage offsetY={headerHeight}>
+            <Stack direction="vertical">
+                <div style={{fontSize: 30, marginBottom: 10, marginTop: 10, fontWeight: 700, color: '#555',
+                    textAlign: 'left', paddingLeft: 150}}>{header}</div>
+                <DataTable value={logs} className="pm-timesheet" style={{paddingTop: 0, marginLeft: 50, marginRight: 50}} 
+                    onRowToggle={(e) => setExpandedRows(e.data)} contextMenuSelection={SelectedSheet}
+                    onContextMenuSelectionChange={e => SetSelectedSheet(e.value)}
+                    onContextMenu={e => sheetContextRef.current.show(e.originalEvent)}
+                    rowExpansionTemplate={(e) => <TimesheetLogs sheet={e} logContextRef={logContextRef} SelectedLog={SelectedLog} />} 
+                        dataKey="date" expandedRows={expandedRows}>
+                    <Column body={ArtistTemplate} className="log-artists" 
+                        style={{position:'absolute', left: -80, padding:5, display: View !== 'Submissions' ? 'none' : null}}></Column>
+                    <Column body={RibbonTemplate} style={{width: 15, maxWidth: 15, padding: 0, margin: 0}} className="log-ribbon" />
 
-                <Column body={expanderTemplate} style={{ width: 50, maxWidth: 50 }} className="log-expander" />
-                <Column header="Date" body={DateTemplate} className="log-date" style={{width: 180, maxWidth: 180}}></Column>
-                <Column header="Projects" body={ProjectsTemplate} className="log-projects"></Column>
-                <Column header="Departments" body={DepartmentsTemplate} className="log-projects"></Column>
-                <Column header="Feedback" body={FeedbackDepartmentsTemplate} className="log-projects"></Column>
-                <Column header="Tasks" body={TasksTemplate} className="log-tasks" style={{width: 150, maxWidth: 150}}></Column>
-                <Column header="Hours" body={HoursTemplate} className="log-hours" style={{width: 150, maxWidth: 150}}></Column>
-                <Column header="Next Day" body={TomorrowTemplate} className="log-hours" style={{width: 150, maxWidth: 150}}></Column>
-                <Column header="Submitted" body={SubmittedTemplate} className="log-submitted" 
-                    style={{width: 150, maxWidth: 150, display: View === 'Submissions' ? 'none' : null}}></Column>
-                <Column body={RibbonTemplate} style={{width: 15, maxWidth: 15}} className="log-ribbon" />
-                <Column body={ApprovedTemplate} className="log-approved" 
-                    style={{width: 200, maxWidth: 200, position:'absolute', right: -200, padding: 5}}></Column>
-            </DataTable>
-            <Stack direction="horizontal" gap={1} className="pm-tag-filters"
-                style={{fontSize: 18, marginRight: 150, marginLeft: 150, marginTop: -30, zIndex: 100}}>
-                <div style={{marginRight: 20}}><span style={{fontWeight: 600}}>{sheetCount}</span> Timesheets...</div>
-                {
-                    projectFilter &&
-                    <div className="pm-tag" key={"ProjectFilter" + "_" + projectFilter}
-                        onClick={() => toggleStatusFilter(projectFilter, searchParams, setSearchParams, "Project")}>
-                        #{projectFilter}
+                    <Column body={expanderTemplate} style={{ width: 50, maxWidth: 50 }} className="log-expander" />
+                    <Column header="Date" body={DateTemplate} className="log-date" style={{width: 180, maxWidth: 180}}></Column>
+                    <Column header="Projects" body={ProjectsTemplate} className="log-projects"></Column>
+                    <Column header="Departments" body={DepartmentsTemplate} className="log-projects"></Column>
+                    <Column header="Feedback" body={FeedbackDepartmentsTemplate} className="log-projects"></Column>
+                    <Column header="Tasks" body={TasksTemplate} className="log-tasks" style={{width: 150, maxWidth: 150}}></Column>
+                    <Column header="Hours" body={HoursTemplate} className="log-hours" style={{width: 150, maxWidth: 150}}></Column>
+                    <Column header="Next Day" body={TomorrowTemplate} className="log-hours" style={{width: 150, maxWidth: 150}}></Column>
+                    <Column header="Submitted" body={SubmittedTemplate} className="log-submitted" 
+                        style={{width: 150, maxWidth: 150, display: View === 'Submissions' ? 'none' : null}}></Column>
+                    <Column body={RibbonTemplate} style={{width: 15, maxWidth: 15}} className="log-ribbon" />
+                    <Column body={ApprovedTemplate} className="log-approved" 
+                        style={{width: 200, maxWidth: 200, position:'absolute', right: -200, padding: 5}}></Column>
+                </DataTable>
+                <Stack direction="horizontal" gap={1} className="pm-tag-filters"
+                    style={{fontSize: 18, marginRight: 150, marginLeft: 150, marginTop: -30, zIndex: 100}}>
+                    <div style={{marginRight: 20}}><span style={{fontWeight: 600}}>{sheetCount}</span> Timesheets...</div>
+                    {
+                        projectFilter &&
+                        <div className="pm-tag" key={"ProjectFilter" + "_" + projectFilter}
+                            onClick={() => toggleStatusFilter(projectFilter, searchParams, setSearchParams, "Project")}>
+                            #{projectFilter}
+                        </div>
+
+                    }
+                    {
+                        departmentFilter &&
+                        <div className="pm-tag" key={"departmentFilter" + "_" + departmentFilter} 
+                            onClick={() => toggleStatusFilter(departmentFilter, searchParams, setSearchParams, "Department")}>
+                            #{departmentFilter}
+                        </div>
+
+                    }
+                    {
+                        feedbackFilter &&
+                        <div className="pm-tag" key={"feedbackFilter" + "_" + feedbackFilter} 
+                            onClick={() => toggleStatusFilter(feedbackFilter, searchParams, setSearchParams, "Feedback")}>
+                            #{feedbackFilter}
+                        </div>
+
+                    }
+                    {
+                        approversFilter &&
+                        <div className="pm-tag" key={"approversFilter" + "_" + approversFilter}
+                            onClick={() => toggleStatusFilter(approversFilter, searchParams, setSearchParams, "Approvers")}>
+                            #{approversFilter}
+                        </div>
+
+                    }
+                    <div className="mx-auto"></div>
+                    {
+                        View === 'Submissions' &&
+                        <>
+                            <div style={{fontWeight: 600}}>{artistCount}</div>
+                            <div>Artists, </div>
+                        </>
+                    }
+                    <div style={{fontWeight: 600, marginLeft: View === 'Submissions' ? 10 : 0}}>{projectCount}</div>
+                    <div>Projects, </div>
+                    <div style={{marginLeft: 10, fontWeight: 600}}>{taskCount}</div>
+                    <div>Tasks, </div>
+                    <div style={{marginLeft: 10, fontWeight: 600}}>{reviewCount}</div>
+                    <div>Reviews, </div>
+                    <div style={{marginLeft: 10, fontWeight: 600}}>{hourCount}</div>
+                    <div>Hours 
+                    {
+                        View !== 'Submissions' &&
+                        <span>,</span>
+                    }
                     </div>
-
-                }
-                {
-                    departmentFilter &&
-                    <div className="pm-tag" key={"departmentFilter" + "_" + departmentFilter} 
-                        onClick={() => toggleStatusFilter(departmentFilter, searchParams, setSearchParams, "Department")}>
-                        #{departmentFilter}
-                    </div>
-
-                }
-                {
-                    feedbackFilter &&
-                    <div className="pm-tag" key={"feedbackFilter" + "_" + feedbackFilter} 
-                        onClick={() => toggleStatusFilter(feedbackFilter, searchParams, setSearchParams, "Feedback")}>
-                        #{feedbackFilter}
-                    </div>
-
-                }
-                {
-                    approversFilter &&
-                    <div className="pm-tag" key={"approversFilter" + "_" + approversFilter}
-                        onClick={() => toggleStatusFilter(approversFilter, searchParams, setSearchParams, "Approvers")}>
-                        #{approversFilter}
-                    </div>
-
-                }
-                <div className="mx-auto"></div>
-                {
-                    View === 'Submissions' &&
-                    <>
-                        <div style={{fontWeight: 600}}>{artistCount}</div>
-                        <div>Artists, </div>
-                    </>
-                }
-                <div style={{fontWeight: 600, marginLeft: View === 'Submissions' ? 10 : 0}}>{projectCount}</div>
-                <div>Projects, </div>
-                <div style={{marginLeft: 10, fontWeight: 600}}>{taskCount}</div>
-                <div>Tasks, </div>
-                <div style={{marginLeft: 10, fontWeight: 600}}>{reviewCount}</div>
-                <div>Reviews, </div>
-                <div style={{marginLeft: 10, fontWeight: 600}}>{hourCount}</div>
-                <div>Hours 
-                {
-                       View !== 'Submissions' &&
-                       <span>,</span>
-                }
-                </div>
-                {
-                     View !== 'Submissions' &&
-                     <>
-                         <div style={{marginLeft: 10, fontWeight: 600}}>{submitCount}</div>
-                         <div>Submissions </div>
-                     </>
-                }
+                    {
+                        View !== 'Submissions' &&
+                        <>
+                            <div style={{marginLeft: 10, fontWeight: 600}}>{submitCount}</div>
+                            <div>Submissions </div>
+                        </>
+                    }
+                </Stack>
             </Stack>
-        </Stack>
+        </ScrollingPage>
     </>)
 }

@@ -9,7 +9,7 @@ import { SetTimelogBoardId, SetTimelogGroupId, SetTimelogItemId, SetTimelogProje
     useTimelogItemDepartment, 
     useTimelogItemId, useTimelogItemOptions, useTimelogProjectId, useTimelogProjectOptions, useTimelogReviewId, 
     useTimelogReviewName, 
-    useTimelogReviewOptions, useTimeLogReviews, useTimesheet, useTimesheetArtist, useTimesheetDate, useTimelogElementTask } from "./Timesheet.context"
+    useTimelogReviewOptions, useTimeLogReviews, useTimesheet, useTimesheetArtist, useTimesheetDate, useTimelogElementTask, useTimelogItemStatus, useTimelogReviewThumbnail, useTimelogReviewLink } from "./Timesheet.context"
 import moment from 'moment';
 import * as _ from 'underscore';
 
@@ -52,6 +52,9 @@ export const TimelogDlg = ({}) => {
     const FeedbackDepartment = useTimelogFeedbackItemDepartment();
     const ReviewName = useTimelogReviewName();
     const ReviewId = useTimelogReviewId();
+    const Status = useTimelogItemStatus();
+    const Thumbnail = useTimelogReviewThumbnail();
+    const Link = useTimelogReviewLink();
     const Item = useTimelogItem();
     const [hours, setHours] = useState(1);
     const [notes, setNotes] = useState('');
@@ -181,6 +184,9 @@ export const TimelogDlg = ({}) => {
                                 result.Department = Department;
                                 result.FeedbackDepartment = FeedbackDepartment;
                                 result.ReviewName = ReviewName;
+                                result.Thumbnail = Thumbnail;
+                                result.Link = Link;
+                                result.Status = Status;
                                 result.updated = moment(moment.now()).format('YYYY-MM-DD HH:mm:ss')
                                 SubmitTimeEntry(result)
                             }}>Save Entry</Button>
