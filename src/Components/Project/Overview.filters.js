@@ -190,7 +190,6 @@ export const filterSearch = (filtered, Search) => {
             filtered = _.filter(filtered, i => {
                 // search should be case insensitive
                 const s = Search.toLowerCase();
-
                 const itemQueries = 
                     [i.name.toLowerCase(),
 
@@ -201,6 +200,7 @@ export const filterSearch = (filtered, Search) => {
                         i.CurrentReview && i.CurrentReview.Tags ? i.CurrentReview.Tags.text.toLowerCase() : '',
 
                         //  base item
+                        i?.ItemCode?.text?.toLowerCase() || '',
                         i.Artist.text.toLowerCase(),
                         i.Director.text.toLowerCase(),
                         i.Status && i.Status.text ? i.Status.text.toLowerCase() : 'Not Started',

@@ -26,7 +26,7 @@ export const TableItemTask = () => {
         }
 
         {
-            ItemCode ? 
+            ItemCode && Grouping !== 'Element'? 
             <Stack direction="vertical" style={{paddingTop: 3}}>
                 <div style={{fontWeight: 700}}>{Task ? Task : Element}</div>
                 <div style={{marginTop: -2}}>{ItemCode}</div> 

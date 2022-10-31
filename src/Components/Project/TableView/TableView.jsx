@@ -44,13 +44,13 @@ export const TableView = () => {
 
                 return (
                     <div key={group} className="pm-item-container" style={{display}}>
-                        <div className="pm-element" style={{fontSize:16}}>{group}</div>
+                        <div className="pm-element" style={{fontSize:18}}>{group}</div>
                             {
-                                ids.map(id => 
+                                ids.map((id, index) => 
                                 <div key={id} className="pm-task-container" 
                                     onMouseOver={() => SetMouseOverRow(id)}>   
                                     <BoardItemProvider BoardItemId={id}>
-                                        <TableItem />
+                                        <TableItem index={index}/>
                                     </BoardItemProvider>
                                 </div>)
                             }

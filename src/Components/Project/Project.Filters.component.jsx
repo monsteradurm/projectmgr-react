@@ -91,6 +91,7 @@ export const ProjectFilters = () => {
                 </Dropdown.Toggle>
                 <Dropdown.Menu variant="light" id="sortMenu">
                     <Dropdown.Item onClick={() => SetParameter('Name', 'BoardSortBy')}>Name</Dropdown.Item>
+                    <Dropdown.Item onClick={() => SetParameter('Item Code', 'BoardSortBy')}>Item Code</Dropdown.Item>
                     <Dropdown.Item onClick={() => SetParameter('Status', 'BoardSortBy')}>Status</Dropdown.Item>
                     <Dropdown.Item onClick={() => SetParameter('Artist', 'BoardSortBy')}>Artist</Dropdown.Item>
                     <Dropdown.Item onClick={() => SetParameter('Director', 'BoardSortBy')}>Director</Dropdown.Item>

@@ -2,7 +2,7 @@ import { Panel } from "primereact/panel";
 import { useContext, useState } from "react"
 import { Stack } from "react-bootstrap";
 import { ErrorLoading } from "../../General/ErrorLoading";
-import { BoardItemContext, useBoardItemName, } from "../Context/Project.Item.context";
+import { BoardItemContext, useBoardItemCode, useBoardItemName, } from "../Context/Project.Item.context";
 import { TableItemArtists } from "./TableItemControls/TableItem.Artists";
 import { TableItemBadges } from "./TableItemControls/TableItem.Badges";
 import { TableItemPane } from "./TableItem.Pane";
@@ -10,14 +10,17 @@ import { TableItemRow } from "./TableItem.Row";
 import { ErrorBoundary } from "react-error-boundary"
 import { TableItemProvider } from "./TableItem.context";
 import { SUSPENSE } from "@react-rxjs/core";
+import { useBoardGrouping } from "../Context/Project.Params.context";
 
 
 
-export const TableItem = () => {
+export const TableItem = ({index}) => {
     const { BoardItemId, CurrentReviewId, Filtered } = useContext(BoardItemContext);
     const [isCollapsed, setCollapsed] = useState(true);
     const BoardItemName = useBoardItemName(BoardItemId)
-
+    const Grouping = useBoardGrouping();
+    const Code = useBoardItemCode(BoardItemId);
+    console.log(Grouping, Code);
     if (!BoardItemId || CurrentReviewId === SUSPENSE)
         return;
 
@@ -31,6 +34,10 @@ export const TableItem = () => {
                         } iconSize="2x" />
                     </div>
                 }>
+                {
+                    (index === 0 && Grouping === 'Element' && !!Code && Code !== SUSPENSE && Code?.length > 0) &&
+                    <div style={{position:'absolute', top: -26, right: 0, fontSize: 18, color: '#777', fontWeight: 600}}>{Code}</div>
+                }
                 <div key="task-left" className="pm-task-left">
                     <TableItemArtists />
                 </div>

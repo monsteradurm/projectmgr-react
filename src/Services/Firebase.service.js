@@ -162,6 +162,7 @@ export class FirebaseService {
         if (!sheet)
             return of(null);
 
+        const artistRef = fsDoc(FirebaseService.db, `Timesheets/${sheet.artist}/Sheets/` + sheet.date);
         const assertArtist$ = FirebaseService.DocumentExists$('Timesheets/' + sheet.artist).pipe(
             switchMap(exists => exists ? of(true) : 
                 from(setDoc(artistRef, ({artist: sheet.artist})))
