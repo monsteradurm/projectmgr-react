@@ -36,7 +36,7 @@ export const TableItem = ({index}) => {
                 }>
                 {
                     (index === 0 && Grouping === 'Element' && !!Code && Code !== SUSPENSE && Code?.length > 0) &&
-                    <div style={{position:'absolute', top: -26, right: 0, fontSize: 18, color: '#777', fontWeight: 600}}>{Code}</div>
+                    <div style={{position:'absolute', top: -26, right: 0, fontSize: 16, color: '#777', fontWeight: 600}}>{Code}</div>
                 }
                 <div key="task-left" className="pm-task-left">
                     <TableItemArtists />
