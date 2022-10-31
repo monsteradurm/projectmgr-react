@@ -136,6 +136,10 @@
     td.log-item {
         vertical-align: top;
     }
+    th.log-entry-notes > div {
+        justify-content: start;
+        align-items:start;
+    }
     .p-datatable-row-expansion {
         box-shadow: inset 0px 5px 20px -10px !important;
         background: #f0f0f0 !important;

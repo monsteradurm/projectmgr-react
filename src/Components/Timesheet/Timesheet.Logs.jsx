@@ -49,7 +49,8 @@ export const TimesheetLogs = ({sheet, logContextRef, SelectedLog, LogContextMenu
                 <Column body={ItemTemplate} style={{paddingLeft: 20}} className="log-item"/>
                 <Column body={ReviewTemplate} className="log-item" />
                 <Column header="Hours" field="hours" style={{width: 150, display: 'block', maxWidth: 150, textAlign:'center', fontWeight:600, fontSize: 16}}/>
-                <Column header="Notes" field="notes" style={{width: '50%', textAlign:'left', justifyContent: 'start', minWidth: '50%', fontSize: 16}} />
+                <Column header="Notes" field="notes" className="log-entry-notes"
+                 style={{width: '50%', textAlign:'left', justifyContent: 'start', minWidth: '50%', fontSize: 16}} />
             </DataTable>
             <div style={{borderBottom: 'solid 2px ' + primary, width: '100%', fontSize: 18, marginTop: 20, padding: 10, fontWeight: 600}}>Next Day</div>
             <div style={{fontSize: 18, marginTop: 10, padding: 10}}>
