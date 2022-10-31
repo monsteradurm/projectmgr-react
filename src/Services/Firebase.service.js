@@ -162,12 +162,8 @@ export class FirebaseService {
         if (!sheet)
             return of(null);
 
-        const artistRef = fsDoc(FirebaseService.db, `Timesheets/${sheet.artist}/Sheets/` + sheet.date);
-        const assertArtist$ = FirebaseService.DocumentExists$('Timesheets/' + sheet.artist).pipe(
-            switchMap(exists => exists ? of(true) : 
-                from(setDoc(artistRef, ({artist: sheet.artist})))
-            )
-        )
+        const artistRef = fsDoc(FirebaseService.db, `Timesheets/${sheet.artist}`);
+        const assertArtist$ = from(setDoc(artistRef, ({artist: sheet.artist})));
 
         const docRef = fsDoc(FirebaseService.db, `Timesheets/${sheet.artist}/Sheets/` + sheet.date);
 
@@ -361,7 +357,6 @@ export class FirebaseService {
             switchMap(artists => {
                 const fs = getFirestore();
                 const references = [];
-                console.log(artists);
                 artists.forEach(artist => {
                     range.forEach(d => {
                         const path = `Timesheets/${artist}/Sheets/${d}`;
@@ -383,7 +378,8 @@ export class FirebaseService {
         
                     return Promise.all(results);
                 })
-            })
+            }),
+            tap(t => console.log("HERE", t))
         )
     }
 

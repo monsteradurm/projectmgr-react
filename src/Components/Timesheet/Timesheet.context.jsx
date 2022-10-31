@@ -495,6 +495,7 @@ const FetchTimeSheets$ = RangeArray$.pipe(
 const FetchTimeSheetSubmissions$ = SubmissionRangeArray$.pipe(
     switchMap((range) => FirebaseService.GetTimesheetSubmissions$(range)),
     map(sheets => sheets.filter(s => !!s.submitted)),
+    tap(console.log)
 )
 
 export const [useTimesheetSubmissions, TimeSheetSubmissions$] = bind(

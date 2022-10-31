@@ -90,6 +90,9 @@ export class SyncsketchService {
             body: formdata,
             crossDomain: true,
             includeUploadProgress: true,
+            maxContentLength: Infinity,
+            maxBodyLength: Infinity,
+            timeout: 60 * 60 * 1025
         }).pipe(
             switchMap(evt => {
                 if (evt?.response?.id) {
