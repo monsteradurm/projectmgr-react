@@ -9,9 +9,11 @@ import moment from 'moment';
 export class IntegrationsService {
 
     
-    static Email_EndOfDay$(timesheet, emails) {
+    static Email_EndOfDay$(timesheet, mgr_emails, allUsers) {
         //(toAddress, subject, text, html)
 
+        let emails = [...(mgr_emails || [])];
+         
         const {artist, date, tomorrow, logs } = timesheet;
         const local = moment(date);
         const YYYY = local.format('YYYY');
@@ -20,6 +22,7 @@ export class IntegrationsService {
         const tomorrow_html = EOD_Tomorrow(tomorrow, 'rgb(0, 156, 194)');
         let today_html = ''
         
+        console.log("ALL USERS", allUsers);
         if (logs?.length) {
             const groups = _.groupBy(logs, l => l.ProjectId + ", " + l.BoardName);
             const grouped_keys = Object.keys(groups);
@@ -29,10 +32,19 @@ export class IntegrationsService {
                 const grouped = groups[g];
                 
                 grouped.forEach(log => {
+                    emails = emails.concat(
+                        log.Artists?.map(a => allUsers[a.toLowerCase()])
+                            .map(a => a.monday.email) || []
+                    );
+                    emails = emails.concat(
+                        log.Directors?.map(a => allUsers[a.toLowerCase()])
+                            .map(a => a.monday.email) || []
+                    );
 
                     const index = grouped.indexOf(log);
                     const borderTop = grouped_keys.indexOf(g) !== 0 && index === 0;
                     const { ProjectId, BoardName, BoardId, GroupId, GroupName, ItemName, ReviewName, notes, FeedbackDepartment, Status, Thumbnail, Link } = log;
+
                     let Element = ItemName;
                     let Task = '';
                     if (Element.indexOf('/') >= 0){
@@ -54,14 +66,15 @@ export class IntegrationsService {
             })
         }
         
+        emails = _.uniq(emails).join('; ')
         const payload = {
             toAddress: emails,
             subject: date + ', EOD Report (' + artist +')',
             html: EOD_Main(artist, Do, Mo, YYYY, today_html, tomorrow_html, 'rgb(0, 156, 194)' )
         }
         
-
         return ajax.post('/integrations/email', payload).pipe(
+            tap(console.log),
             take(1),
             tap(res => console.log("/integrations/emais", {result: res}))
         )

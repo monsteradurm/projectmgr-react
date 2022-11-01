@@ -285,9 +285,36 @@ export class SyncsketchService {
         )
     }
     
+    static URLToBlob = (url) => {
+        console.log("FINDING BLOB", url)
+    return from(fetch(url)).pipe(
+     
+        switchMap(res => res.blob()),
+        switchMap(blob => Observable.create(obs => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        const base64 = reader.result;
+                        console.log("HERE", base64);
+                        obs.next(base64);
+                        obs.complete();
+                    };
+                    reader.readAsDataURL(blob);
+                    //reader.readAsDataURL(blob);
+                })
+            ),
+            tap(console.log),
+        )
+    }
+
     static ThumbnailFromId$ = (id) => {
         if (id === SUSPENSE) return of(SUSPENSE);
         if (!id) return of(null);
+
+        const stored = sessionStorage.getItem(id);
+        console.log("STORED IMAGE? ", stored);
+
+        if (stored) return of(stored);
+
         return SyncsketchService.Query$(SyncsketchQueries.ThumbnailById(id)).pipe(
             map(item => {
                 console.log("Thumbnail from Id", item);
@@ -295,6 +322,15 @@ export class SyncsketchService {
                 
                 return item.thumbnail_url
             }),
+            map(url => !url ? null : url
+                .replace('https://media-cdn.syncsketch.com/', '/media-cdn-syncsketch-com/')
+                .replace('https://item-data-cdn.syncsketch.com/', '/item-data-cdn-syncsketch-com/')
+            ),
+            switchMap((url) => SyncsketchService.URLToBlob(url).pipe(
+                    tap(console.log),
+                    tap((res) => sessionStorage.setItem(id, res))
+                )
+            )
         );
     }
 

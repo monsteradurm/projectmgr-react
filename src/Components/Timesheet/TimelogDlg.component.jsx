@@ -9,7 +9,7 @@ import { SetTimelogBoardId, SetTimelogGroupId, SetTimelogItemId, SetTimelogProje
     useTimelogItemDepartment, 
     useTimelogItemId, useTimelogItemOptions, useTimelogProjectId, useTimelogProjectOptions, useTimelogReviewId, 
     useTimelogReviewName, 
-    useTimelogReviewOptions, useTimeLogReviews, useTimesheet, useTimesheetArtist, useTimesheetDate, useTimelogElementTask, useTimelogItemStatus, useTimelogReviewThumbnail, useTimelogReviewLink } from "./Timesheet.context"
+    useTimelogReviewOptions, useTimeLogReviews, useTimesheet, useTimesheetArtist, useTimesheetDate, useTimelogElementTask, useTimelogItemStatus, useTimelogReviewThumbnail, useTimelogReviewLink, useTimelogDirectors, useTimelogArtists } from "./Timesheet.context"
 import moment from 'moment';
 import * as _ from 'underscore';
 
@@ -56,6 +56,9 @@ export const TimelogDlg = ({}) => {
     const Thumbnail = useTimelogReviewThumbnail();
     const Link = useTimelogReviewLink();
     const Item = useTimelogItem();
+    const Directors = useTimelogDirectors();
+    const Artists = useTimelogArtists();
+
     const [hours, setHours] = useState(1);
     const [notes, setNotes] = useState('');
     const [entry, setEntry] = useState(null);
@@ -185,6 +188,8 @@ export const TimelogDlg = ({}) => {
                                 result.FeedbackDepartment = FeedbackDepartment;
                                 result.ReviewName = ReviewName;
                                 result.Thumbnail = Thumbnail;
+                                result.Directors = Directors;
+                                result.Artists = Artists;
                                 result.Link = Link;
                                 result.Status = Status;
                                 result.updated = moment(moment.now()).format('YYYY-MM-DD HH:mm:ss')

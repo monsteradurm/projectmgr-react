@@ -20,7 +20,7 @@ export const TableItem = ({index}) => {
     const BoardItemName = useBoardItemName(BoardItemId)
     const Grouping = useBoardGrouping();
     const Code = useBoardItemCode(BoardItemId);
-    console.log(Grouping, Code);
+
     if (!BoardItemId || CurrentReviewId === SUSPENSE)
         return;
 

@@ -127,7 +127,6 @@ const [useSyncsketchProjectReviews, SyncsketchProjectReviews$] = bind(
         },{}),
         map(map => Object.entries(map)),
         concatMap(entries => from(entries)),
-        tap(T => console.log("SYNCSKETCH PROJECT REVIEWS", T))
     ), SUSPENSE
 )
 
@@ -273,7 +272,6 @@ const [, SyncsketchItems$] = bind(
 const [useSyncsketchItems,] = bind(
     (reviewId, department, index) => ReadyOrSuspend$(reviewId, SyncsketchItems$).pipe(
         switchMap(items => {
-            console.log(items);
             if ([items, department, index].indexOf(SUSPENSE) >= 0)
                 return EMPTY;
 
@@ -307,7 +305,6 @@ const [useLatestThumbnail, LatestThumbnail$] = bind(
             else if (!link) return of(null);
             
             const id = ItemIdFromSyncLink(link);
-            console.log("HERE", id);
             return SyncsketchService.ThumbnailFromId$(id).pipe(
                 catchError(err => {
                     console.log("Could not retrieve Thumbnail from ItemId: " + id)

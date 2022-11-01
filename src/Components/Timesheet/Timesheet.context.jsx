@@ -2,7 +2,7 @@ import { bind, SUSPENSE } from "@react-rxjs/core";
 import { createSignal } from "@react-rxjs/utils";
 import { catchError, combineLatest, concatMap, EMPTY, map, merge, of, shareReplay, switchMap, take, tap, withLatestFrom } from "rxjs";
 import { SendToastError, SendToastSuccess, SendToastWarning } from "../../App.Toasts.context";
-import { IsAdmin$, LoggedInUser$, Managers$, MondayUser$ } from "../../App.Users.context";
+import { AllUsers$, IsAdmin$, LoggedInUser$, Managers$, MondayUser$ } from "../../App.Users.context";
 import { FirebaseService } from "../../Services/Firebase.service";
 import moment from 'moment';
 import * as _ from 'underscore';
@@ -159,6 +159,16 @@ export const [useTimelogReviewOptions, TimelogReviewOptions$] = bind(
     ), null
 )
 
+export const [useTimelogDirectors, ] = bind(
+    TimelogItem$.pipe(
+        map(item => item?.Director?.value || [])
+    ), null
+)
+export const [useTimelogArtists, ] = bind(
+    TimelogItem$.pipe(
+        map(item => item?.Artist?.value || [])
+    ), null
+)
 export const [NewTimelogDlgEvent$, ShowTimelogDialog] = createSignal(visible => {
     if (!visible) {
         SetTimelogProjectId(null);
@@ -535,12 +545,12 @@ export const ApproveTimesheet = (sheet, user) => {
 export const SubmitTimesheetForReview = (sheet) => {
     const emails$ = Managers$.pipe(
         map(users => _.pluck(users, 'email')),
-        map(emails => emails.join('; ')),
         take(1)
     );
 
     emails$.pipe(
-        switchMap(emails => IntegrationsService.Email_EndOfDay$(sheet, emails))
+        withLatestFrom(AllUsers$),
+        switchMap(([mgr_emails, allUsers]) => IntegrationsService.Email_EndOfDay$(sheet, mgr_emails, allUsers))
     ).pipe(
         take(1)
     ).subscribe(res => {
