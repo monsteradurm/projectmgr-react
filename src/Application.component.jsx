@@ -28,6 +28,7 @@ import { GalleryUpdateComponent } from './System/GalleryUpdate';
 import { TimesheetComponent } from './Components/Timesheet/Timesheet.component';
 import { TimesheetSubmissions } from './Components/Timesheet/Timesheet.Submissions';
 import { Helmet } from 'react-helmet';
+import { useReportTeam } from './Components/Timesheet/Timesheet.context';
 
 const preventMouseProps = (evt) => {
   evt.stopPropagation();
@@ -55,6 +56,8 @@ function App() {
   const User = useLoggedInUser();
   const SimulatedUser = useSimulatedUser();
   const AllUsers = useAllUsers() // pre-fetch observable for sharing;
+  const ReportingTeam = useReportTeam() // pre-fetch;
+  
   const isAuthenticated = useIsAuthenticated();
   const { instance, accounts, inProgress } = useMsal();
   const [accessToken, setAccessToken] = useState(null);
@@ -62,6 +65,7 @@ function App() {
   const toastRef = useRef();
   const Toaster = useToaster(toastRef);
   const [URL, NavigationHandler] = useNavigationHandler()
+
   const FavIcon = useFavIcon();
 
   const authRequest = useMemo(() => ({

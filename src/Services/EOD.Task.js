@@ -77,7 +77,7 @@ ${borderTop ? `<table style="font-family:'Open Sans',sans-serif;margin-top:10px;
                             <tr>
                               <td style="padding-right: 0px;padding-left: 0px;" align="right">
                               ${image ?
-                                (link ? `<a href="${link}">` : '') + `<img align="right" border="0" src="${image}"  
+                                (link ? `<a href="${link}">` : '') + `<img data-imagetype="External" align="right" border="0" src="${image}"  
                                   style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;
                                   display: inline-block !important;border: none;height: auto;float: none;width: 100%;max-width: 150px;border:solid 1px black;cursor:pointer"
                                   width="229" />` + (link ? '</a>' : '') : ''}

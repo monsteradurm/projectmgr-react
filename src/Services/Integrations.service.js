@@ -20,9 +20,9 @@ export class IntegrationsService {
         const Mo = local.format('MMM');
         const Do = local.format("Do");
         const tomorrow_html = EOD_Tomorrow(tomorrow, 'rgb(0, 156, 194)');
+        const attachments = []
         let today_html = ''
         
-        console.log("ALL USERS", allUsers);
         if (logs?.length) {
             const groups = _.groupBy(logs, l => l.ProjectId + ", " + l.BoardName);
             const grouped_keys = Object.keys(groups);
@@ -36,6 +36,8 @@ export class IntegrationsService {
                         log.Artists?.map(a => allUsers[a.toLowerCase()])
                             .map(a => a.monday.email) || []
                     );
+                    console.log("ARTISTS: ", log.Artists, log.Artists?.map(a => allUsers[a.toLowerCase()])
+                    .map(a => a.monday.email))
                     emails = emails.concat(
                         log.Directors?.map(a => allUsers[a.toLowerCase()])
                             .map(a => a.monday.email) || []
@@ -44,6 +46,11 @@ export class IntegrationsService {
                     const index = grouped.indexOf(log);
                     const borderTop = grouped_keys.indexOf(g) !== 0 && index === 0;
                     const { ProjectId, BoardName, BoardId, GroupId, GroupName, ItemName, ReviewName, notes, FeedbackDepartment, Status, Thumbnail, Link } = log;
+                    
+                    let inline_thumb = log.id + '.jpg';
+                    if (Thumbnail) {
+                        attachments.push({filename: inline_thumb, path: Thumbnail})
+                    }
 
                     let Element = ItemName;
                     let Task = '';
@@ -61,18 +68,24 @@ export class IntegrationsService {
                     today_html += EOD_Task(BoardURL, ProjectId, BoardName, 
                         (GroupName !== 'All' && BoardName.indexOf(GroupName) < 0 ? GroupName + ', ' : '') + Element, 
                         Task, subtitle2, 
-                        '<span style="font-style: italic;font-weight:bold">' + Status + '</span> - ' + notes , Link, Thumbnail, index === 0, borderTop);
+                        '<span style="font-style: italic;font-weight:bold">' + Status + '</span> - ' + notes , Link, inline_thumb, index === 0, borderTop);
                 });
             })
         }
         
-        emails = _.uniq(emails).join('; ')
-        const payload = {
+        emails = _.uniq(emails).join('; ');
+
+        console.log(emails);
+        let payload = {
             toAddress: emails,
             subject: date + ', EOD Report (' + artist +')',
-            html: EOD_Main(artist, Do, Mo, YYYY, today_html, tomorrow_html, 'rgb(0, 156, 194)' )
+            html: EOD_Main(artist, Do, Mo, YYYY, today_html, tomorrow_html, 'rgb(0, 156, 194)' ),
+            attachments
         }
         
+        console.log("PAYLOAD", payload);
+
+        payload.toAddress = 'acranch@liquidanimation.com';
         return ajax.post('/integrations/email', payload).pipe(
             tap(console.log),
             take(1),

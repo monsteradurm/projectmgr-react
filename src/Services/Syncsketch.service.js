@@ -287,6 +287,7 @@ export class SyncsketchService {
     
     static URLToBlob = (url) => {
         console.log("FINDING BLOB", url)
+
     return from(fetch(url)).pipe(
      
         switchMap(res => res.blob()),
@@ -305,32 +306,27 @@ export class SyncsketchService {
             tap(console.log),
         )
     }
+    static ThumbnailToBlob = (url) => {
+        console.log("Thumbnail to blob", url);
+        let localized = url
+            .replace('https://media-cdn.syncsketch.com/', '/media-cdn-syncsketch-com/')
+            .replace('https://item-data-cdn.syncsketch.com/', '/item-data-cdn-syncsketch-com/');
+
+
+        return SyncsketchService.URLToBlob(localized);
+    }
 
     static ThumbnailFromId$ = (id) => {
         if (id === SUSPENSE) return of(SUSPENSE);
         if (!id) return of(null);
 
-        const stored = sessionStorage.getItem(id);
-        console.log("STORED IMAGE? ", stored);
-
-        if (stored) return of(stored);
-
         return SyncsketchService.Query$(SyncsketchQueries.ThumbnailById(id)).pipe(
             map(item => {
-                console.log("Thumbnail from Id", item);
                 if (!item?.thumbnail_url) return null;
                 
                 return item.thumbnail_url
             }),
-            map(url => !url ? null : url
-                .replace('https://media-cdn.syncsketch.com/', '/media-cdn-syncsketch-com/')
-                .replace('https://item-data-cdn.syncsketch.com/', '/item-data-cdn-syncsketch-com/')
-            ),
-            switchMap((url) => SyncsketchService.URLToBlob(url).pipe(
-                    tap(console.log),
-                    tap((res) => sessionStorage.setItem(id, res))
-                )
-            )
+            
         );
     }
 

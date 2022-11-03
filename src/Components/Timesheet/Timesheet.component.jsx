@@ -321,7 +321,6 @@ export const TimesheetComponent = ({headerHeight}) => {
         departments = _.uniq(departments).map(p => p.indexOf('_') >= 0 ? p.split('_')[0] : p)
         return <TagComponent tags={departments} searchKey="Department"/>
     }
-
     const expanderTemplate = (sheet) => {
         const canExpand = sheet?.logs?.length || sheet?.tomorrow;
         const isExpanded = !!expandedRows[sheet?.date]

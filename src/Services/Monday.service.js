@@ -375,4 +375,11 @@ export class MondayService {
         map(teams => teams.length > 0 ? teams[0] : ({users: []})),
         map(team => team?.users ? team.users : []),
       )
+
+      static EODReportTeam$ = MondayService.Execute$(MondayGraphQL.EODReportTeam).pipe(
+        take(1),
+        map(t => t?.teams ? t.teams : []),
+        map(teams => teams.length > 0 ? teams[0] : ({users: []})),
+        map(team => team?.users ? team.users : []),
+      )
 }

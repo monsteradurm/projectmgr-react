@@ -1,6 +1,6 @@
 import { bind, SUSPENSE } from "@react-rxjs/core";
 import { createSignal } from "@react-rxjs/utils";
-import { catchError, combineLatest, concatMap, EMPTY, map, merge, of, shareReplay, switchMap, take, tap, withLatestFrom } from "rxjs";
+import { catchError, combineLatest, concatMap, EMPTY, from, map, merge, of, shareReplay, switchMap, take, tap, toArray, withLatestFrom } from "rxjs";
 import { SendToastError, SendToastSuccess, SendToastWarning } from "../../App.Toasts.context";
 import { AllUsers$, IsAdmin$, LoggedInUser$, Managers$, MondayUser$ } from "../../App.Users.context";
 import { FirebaseService } from "../../Services/Firebase.service";
@@ -8,6 +8,7 @@ import moment from 'moment';
 import * as _ from 'underscore';
 import { IntegrationsService } from "../../Services/Integrations.service";
 import { SyncsketchService } from "../../Services/Syncsketch.service";
+import { MondayService } from "../../Services/Monday.service";
 export const [TimelogProjectIdChanged$, SetTimelogProjectId] = createSignal(id => id);
 export const [TimelogBoardIdChanged$, SetTimelogBoardId] = createSignal(id => id);
 export const [TimelogGroupIdChanged$, SetTimelogGroupId] = createSignal(id => id);
@@ -542,15 +543,49 @@ export const ApproveTimesheet = (sheet, user) => {
         }
     })
 }
+
+export const [useReportTeam, ReportTeam$] = bind(
+    MondayService.EODReportTeam$, []
+)
+
 export const SubmitTimesheetForReview = (sheet) => {
-    const emails$ = Managers$.pipe(
+    const mgr_emails$ = ReportTeam$.pipe(
         map(users => _.pluck(users, 'email')),
         take(1)
     );
 
-    emails$.pipe(
-        withLatestFrom(AllUsers$),
-        switchMap(([mgr_emails, allUsers]) => IntegrationsService.Email_EndOfDay$(sheet, mgr_emails, allUsers))
+    const sheet$ = of(sheet); /*//.pipe(
+        map(logs => sheet.logs || []),
+        tap(console.log),
+        concatMap(logs => from(logs).pipe(
+            concatMap(log => {
+                console.log("Thumbnail: ", log.Thumbnail);
+
+                if (!log.Thumbnail) 
+                    return of(log);
+
+                else if (log.Thumbnail.includes('base64'))
+                    return of(log);
+
+                return SyncsketchService.ThumbnailToBlob(log.Thumbnail).pipe(
+                    map(blob => ({...log, Thumbnail: blob})),
+                )
+            }),
+            tap(t => console.log("HERE!!!!!!!!", t)),
+            take(logs.length),
+            toArray(),
+            map(logs => ({...sheet, logs})),
+            tap(t => console.log("All Logs from Sheet: ", t))
+        ))
+    ) */
+
+    sheet$.pipe(
+        tap(console.log),
+        withLatestFrom(mgr_emails$),
+        tap(console.log),
+        withLatestFrom(AllUsers$.pipe(take(1))),
+        tap(console.log),
+        switchMap(([[_sheet, mgr_emails], allUsers]) => IntegrationsService.Email_EndOfDay$(_sheet, mgr_emails, allUsers))
     ).pipe(
         take(1)
     ).subscribe(res => {

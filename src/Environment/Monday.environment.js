@@ -152,6 +152,16 @@ export const MondayGraphQL = {
         email
       }
     }}`,
+    
+    EODReportTeam: `query{ teams (ids:727332) {
+      id
+      name
+      users {
+        id
+        name
+        email
+      }
+    }}`,
 
     Mutate_DateColumn: (boardId, itemId, columnId, date) => {
       const value = date ? {date} : { }

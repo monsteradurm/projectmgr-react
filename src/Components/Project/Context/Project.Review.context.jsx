@@ -55,7 +55,12 @@ const [useReviews, Reviews$] = bind(id =>
         map(subitems => subitems.filter(i => 
             i['Feedback Department']?.text?.length && i.name?.length)),
         // sort by subitem index, reverse so first is most recent
-        map(subitems => _.sortBy(subitems, i => i.Index?.text || -1).reverse())
+        map(subitems => _.sortBy(subitems, i => {
+            if (!i.Index?.text)
+                return '000';
+            let index = '00' + i.Index.text;
+            return index.slice(-3);
+    }).reverse())
     ), SUSPENSE
 )
 
