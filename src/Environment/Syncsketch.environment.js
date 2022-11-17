@@ -12,7 +12,7 @@ const upload =  'syncsketch.com/items/uploadToReview'
 
 export const SyncsketchPosts = {
     RenameItem: (id) => `/syncsketch/item/${id}/`,
-    UploadFile: (reviewId, type) => `/syncsketch-upload/${reviewId}/?noConvertFlag=1${
+    UploadFile: (reviewId, type) => `/syncsketch-upload/${reviewId}/?noConvertFlag=0${
         type === 'Standard' ? '' : (
             type === '360 video' ? '&type=video360' : '&type=image360'
         )
