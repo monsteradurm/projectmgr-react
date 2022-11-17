@@ -91,8 +91,7 @@ export class SyncsketchService {
             includeUploadProgress: true,
             maxContentLength: Infinity,
             maxBodyLength: Infinity,
-            headers: {...UploadHeaders, 
-                'Content-Type': 'multipart/form-data;boundary=' + formdata.getBoundary()},
+            UploadHeaders,
             timeout: 60 * 60 * 1025
         }).pipe(
             switchMap(evt => {
