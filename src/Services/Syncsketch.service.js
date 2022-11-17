@@ -86,12 +86,13 @@ export class SyncsketchService {
         return ajax({
             url,
             method: 'POST',
-            headers: UploadHeaders,
             body: formdata,
             crossDomain: true,
             includeUploadProgress: true,
             maxContentLength: Infinity,
             maxBodyLength: Infinity,
+            headers: {...UploadHeaders, 
+                'Content-Type': 'multipart/form-data;boundary=' + formData.getBoundary()},
             timeout: 60 * 60 * 1025
         }).pipe(
             switchMap(evt => {
