@@ -88,12 +88,11 @@ export class SyncsketchService {
             method: 'POST',
             body: formdata,
             crossDomain: true,
-            redirect: 'follow',
             includeUploadProgress: true,
-            maxContentLength: file.size + 1024*1024,
-            maxBodyLength: file.size + 1024*1024,
+            contentType: 'multipart/form-data',
+            
             headers: UploadHeaders,
-            timeout: 60 * 60 * 1025
+            timeout: 60 * 60 * 1025 * 60
         }).pipe(
             switchMap(evt => {
                 if (evt?.response?.id) {
@@ -137,6 +136,8 @@ export class SyncsketchService {
                                 headers: UploadHeaders,
                                 body: formdata,
                                 crossDomain: true,
+                                contentType: 'multipart/form-data',
+                                timeout: 60 * 60 * 1025 * 60,
                                 includeUploadProgress: true,
                     });
 
