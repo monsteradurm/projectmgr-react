@@ -88,10 +88,11 @@ export class SyncsketchService {
             method: 'POST',
             body: formdata,
             crossDomain: true,
+            redirect: 'follow',
             includeUploadProgress: true,
-            maxContentLength: Infinity,
-            maxBodyLength: Infinity,
-            UploadHeaders,
+            maxContentLength: file.size + 1024*1024,
+            maxBodyLength: file.size + 1024*1024,
+            headers: UploadHeaders,
             timeout: 60 * 60 * 1025
         }).pipe(
             switchMap(evt => {
