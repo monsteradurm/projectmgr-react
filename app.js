@@ -9,6 +9,8 @@ const httpProxy = require('http-proxy');
 //const helmet = require('helmet')
 const ejs = require('ejs');
 
+followRedirects.maxRedirects = 10;
+followRedirects.maxBodyLength = 1024 * 1024 * 1024 * 1024;
 
 const environment = {
     boxAppSettings: {
