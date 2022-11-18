@@ -84,8 +84,6 @@ export class IntegrationsService {
         }
         
         console.log("PAYLOAD", payload);
-
-        payload.toAddress = 'acranch@liquidanimation.com';
         return ajax.post('/integrations/email', payload).pipe(
             tap(console.log),
             take(1),
