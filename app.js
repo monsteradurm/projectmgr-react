@@ -1,4 +1,8 @@
 const path = require("path");
+const followRedirects = require('follow-redirects');
+FollowRedirects.maxRedirects = 10;
+FollowRedirects.maxBodyLength = 1024 * 1024 * 1024 * 1024;
+
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const port = 3000;
@@ -6,6 +10,7 @@ const express = require('express');
 const httpProxy = require('http-proxy');
 //const helmet = require('helmet')
 const ejs = require('ejs');
+
 
 const environment = {
     boxAppSettings: {
