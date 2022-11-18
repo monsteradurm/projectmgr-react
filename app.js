@@ -1,7 +1,5 @@
 const path = require("path");
 const followRedirects = require('follow-redirects');
-followRedirects.maxRedirects = 10;
-followRedirects.maxBodyLength = 1024 * 1024 * 1024 * 1024;
 
 const bodyParser = require('body-parser');
 const fs = require('fs');
