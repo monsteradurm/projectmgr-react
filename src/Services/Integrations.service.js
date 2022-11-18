@@ -77,7 +77,7 @@ export class IntegrationsService {
         
         emails = _.uniq(emails).join('; ');
         let payload = {
-            toAddress: 'acranch@liquidanimation.com', //emails,
+            toAddress: emails,
             subject: date + ', EOD Report (' + artist +')',
             html: EOD_Main(artist, Do, Mo, YYYY, today_html, tomorrow_html, 'rgb(0, 156, 194)' ),
             attachments

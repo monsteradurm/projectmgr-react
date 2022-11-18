@@ -217,6 +217,12 @@ export const [useTimelogReviewName, TimelogReviewName$] = bind(
     ), null
 )
 const ItemIdFromSyncLink = (link) => {
+    if (link === null)
+        return null;
+
+    else if (link.indexOf('/#/') < 0)
+        return null;
+
     const linkArr = link.split('/#/').filter(x => x && x.length > 0);
     return linkArr[1].indexOf('/') > 0 ? _.last(linkArr[1].split('/')) : linkArr[1];
 }
