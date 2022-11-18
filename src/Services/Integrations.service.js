@@ -49,7 +49,9 @@ export class IntegrationsService {
                     
                     let inline_thumb = log.id + '.jpg';
                     if (Thumbnail) {
-                        attachments.push({filename: inline_thumb, path: Thumbnail})
+                        attachments.push({filename: inline_thumb,
+                            path: Thumbnail,
+                        cid: inline_thumb})
                     }
 
                     let Element = ItemName;
@@ -74,10 +76,8 @@ export class IntegrationsService {
         }
         
         emails = _.uniq(emails).join('; ');
-
-        console.log(emails);
         let payload = {
-            toAddress: emails,
+            toAddress: 'acranch@liquidanimation.com', //emails,
             subject: date + ', EOD Report (' + artist +')',
             html: EOD_Main(artist, Do, Mo, YYYY, today_html, tomorrow_html, 'rgb(0, 156, 194)' ),
             attachments

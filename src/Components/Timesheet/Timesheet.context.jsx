@@ -554,30 +554,30 @@ export const SubmitTimesheetForReview = (sheet) => {
         take(1)
     );
 
-    const sheet$ = of(sheet); /*//.pipe(
-        map(logs => sheet.logs || []),
+    const sheet$ = of(sheet).pipe(
+        map(() => sheet.logs || []),
         tap(console.log),
         concatMap(logs => from(logs).pipe(
-            concatMap(log => {
-                console.log("Thumbnail: ", log.Thumbnail);
-
-                if (!log.Thumbnail) 
-                    return of(log);
-
-                else if (log.Thumbnail.includes('base64'))
-                    return of(log);
-
-                return SyncsketchService.ThumbnailToBlob(log.Thumbnail).pipe(
-                    map(blob => ({...log, Thumbnail: blob})),
-                )
-            }),
-            tap(t => console.log("HERE!!!!!!!!", t)),
-            take(logs.length),
-            toArray(),
-            map(logs => ({...sheet, logs})),
-            tap(t => console.log("All Logs from Sheet: ", t))
-        ))
-    ) */
+                concatMap(log => 
+                    SyncsketchService.ThumbnailFromId$(
+                        ItemIdFromSyncLink(log.Link)
+                    ).pipe(
+                        switchMap(url => !url ? of(null) : 
+                            SyncsketchService.ThumbnailToBlob(url)
+                        ),
+                        map(url => url ? ({...log, Thumbnail: url}) : log),
+                        catchError(err => of(log))
+                    )
+                ),
+                tap(t => console.log("HERE!!!!!!!!", t)),
+                take(logs.length),
+                toArray(),
+                map(logs => ({...sheet, logs})),
+                tap(t => console.log("All Logs from Sheet: ", t)),
+                
+            )
+        )
+    )
 
     sheet$.pipe(
         tap(console.log),

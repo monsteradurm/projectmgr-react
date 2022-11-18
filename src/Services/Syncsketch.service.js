@@ -297,7 +297,6 @@ export class SyncsketchService {
                     const reader = new FileReader();
                     reader.onloadend = () => {
                         const base64 = reader.result;
-                        console.log("HERE", base64);
                         obs.next(base64);
                         obs.complete();
                     };
@@ -314,8 +313,7 @@ export class SyncsketchService {
             .replace('https://media-cdn.syncsketch.com/', '/media-cdn-syncsketch-com/')
             .replace('https://item-data-cdn.syncsketch.com/', '/item-data-cdn-syncsketch-com/');
 
-
-        return SyncsketchService.URLToBlob(localized);
+        return of('https://projectmgr.live' + localized); //SyncsketchService.URLToBlob(localized);
     }
 
     static ThumbnailFromId$ = (id) => {
