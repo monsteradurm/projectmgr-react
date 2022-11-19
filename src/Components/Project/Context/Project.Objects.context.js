@@ -22,8 +22,12 @@ export const BoardItemParam$ = combineLatest([ProjectId$, BoardId$, GroupId$]).p
 export const InitialBoardItems$ = BoardItemParam$.pipe(
     switchMap(params => {
         const [ProjectId, BoardId, GroupId] = params;
-        return FirebaseService.BoardItems$(ProjectId, BoardId, GroupId)
+        return FirebaseService.BoardItems$(ProjectId, BoardId, GroupId).pipe(
+            debounceTime(250),
+            map(items => items.map(i => ({...i, ProjectId, BoardId, GroupId}))),
+        )
     }),
+    
     tap(() => RemoveQueueMessage(PROJ_QID, M_GetBoardItems[0])),
     tap(() => RefreshBadges()),
     tap(() => RefreshTags())
@@ -31,7 +35,9 @@ export const InitialBoardItems$ = BoardItemParam$.pipe(
 export const BoardItemChanged$ = BoardItemParam$.pipe(
     switchMap(params => {
         const [ProjectId, BoardId, GroupId] = params;
-        return FirebaseService.BoardItemsChanged$(ProjectId, BoardId, GroupId)
+        return FirebaseService.BoardItemsChanged$(ProjectId, BoardId, GroupId).pipe(
+            map(i => ({...i, ProjectId, BoardId, GroupId})),
+        )
     }),
     tap(() => RemoveQueueMessage(PROJ_QID, M_GetBoardItems[0])),
     tap(() => RefreshBadges()),
@@ -40,7 +46,7 @@ export const BoardItemChanged$ = BoardItemParam$.pipe(
 
 export const BoardItemStream$ = merge(InitialBoardItems$.pipe(
     concatMap(reviewArr => from(reviewArr))
-), BoardItemChanged$);
+), BoardItemChanged$)
 
 export const [BoardItemById, BoardItemIds$] = partitionByKey(
     BoardItemStream$, x => x.id
@@ -60,6 +66,7 @@ export const [useRawBoardItems, RawBoardItems$] = bind(
 export const [, DepartmentOptions$] = partitionByKey(
     BoardItemStream$.pipe(
         filter(x => x?.Department?.value),
+        tap(console.log),
         map(x => x.Department.value),
         map(x => x[0]),
         distinct()
@@ -117,13 +124,15 @@ export const [useColumnSettings, ColumnSettings$] = bind(
 
 // --- filtered board items ---
 export const [useDepartmentBoardItems, DepartmentBoardItems$] = bind(
-    combineLatest([RawBoardItems$, Department$]).pipe(
-        map(([items, Department]) => {
+    combineLatest([RawBoardItems$, Department$, GroupId$]).pipe(
+        map(([items, Department, GroupId]) => {
+            const groupItems = items.filter(i => i.GroupId === GroupId);
+
             if (Department === 'All Departments')
-                return items;
+                return groupItems;
             
-            return filterDepartments(items, Department);
-        })
+            return filterDepartments(groupItems, Department);
+        }),
     )
 );
 
