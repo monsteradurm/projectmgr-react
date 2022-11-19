@@ -1,0 +1,28 @@
+.pm-boarditem-logs {
+    tr > td {
+        padding: 5px !important;
+        margin: 0px !important;
+    }
+    .p-avatar.p-avatar-circle {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    .p-avatar.p-avatar-circle > .p-button.p-button-rounded {
+        width: 40px !important;
+        height: 40px !important;
+        max-width: 40px !important;
+        max-height: 40px !important;
+        min-height: 40px !important;
+        min-width: 40px !important;
+    }
+
+    tr > th {
+        font-weight: 600 !important;
+    }
+
+    th.item-log-notes > div {
+        align-items: start;
+        justify-content: start;
+    }
+}

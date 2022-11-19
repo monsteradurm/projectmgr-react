@@ -20,6 +20,7 @@ import { BoardId$, GroupId$, ProjectId$ } from "../Context/Project.Params.contex
 import { MondayService } from "../../../Services/Monday.service";
 import { IntegrationsService } from "../../../Services/Integrations.service";
 import { SetTimelineDialogParameters, SetTimesheetDate, ShowTimelogDialog } from "../../Timesheet/Timesheet.context";
+import { FirebaseService } from "../../../Services/Firebase.service";
 
 // current tabs stored according to boarditem
 const _activeTabMap = (BoardItemId, ActiveTab) => ({BoardItemId, ActiveTab});
@@ -174,6 +175,14 @@ const OnAddArtist = (BoardItemId, CurrentReviewId, artist) => {
         })
     });
 }
+
+const [useTableItemLogs, ] = bind(
+    (BoardItemId, visible) => 
+    of(BoardItemId).pipe(
+        switchMap(id => !!id  && id !== SUSPENSE && !!visible? of(id) : EMPTY),
+        switchMap(id => FirebaseService.GetItemLogs$(id).pipe(take(1)))
+    ), SUSPENSE
+)
 
 const [, RemoveArtistMenu$] = bind(
     (BoardItemId, CurrentReviewId) => 
@@ -409,6 +418,16 @@ const [useSummaryMenu, ] = bind(
     ), SUSPENSE
 )
 
+const [useLogsMenu, ] = bind(
+    BoardItemId =>
+    ReadyOrSuspend$(BoardItemId, ActiveTab$).pipe(
+        map(activeTab => ({
+            label: 'Logs',
+            className: activeTab === 'Logs' ? 'pm-item-tab-active' :'',
+            command: (evt) => SetActiveTab(BoardItemId, 'Logs')
+        })),
+    ), SUSPENSE
+)
 const DefaultTableItemState = {
     ActiveTab: SUSPENSE,
     ActiveTabType: SUSPENSE,
@@ -448,6 +467,8 @@ export {
     useReferenceMenu,
     useReviewsMenu,
     useSummaryMenu,
+    useLogsMenu,
+    useTableItemLogs,
     useTableItemContextMenu,
     TableItemProvider
 }

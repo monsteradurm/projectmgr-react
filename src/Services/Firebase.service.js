@@ -285,6 +285,26 @@ export class FirebaseService {
         take(1)
     )
 
+    static GetItemLogs$(itemId) {
+        const q = query(collectionGroup(FirebaseService.db, 'LogEntries'), where('ItemId', '==', itemId.toString()));
+        return from(getDocs(q)).pipe(
+            map(snapshot => {
+                const result = [];
+                snapshot.forEach(s => {
+                    const logRef = s.ref;
+                    const colRef = logRef.parent;
+                    const dateRef = colRef.parent;
+                    const sheetColRef = dateRef.parent;
+                    const artistRef = sheetColRef.parent;
+                    result.push({...s.data(), artist: artistRef.id, date: dateRef.id})
+                });
+
+                return result;
+            }),
+            map(entries => _.sortBy(entries, e => e.date))
+        )
+    }
+
     static ItemsByAllocations$ = (allocations) => from(allocations).pipe(
             concatMap(a => {
                 const b = a.boardId.toString();
