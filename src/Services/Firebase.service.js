@@ -1,7 +1,7 @@
 import { FirebaseConfig } from "../Environment/Firebase.environment"
 import * as firebase from 'firebase/app';
-import { getFirestore, collection as fsCollection, doc as fsDoc, query, runTransaction, setDoc,
-    deleteDoc, QuerySnapshot   } from 'firebase/firestore';
+import { getFirestore, collection as fsCollection, doc as fsDoc, query, runTransaction, setDoc, where,
+    deleteDoc, QuerySnapshot, collectionGroup, getDocs   } from 'firebase/firestore';
 import { collectionChanges, doc, collection } from 'rxfire/firestore';
 import * as _ from 'underscore';
 import { BehaviorSubject, concatAll, concatMap, EMPTY, expand, scan, firstValueFrom, from, map,debounceTime, mergeMap, reduce, skip, switchMap, take, tap, toArray, withLatestFrom, of, catchError } from "rxjs";
@@ -10,6 +10,18 @@ import { ReverseProxy } from "../Environment/proxy.environment";
 import moment from 'moment';
 const app = firebase.initializeApp(FirebaseConfig);
 export class FirebaseService {
+
+    /* Start Testing */
+
+    static GetProjectHours$() {
+        const logs = query(collectionGroup(FirebaseService.db, 'LogEntries'), where('ProjectId', '==', "LAS0005_DWTD"));
+        
+        console.log("HERE, HERE, HERE");
+        return from(getDocs(logs));
+    }
+
+    /* End Testing */
+
 
     static get db() {
         return getFirestore(app)
@@ -161,7 +173,6 @@ export class FirebaseService {
 
         if (!sheet)
             return of(null);
-
         const artistRef = fsDoc(FirebaseService.db, `Timesheets/${sheet.artist}`);
         const assertArtist$ = from(setDoc(artistRef, ({artist: sheet.artist})));
 
@@ -169,6 +180,13 @@ export class FirebaseService {
 
         return assertArtist$.pipe(
             switchMap(() => from(setDoc(docRef, sheet))),
+                concatMap(() => from(sheet.logs?.length ? sheet.logs : []).pipe(
+                    switchMap(log => {
+                        const logRef = fsDoc(FirebaseService.db, `Timesheets/${sheet.artist}/Sheets/` + sheet.date + '/LogEntries/' + log.ItemId);
+                        return from(setDoc(logRef, log))
+                    })
+                )
+            ),
             map(res => sheet),
             catchError(err => {
                 console.log(err);

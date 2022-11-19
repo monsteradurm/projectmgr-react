@@ -19,6 +19,7 @@ const PrimaryColors = {
     'Applications' : '#964cc9',
     'Gallery' : '#FF9616',
     'GalleryUpdate' : '#FF9616',
+    'Testing' : '#c20051',
     'default' : 'gray'
 }
 
