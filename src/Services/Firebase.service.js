@@ -1,10 +1,10 @@
 import { FirebaseConfig } from "../Environment/Firebase.environment"
 import * as firebase from 'firebase/app';
 import { getFirestore, collection as fsCollection, doc as fsDoc, query, runTransaction, setDoc, where,
-    deleteDoc, QuerySnapshot, collectionGroup, getDocs   } from 'firebase/firestore';
+    deleteDoc, QuerySnapshot, collectionGroup, getDocs, onSnapshot   } from 'firebase/firestore';
 import { collectionChanges, doc, collection } from 'rxfire/firestore';
 import * as _ from 'underscore';
-import { BehaviorSubject, concatAll, concatMap, EMPTY, expand, scan, firstValueFrom, from, map,debounceTime, mergeMap, reduce, skip, switchMap, take, tap, toArray, withLatestFrom, of, catchError } from "rxjs";
+import { BehaviorSubject, concatAll, concatMap, EMPTY, expand, scan, firstValueFrom, from, map,debounceTime, mergeMap, reduce, skip, switchMap, take, tap, toArray, withLatestFrom, of, catchError, Observable } from "rxjs";
 import { ajax } from "rxjs/ajax";
 import { ReverseProxy } from "../Environment/proxy.environment";
 import moment from 'moment';
@@ -15,12 +15,11 @@ export class FirebaseService {
 
     static GetProjectHours$() {
         const logs = query(collectionGroup(FirebaseService.db, 'LogEntries'), where('ProjectId', '==', "LAS0005_DWTD"));
-        
-        console.log("HERE, HERE, HERE");
         return from(getDocs(logs));
     }
 
     /* End Testing */
+
 
 
     static get db() {
@@ -261,18 +260,25 @@ export class FirebaseService {
     }
 
     static AllocationsChanged$ = (name) => {
-        const col = 'Allocations/' + name + '/items';
-        return FirebaseService.SubscribeToCollection$(col).pipe(
-            concatMap(changes => from(changes).pipe(
-                concatMap(change => FirebaseService.GetDocument$(col, change.doc.id).pipe(
-                    map(d => ({...d.data(), action: change.type}))
-                    ),
-                ),
-                take(changes.length),
-                toArray()
-                )
-            )
-        )
+        const q = query(collectionGroup(FirebaseService.db, "Items"), where("CurrentArtist", "array-contains", name));
+        return new Observable((obs) => {
+            let init=false;
+            onSnapshot(q, (snapshot) => {
+                const result = [];
+                
+                if (!init) {
+                    snapshot.forEach(doc => {
+                        result.push({action: 'added', ...doc.data()})
+                    });
+                    init = true;
+                }
+                snapshot.docChanges().forEach((change) => {
+                    result.push({action: change.type, ...change.doc.data()});
+                });
+
+                obs.next(result);
+            })
+        });
     }
 
     static GalleryItems$ = FirebaseService.AllDocsFromCollection$('Gallery').pipe(
@@ -284,7 +290,19 @@ export class FirebaseService {
         ),
         take(1)
     )
-
+    static ProjectItemsFromIds$(ids) {
+        const q = query(collectionGroup(FirebaseService.db, 'Items'), where('id', 'in', ids));
+        return from(getDocs(items)).pipe(
+            map(snapshot => {
+                const result = [];
+                snapshot.forEach(s => {
+                    result.push(s.data());
+                    return result;
+                });
+            })
+        )
+    }
+    
     static GetItemLogs$(itemId) {
         const q = query(collectionGroup(FirebaseService.db, 'LogEntries'), where('ItemId', '==', itemId.toString()));
         return from(getDocs(q)).pipe(

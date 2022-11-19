@@ -67,9 +67,13 @@ const TaskTemplate = (item) => {
 }
 
 const BoardTemplate = (item) => {
-    let projectId = _.last(item.project.nesting);
-    return <span onClick={(e) => onClickHandler(e, `Projects?ProjectId=${projectId}&BoardId=${item.board.id}&GroupId=${item.group.id}`)}>
-        {item.board.name.replace('/', ' / ') + ", " + item.group.name}</span>;
+    let nesting = [item.board_description];
+    if (nesting[0].indexOf('/'))
+        nesting = nesting[0].split('/');
+
+    let projectId = _.last(nesting);
+    return <span onClick={(e) => onClickHandler(e, `Projects?ProjectId=${projectId}&BoardId=${item.boardId}&GroupId=${item.groupId}`)}>
+        {item.boardName.replace('/', ' / ') + ", " + item.groupTitle}</span>;
 }
 
 const TimelineTemplate = (item) => {
@@ -160,9 +164,11 @@ export const AllocationsComponent = ({headerHeight}) => {
 
         if (Search?.length > 0) {
             let s = Search.toLowerCase();
-            result = result.filter(a => [a.board.name, a.group.name, a.name, a.Department?.text, 
+            result = result.filter(a => [a.boardName, a.groupTitle, a.name, a.Department?.text, 
                 a.Status?.text, useAllocatedReviewName(a)].join(' ').toLowerCase().indexOf(s) >= 0)
         }
+        // filter approved
+        // result = result.filter(a => a.Status?.text?.indexOf('Approved') < 0)
         if (statusFilter?.length) {
             result = result.filter(a => a.Status?.text?.replace(/\s/g, '') == statusFilter)
         }
@@ -182,8 +188,8 @@ export const AllocationsComponent = ({headerHeight}) => {
 
         result = _.sortBy(result, a => {
             switch(SortBy) {
-                case 'Item': return a.name + "/" + a.group.name + "/" + a.board.name;
-                case 'Board': return a.board.name + "/" + a.group.name + "/" + a.name;
+                case 'Item': return a.name + "/" + a.groupTitle + "/" + a.boardName;
+                case 'Board': return a.boardName + "/" + a.groupTitle + "/" + a.name;
                 case 'Review': {
                     let review = useAllocatedReviewName(a);
                     return review && review.length > 0 ? review : 'zzzzzz'

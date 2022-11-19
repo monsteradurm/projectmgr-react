@@ -122,7 +122,7 @@ const [, BoardItemColumns$] = bind(
         map(items => items.length > 0 ? items[0] : {}),
         // monday item columns will have the id property
         map(item => Object.keys(item)
-            .filter(k => !!item[k].id)
+            .filter(k => !!item[k]?.id)
             // only need id
             .map(k => ({id : item[k].id, title: k}))
         ),

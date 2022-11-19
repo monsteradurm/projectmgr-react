@@ -139,8 +139,6 @@ export const TableItemReview = ({ReviewId, ActiveDepartment, primary}) => {
     const SiblingDepartments = useSiblingReviewDepartments(Element, ReviewDepartment);
 
     const SyncsketchReview = useSyncsketchReview(SyncElementName, ReviewDepartment);
-    console.log("SYNC REVIEW", SyncElementName, SyncsketchReview);
-
     const Name = useReviewName(ReviewId);
     const Index = useReviewIndex(ReviewId);
     const ReviewItems = useSyncsketchItems(SyncsketchReview?.uuid, Department, Index);

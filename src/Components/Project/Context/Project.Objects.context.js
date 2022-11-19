@@ -66,7 +66,6 @@ export const [useRawBoardItems, RawBoardItems$] = bind(
 export const [, DepartmentOptions$] = partitionByKey(
     BoardItemStream$.pipe(
         filter(x => x?.Department?.value),
-        tap(console.log),
         map(x => x.Department.value),
         map(x => x[0]),
         distinct()

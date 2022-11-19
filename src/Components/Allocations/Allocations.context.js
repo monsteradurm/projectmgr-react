@@ -8,6 +8,7 @@ import { Dropdown } from "react-bootstrap";
 import { Badge } from "primereact";
 import { SetCurrentRoute } from '../../Application.context';
 import { createSignal } from "@react-rxjs/utils";
+import { doc } from "firebase/firestore";
 
 const allocationsSearchMap = (val, searchParams, setSearchParams) => {
     if (setSearchParams && searchParams) {
@@ -46,6 +47,13 @@ export const [useMyAllocations, MyAllocations$] = bind(
         switchMap(user => !!user && user !== SUSPENSE ? of(user) : EMPTY),
         map(user => user.name),
         switchMap(name => FirebaseService.AllocationsChanged$(name)),
+        
+        map(docs => _.filter(docs, d => 
+            !d.CurrentStatus || (
+                d.CurrentStatus?.indexOf('Approved') < 0
+                && d.CurrentStatus?.indexOf('Blocked') < 0)
+            )
+        ),
         map(docs => _.reduce(docs, (acc, cur) => {
                 let nesting = ['Other', cur.board_description]
 
@@ -61,7 +69,6 @@ export const [useMyAllocations, MyAllocations$] = bind(
                 return acc;
             }, {})
         ),
-        tap(t => console.log("ALLOCATIONS: ", t))
     ), SUSPENSE
 )
 
@@ -76,10 +83,8 @@ export const [useAllocationsByProject, AllocationsByProject$] = bind(
                 return [];
 
             const items = group[nesting[1]];
-            
             return items ? items : [];
         }),
-        concatMap(allocations => FirebaseService.ItemsByAllocations$(allocations))
     ), SUSPENSE
 )
 
