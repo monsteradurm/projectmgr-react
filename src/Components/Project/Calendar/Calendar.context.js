@@ -1,5 +1,5 @@
 import { bind, SUSPENSE } from "@react-rxjs/core";
-import { map } from "rxjs";
+import { map, tap } from "rxjs";
 import { GoogleTimelineData$ } from "../Timeline/Timeline.context";
 import * as _ from 'underscore';
 
@@ -10,8 +10,9 @@ export const [useCalendarEvents, CalendarEvents$] = bind(
             return { 
                 title: i.name, id: i.id, start: i.start, end: i.end,
                 backgroundColor: i.status.color, allDay: true,
-                extendedProps: i
+                extendedProps: i.extended
             }
-        }))
+        })),
+        tap(console.log)
     ), SUSPENSE
 )   

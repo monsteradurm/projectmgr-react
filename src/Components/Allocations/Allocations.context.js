@@ -55,6 +55,7 @@ export const [useMyAllocations, MyAllocations$] = bind(
             )
         ),
         map(docs => _.reduce(docs, (acc, cur) => {
+                console.log("HERE", cur);
                 let nesting = ['Other', cur.board_description]
 
                 if (nesting[1].indexOf('/') >= 0)

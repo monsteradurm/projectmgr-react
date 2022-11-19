@@ -1,12 +1,9 @@
 import { bind, SUSPENSE } from "@react-rxjs/core";
-
-import { FilteredItems$ } from "../Charts/Charts.context";
 import * as _ from 'underscore';
-import { combineLatest, concatMap, from, map, switchMap, tap, filter, toArray, scan, of, withLatestFrom, take } from "rxjs";
-import { FilteredBoardItemIds$, GroupedBoardItems$ } from "../Context/Project.Objects.context";
+import { combineLatest, from, map, switchMap, tap, filter, toArray, of, take } from "rxjs";
+import { DepartmentBoardItems$, GroupedBoardItems$ } from "../Context/Project.Objects.context";
 import { AssignedArtists$, AssignedTimeline$, BoardItemName$, BoardItemStatus$ } from "../Context/Project.Item.context";
 import { CurrentReview$ } from "../Context/Project.Review.context";
-import { SvelteGantt, SvelteGanttTable } from 'svelte-gantt';
 import moment from 'moment';
 
 
@@ -38,6 +35,7 @@ export const GoogleTimelineColumns = [
                 of(id), AssignedArtists$(id, reviewId), AssignedTimeline$(id, reviewId), 
                 BoardItemName$(id), BoardItemStatus$(id),
             ]).pipe(
+                tap(t => console.log("TIMELINE ITEM DATA", t)),
                 map(([id, artists, timeline, [element, task], status]) => {
                     if (!timeline?.text || timeline?.text?.indexOf(' - ') < 0)
                         return null;
@@ -49,23 +47,39 @@ export const GoogleTimelineColumns = [
                 }),
             )
   )
-  export const [, ParseTimelineData$] = bind( 
-      items => 
-        from(items).pipe(
-            switchMap(id => CurrentReview$(id).pipe(
-                    switchMap(reviewId =>  TimelineItemData$(id, reviewId))
-                )
-            ),
-            take(items.length),
-            toArray(),
-        )
-  )
 
   export const [, GoogleTimelineData$] = bind(
-    GroupedBoardItems$.pipe(
-        map(groups => groups.map(g => g[1])),
-        map(groupIds => _.flatten(groupIds)),
-        switchMap(items => ParseTimelineData$(items)),
+    DepartmentBoardItems$.pipe(
+        map(items => {
+            if (!items || items.length < 1)
+                return [];
+
+            return _.map(items, i => {
+
+                if (!i.CurrentTimeline?.length || i.CurrentTimeline.indexOf(' - ') < 0)
+                    return null;
+
+                const dateArr = i.CurrentTimeline.split(' - ');
+                const start = moment(dateArr[0]).toDate();
+                const end = moment(dateArr[1]).toDate();
+
+                console.log("START: ", dateArr[0], start)
+                let element = i.name;
+                let task = null;
+                if (i.name.indexOf('/') > 0) {
+                    const nameArr = i.name.split('/');
+
+                    element = nameArr.shift();
+                    task = nameArr.join("/");
+                }
+
+                const status = i.Status?.info?.color ? {text: i.Status.text || 'Not Started', color: i.Status.info.color || 'black'} : 
+                    {text: 'Not Started', color: 'black' }
+                return {id: i.id, name: task ? `${element}, ${task}` : element, start, 
+                    end, status, extended: i,
+                    artists: i.CurrentArtist?.length ? i.CurrentArtist.join(", "): 'Unassigned'}
+            })
+        }),
         map(items => items.filter(i => !!i)),
         tap(t => console.log("ITEMS", t))
     ), SUSPENSE

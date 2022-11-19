@@ -29,15 +29,25 @@ export const ProjectCalendar = ({}) => {
         const item = eventInfo.event.extendedProps;
         let task;
         let element = item.name;
-        if (element.indexOf(', ') >= 0) {
-            [element, task] = element.split(', ');
+        if (element.indexOf('/') >= 0) {
+            [element, task] = element.split('/');
         }
         return (
-          <Stack direction="vertical">
-            <Stack direction="horizontal" gap={2}>
-                <div style={{fontWeight: 600, paddingLeft: 20}}>{element}</div>
+          <Stack direction="vertical" style={{padding: '10px 20px'}}>
+                <div style={{fontWeight: 600, fontSize: 18}}>{element}</div>
+                <Stack direction="horizontal" gap={1}>
                 <div style={{fontWeight: 400}}>{task}</div>
-            </Stack>
+                {
+                    item.CurrentReview && 
+                    <div>({item.CurrentReview.name})</div>
+                }
+                </Stack>
+                <div className="my-auto"></div>
+                <Stack direction="horizontal">
+                    <div className="mx-auto"></div>
+                    <div>{item.CurrentArtist}</div>
+                </Stack>
+                
           </Stack>
         )
     }
@@ -54,7 +64,7 @@ export const ProjectCalendar = ({}) => {
                     </div>
                 </Stack> : 
                 <div  style={{marginTop: 30}}>
-                <FullCalendar events={events} plugins={[ dayGridPlugin ]}
+                <FullCalendar events={events} plugins={[ dayGridPlugin ]} height="auto"
                 initialView="dayGridMonth" eventContent={renderEventContent} />
                 </div>
             }
