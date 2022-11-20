@@ -103,7 +103,7 @@ const FilteredBoardItems$ =
     combineLatest([GroupedBoardItems$, DepartmentBoardItems$, FilteredBoardItemIds$, BoardReverseSorting$]).pipe(
 
     map(([groups, items, filteredIds, reversed]) => {
-        let ids = Array.isArray(groups[1]) ? _.flatten(groups.map(g => g[1])) : group;
+        let ids = Array.isArray(groups[1]) ? _.flatten(groups.map(g => g[1])) : groups;
         let filteredItems = items.filter(i => filteredIds.indexOf(i.id) >= 0);
         const sorted = _.sortBy(filteredItems, i => ids.indexOf(i.id));
         if (reversed)

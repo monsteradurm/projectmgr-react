@@ -27,9 +27,9 @@ const ResourceLabel = (data) => {
     const resource = data.resource;
     const item = resource.extendedProps;
     console.log("ResourceLabel", item)
-    return <Stack direction="vertical" style={{textAlign: 'right', position:'relative'}}>
-        <div style={{fontSize:16, fontWeight: 600}}>{resource.title}</div>
-        <div>{item.task}</div>
+    return <Stack direction="vertical" className="my-auto" style={{textAlign: 'right', position:'relative', justifyContent: 'center', height: '100%'}}>
+        <div style={{fontSize:15, fontWeight: 600}}>{resource.title}</div>
+        <div style={{fontSize: 14}}>{item.task}</div>
     </Stack>
 }
 
@@ -73,7 +73,7 @@ export const ProjectTimeline = ({}) => {
             <div>(<span className='pm-tag' onClick={() => 
                 toggleArrFilter(item.feedback, 'BoardFeedbackDepartmentFilter', searchParams, setSearchParams)}>{item.feedback}</span>)</div>
         </Stack>
-        return <Stack direction="vertical" style={{textAlign: 'center', justifyContent: 'center'}}>
+        return <Stack direction="vertical" style={{textAlign: 'center', justifyContent: 'center', fontSize:15}}>
             {
                 item.artist &&
                 <div style={{ left: -160, position: 'absolute'}}>
