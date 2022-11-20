@@ -1,20 +1,20 @@
 import { SUSPENSE } from '@react-rxjs/core';
-import { Gantt, Task, EventOption, StylingOption, ViewMode, DisplayOption } from 'gantt-task-react';
+import { Gantt, ViewMode } from 'gantt-task-react';
 import "gantt-task-react/dist/index.css";
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { Stack } from 'react-bootstrap';
 import { BreedingRhombusSpinner } from 'react-epic-spinners';
 import { AddQueueMessage, RemoveQueueMessage, useBusyMessage } from '../../../App.MessageQueue.context';
-import { GoogleTimelineColumns, useGoogleTimelineColors, useGooleTimelineRows, useTimelineData, useTimelineRange, useTimelineRows, useTimelineTasks } from './Timeline.context';
+import { GoogleTimelineColumns, useFrappeData, useGoogleTimelineColors, useGooleTimelineRows, useTimelineData, useTimelineRange, useTimelineRows, useTimelineTasks } from './Timeline.context';
 import { TimelineTooltipContent } from './Timeline.TooltipContent';
 import { Chart } from "react-google-charts";
 import moment from 'moment';
-
 const TL_ID = '/Timeline'
 
 const EmptyComponent = () => {
     return <></>
 }
+
 
 const RenderTimeline = ({rows, columns, colors}) => {
     const [chart, setChart] = useState(null);
@@ -33,6 +33,7 @@ export const ProjectTimeline = ({}) => {
     const rows = useGooleTimelineRows();
     const columns = GoogleTimelineColumns;
     const colors = useGoogleTimelineColors();
+    const data = useFrappeData();
 
     useLayoutEffect(() => {
         AddQueueMessage(TL_ID, 'init-timeline', 'Retrieving Timeline Data...');
@@ -43,6 +44,7 @@ export const ProjectTimeline = ({}) => {
             RemoveQueueMessage(TL_ID, 'init-timeline');
             setInitializing(false);
         }
+        
     }, [rows, columns, colors])
 
     return (
@@ -55,7 +57,10 @@ export const ProjectTimeline = ({}) => {
                     <div style={{fontWeight: 300, textAlign: 'center', fontSize: '25px', marginTop: '50px'}}>
                         {BusyMessage?.message}
                     </div>
-                </Stack> : <RenderTimeline rows={rows} columns={columns} colors={colors}/>    
+                </Stack> : 
+                <Gantt tasks={data} style={{marginTop: 20}} headerHeight={100} rowHeight={30} viewMode={ViewMode.Day}
+                    TooltipContent={TimelineTooltipContent}
+                    TaskListHeader={EmptyComponent} TaskListTable={EmptyComponent}/>
             }
             
         </>
@@ -64,6 +69,5 @@ export const ProjectTimeline = ({}) => {
 }
 
 /*
-<Gantt tasks={data} style={{marginTop: 20}} TooltipContent={TimelineTooltipContent}
-                TaskListHeader={EmptyComponent} TaskListTable={EmptyComponent}/>
+
 */

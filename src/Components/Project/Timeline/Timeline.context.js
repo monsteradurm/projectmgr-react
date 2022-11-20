@@ -5,7 +5,7 @@ import { DepartmentBoardItems$, GroupedBoardItems$ } from "../Context/Project.Ob
 import { AssignedArtists$, AssignedTimeline$, BoardItemName$, BoardItemStatus$ } from "../Context/Project.Item.context";
 import { CurrentReview$ } from "../Context/Project.Review.context";
 import moment from 'moment';
-
+import { ItemSummary } from "../ProjectItem/ItemSummary.component";
 
 export const [useTimelineRows, TimelineRows$] = bind(
     GroupedBoardItems$.pipe(
@@ -62,8 +62,6 @@ export const GoogleTimelineColumns = [
                 const dateArr = i.CurrentTimeline.split(' - ');
                 const start = moment(dateArr[0]).toDate();
                 const end = moment(dateArr[1]).toDate();
-
-                console.log("START: ", dateArr[0], start)
                 let element = i.name;
                 let task = null;
                 if (i.name.indexOf('/') > 0) {
@@ -84,6 +82,52 @@ export const GoogleTimelineColumns = [
         tap(t => console.log("ITEMS", t))
     ), SUSPENSE
 )
+
+
+const ParseFrappeItem = (item, parentId) => {
+    if (!item.Timeline?.text?.length)
+        return null;
+
+    console.log(item.Status);
+    const tl = item.Timeline?.text.split(' - ');
+    const color = item.Status?.info?.color || 'black'
+    let name = item.name;
+    let task = null;
+    if (name.indexOf('/') >= 0) {
+        name = item.name.split('/')[0]
+        task = item.name.split('/')[1]
+    }
+    return {
+        review: item.CurrentReview,
+        id: item.id,
+        name,
+        task,
+        start: moment(tl[0]).toDate(),
+        end: moment(tl[1]).toDate(),
+        progress: 100,
+        status: { color, text: item.CurrentStatus || 'Not Started' },
+        styles: { progressColor: color, progressSelectedColor: color },
+      }
+}
+
+export const [useFrappeData, FrappeData$] = bind(
+    DepartmentBoardItems$.pipe(
+        map(items => {
+            if (!items || items.length < 1)
+                return [];
+
+            const res = []
+            _.forEach(items, i => {
+                res.push(ParseFrappeItem(i));
+            });
+
+            return res;
+        }),
+        map(items => items.filter(i => !!i)),
+    ), SUSPENSE
+)
+
+
 
 export const [useGooleTimelineRows, GoogleTimelineRows$] = bind(
     GoogleTimelineData$.pipe(
