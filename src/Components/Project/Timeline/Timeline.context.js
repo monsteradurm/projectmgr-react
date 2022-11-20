@@ -84,11 +84,31 @@ export const GoogleTimelineColumns = [
 )
 
 
-const ParseFrappeItem = (item, parentId) => {
+const ParseResourceItem = (item, parentId) => {
     if (!item.Timeline?.text?.length)
         return null;
 
-    console.log(item.Status);
+    const tl = item.Timeline?.text.split(' - ');
+    let name = item.name;
+    let task = null;
+    if (name.indexOf('/') >= 0) {
+        name = item.name.split('/')[0]
+        task = item.name.split('/')[1]
+    }
+
+    return {
+        id: item.id,
+        title: name, 
+        task,
+        department: item.Department?.text
+      }
+}
+
+const ParseResourceEvent = (item, parentId) => {
+    if (!item.Timeline?.text?.length)
+        return null;
+
+
     const tl = item.Timeline?.text.split(' - ');
     const color = item.Status?.info?.color || 'black'
     let name = item.name;
@@ -99,18 +119,20 @@ const ParseFrappeItem = (item, parentId) => {
     }
     return {
         review: item.CurrentReview,
-        id: item.id,
-        name,
+        resourceId: item.id,
+        title: task,
         task,
+        artist: item.CurrentArtist,
+        status: item.CurrentStatus,
+        backgroundColor: color,
+        eventTextColor: 'white',
         start: moment(tl[0]).toDate(),
         end: moment(tl[1]).toDate(),
         progress: 100,
-        status: { color, text: item.CurrentStatus || 'Not Started' },
-        styles: { progressColor: color, progressSelectedColor: color },
       }
 }
 
-export const [useFrappeData, FrappeData$] = bind(
+export const [useTimelineResources,] = bind(
     DepartmentBoardItems$.pipe(
         map(items => {
             if (!items || items.length < 1)
@@ -118,7 +140,23 @@ export const [useFrappeData, FrappeData$] = bind(
 
             const res = []
             _.forEach(items, i => {
-                res.push(ParseFrappeItem(i));
+                res.push(ParseResourceItem(i));
+            });
+
+            return res;
+        }),
+        map(items => items.filter(i => !!i)),
+    ), SUSPENSE
+)
+export const [useTimelineEvents,] = bind(
+    DepartmentBoardItems$.pipe(
+        map(items => {
+            if (!items || items.length < 1)
+                return [];
+
+            const res = []
+            _.forEach(items, i => {
+                res.push(ParseResourceEvent(i));
             });
 
             return res;
