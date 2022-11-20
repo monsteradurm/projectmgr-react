@@ -81,4 +81,26 @@
     .fc .fc-timeline-slot-cushion {
         width: 100%
     }
+
+    .pm-tag{
+        font-weight: 400;
+    }
+    .pm-tag:hover{
+        font-weight:600;
+        color: white !important;
+        -webkit-text-stroke-width: 0.1px;
+    }
+    .pm-tag:hover::before{
+        content: '#'
+    }
+
+    .p-avatar-circle {
+        margin-top: 8px;
+        height: 45px !important;
+        width: 45px !important;
+        max-height: 45px  !important;
+        max-width: 45px  !important;
+        min-width: 45px !important;
+        min-height: 45px !important;
+    }
 }

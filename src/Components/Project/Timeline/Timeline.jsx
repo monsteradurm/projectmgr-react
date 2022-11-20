@@ -1,7 +1,7 @@
 import { SUSPENSE } from '@react-rxjs/core';
 import { Gantt, ViewMode } from 'gantt-task-react';
 import "gantt-task-react/dist/index.css";
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import FullCalendar from '@fullcalendar/react' // must go before plugins
 import resourceTimelinePlugin from '@fullcalendar/resource-timeline';
 import { Stack } from 'react-bootstrap';
@@ -14,34 +14,15 @@ import moment from 'moment';
 import "./Timeline.scss";
 import { useCalendarEvents } from '../Calendar/Calendar.context';
 import { SupportUsers } from '../../Support/Support.Users';
+import { useBoardFilters } from '../Context/Project.Params.context';
+import { useSearchParams } from 'react-router-dom';
+import { toggleArrFilter } from '../Overview.filters';
 const TL_ID = '/Timeline'
 
 const EmptyComponent = () => {
     return <></>
 }
 
-const renderEventContent = (data) => {
-    const event = data.event;
-    const item = event.extendedProps;
-    return <Stack direction="vertical" style={{textAlign: 'center', justifyContent: 'center'}}>
-        {
-            item.artist &&
-            <div style={{ left: -160, position: 'absolute'}}>
-                <SupportUsers artists={item.artist} id={event.id}
-                    color={event.backgroundColor} align="left"/>
-            </div>
-        }
-        {
-            item.review ?
-            <>
-                <div>{item.review.name}</div>
-                <div>({item.status})</div>
-            </>
-            : <div>{item.status}</div>
-        }
-        
-    </Stack>
-}
 const ResourceLabel = (data) => {
     const resource = data.resource;
     const item = resource.extendedProps;
@@ -68,6 +49,8 @@ export const ProjectTimeline = ({}) => {
     const BusyMessage = useBusyMessage(TL_ID);
     const Resources = useTimelineResources();
     const Events = useTimelineEvents();
+    const calendarRef = useRef();
+    const [searchParams, setSearchParams] = useSearchParams();
     useLayoutEffect(() => {
         AddQueueMessage(TL_ID, 'init-timeline', 'Retrieving Timeline Data...');
     }, []);
@@ -77,8 +60,38 @@ export const ProjectTimeline = ({}) => {
             RemoveQueueMessage(TL_ID, 'init-timeline');
             setInitializing(false);
         }
-        
+
     }, [Resources, Events])
+
+    const renderEventContent = (data) => {
+        const event = data.event;
+        const item = event.extendedProps;
+        //BoardFeedbackDepartmentFilter
+        const statusHTML = <Stack direction="horizontal" gap={2} style={{justifyContent: 'center'}}>
+            <div className="pm-tag" onClick={() => 
+                toggleArrFilter(item.status, 'BoardStatusFilter', searchParams, setSearchParams)}>{item.status}</div>
+            <div>(<span className='pm-tag' onClick={() => 
+                toggleArrFilter(item.feedback, 'BoardFeedbackDepartmentFilter', searchParams, setSearchParams)}>{item.feedback}</span>)</div>
+        </Stack>
+        return <Stack direction="vertical" style={{textAlign: 'center', justifyContent: 'center'}}>
+            {
+                item.artist &&
+                <div style={{ left: -160, position: 'absolute'}}>
+                    <SupportUsers artists={item.artist} id={event.id}
+                        color={event.backgroundColor} align="left"/>
+                </div>
+            }
+            {
+                item.review &&
+                <>
+                    <div>{item.review.name}</div>
+                </>
+            }
+            {
+                statusHTML
+            }
+        </Stack>
+    }
 
     return (
         <div id="pm-timeline" style={{marginTop: 20}}>
@@ -92,11 +105,11 @@ export const ProjectTimeline = ({}) => {
                     </div>
                 </Stack> : 
                 <FullCalendar events={Events} resources={Resources} plugins={[ resourceTimelinePlugin ]} height="auto"
-                slotDuration="24:00:00" slotLabelFormat={[
-                    { day: 'numeric', weekday: 'short',  } // lower level of text
-                ]} resourceAreaWidth="350px" resourceLabelContent={ResourceLabel} resourceAreaHeaderContent={<div style={{textAlin:'right'}}>Item</div>}
-                eventContent={renderEventContent}
-                initialView="resourceTimelineWeek" schedulerLicenseKey="CC-Attribution-NonCommercial-NoDerivatives" />
+                    slotDuration="24:00:00" slotLabelFormat={[
+                        { day: 'numeric', weekday: 'short',  } // lower level of text
+                    ]} resourceAreaWidth="350px" resourceLabelContent={ResourceLabel} resourceAreaHeaderContent={<div style={{textAlin:'right'}}>Item</div>}
+                    eventContent={renderEventContent} ref={calendarRef} eventOrderStrict={true} eventOrder="index" resourceOrder="index"
+                    initialView="resourceTimelineWeek" schedulerLicenseKey="CC-Attribution-NonCommercial-NoDerivatives" />
 
                 
             }
@@ -105,9 +118,3 @@ export const ProjectTimeline = ({}) => {
     )
 
 }
-
-/*
-<Gantt tasks={data} style={{marginTop: 20}} headerHeight={100} rowHeight={30} viewMode={ViewMode.Day}
-                    TooltipContent={TimelineTooltipContent}
-                    TaskListHeader={EmptyComponent} TaskListTable={EmptyComponent}/>
-*/
