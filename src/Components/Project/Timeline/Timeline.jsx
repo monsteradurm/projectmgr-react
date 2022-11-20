@@ -28,8 +28,8 @@ const ResourceLabel = (data) => {
     const item = resource.extendedProps;
     console.log("ResourceLabel", item)
     return <Stack direction="vertical" className="my-auto" style={{textAlign: 'right', position:'relative', justifyContent: 'center', height: '100%'}}>
-        <div style={{fontSize:15, fontWeight: 600}}>{resource.title}</div>
-        <div style={{fontSize: 14}}>{item.task}</div>
+        <div style={{fontSize:14, fontWeight: 600}}>{resource.title}</div>
+        <div style={{fontSize: 13}}>{item.task}</div>
     </Stack>
 }
 
@@ -73,7 +73,7 @@ export const ProjectTimeline = ({}) => {
             <div>(<span className='pm-tag' onClick={() => 
                 toggleArrFilter(item.feedback, 'BoardFeedbackDepartmentFilter', searchParams, setSearchParams)}>{item.feedback}</span>)</div>
         </Stack>
-        return <Stack direction="vertical" style={{textAlign: 'center', justifyContent: 'center', fontSize:15}}>
+        return <Stack direction="vertical" style={{textAlign: 'center', justifyContent: 'center', fontSize:14}}>
             {
                 item.artist &&
                 <div style={{ left: -160, position: 'absolute'}}>
@@ -104,7 +104,7 @@ export const ProjectTimeline = ({}) => {
                         {BusyMessage?.message}
                     </div>
                 </Stack> : 
-                <FullCalendar events={Events} resources={Resources} plugins={[ resourceTimelinePlugin ]} height="auto"
+                <FullCalendar events={Events} resources={Resources} plugins={[ resourceTimelinePlugin ]} height="auto" weekends={false}
                     slotDuration="24:00:00" slotLabelFormat={[
                         { day: 'numeric', weekday: 'short',  } // lower level of text
                     ]} resourceAreaWidth="350px" resourceLabelContent={ResourceLabel} resourceAreaHeaderContent={<div style={{textAlin:'right'}}>Item</div>}
