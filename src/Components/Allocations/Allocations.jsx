@@ -19,12 +19,19 @@ import { AllocationsFilterBar } from "./Allocations.FilterBar";
 import * as _ from 'underscore';
 import { sortBy } from "underscore";
 import { toggleArrFilter, toggleStatusFilter } from "../Project/Overview.filters";
+import moment from 'moment';
 
 const onClickHandler = (e, url) => {
     if (!url)
         return;
     
     NavigationService.OpenNewTab(url, e);
+}
+
+const headerTemplate = (data) => {
+    return (
+        <div style={{fontSize: 20, fontWeight: 700, padding: 20, paddingLeft: 0, paddingBottom: 0, color: 'gray', marginLeft: -10}}>{data.allocationGroup}</div>
+    );
 }
 
 
@@ -76,11 +83,7 @@ const BoardTemplate = (item) => {
         {item.boardName.replace('/', ' / ') + ", " + item.groupTitle}</span>;
 }
 
-const TimelineTemplate = (item) => {
-    if (item?.Timeline?.text?.length)
-        return item.Timeline.text;
-    return <span style={{opacity: 0.5, fontStyle: 'italic'}}>'No Timeline..'</span>;
-}
+
 
 
 
@@ -238,10 +241,55 @@ export const AllocationsComponent = ({headerHeight}) => {
             </div>;
     }
 
+    const TimelineTemplate = (item) => {
+        if (!item?.Timeline?.text?.indexOf(' - '))
+            return <></>;
+        let tl = item.Timeline.text.split(' - ')
+    
+        let start = moment(tl[0]);
+        let end = moment(tl[1]);
+    
+        const color = 'black';
+        return <Stack direction="horizontal" gap={1}>
+            <div style={{fontWeight: 700, color}}>{start.format('MMM')}</div>
+            <div style={{fontWeight: 600}}>{start.format('Do')}</div>
+            <div>-</div>
+            <div style={{fontWeight: 700, color}}>{end.format('MMM')}</div>
+            <div style={{fontWeight: 600}}>{end.format('Do')}</div>
+        </Stack>
+    }
+
     if (filteredAllocations === SUSPENSE)
         return <></>
 
-    return <>
+    const today = filteredAllocations.filter(a => a.allocationGroup === 'Today');
+    const week = filteredAllocations.filter(a => a.allocationGroup === 'This Week');
+    const scheduled = filteredAllocations.filter(a => a.allocationGroup === 'Scheduled');
+    const notimeline = filteredAllocations.filter(a => a.allocationGroup === 'No Timeline');
+
+    const AllocationsTable = ({data, header}) => {
+        return (
+            <>
+                <div className="allocations-header">{header}</div>
+                <DataTable value={data} className="pm-allocations" rowGroupMode="rowspan" responsiveLayout="scroll">
+                    <Column body={BoardTemplate} className="allocation-board"></Column>
+                    <Column header="Task" body={TaskTemplate} className="allocation-task"></Column>
+                    <Column header="Review" body={ReviewTemplate} className="allocation-review"></Column>
+                    <Column header="Department" body={DepartmentTemplate} className="allocation-department"></Column>
+                    <Column header="Status" body={StatusTemplate} className="allocation-status"></Column>
+                    {
+                        header !== 'No Timeline' &&
+                        <Column header="Timeline" body={TimelineTemplate} className="allocation-timeline"></Column>
+                    }
+                    {
+                        //<Column header="Tags" body={TagsTemplate} className="allocation-tags"></Column>
+                    }
+                    <Column body={ThumbnailTemplate}></Column>
+                </DataTable>
+            </>)
+    }
+
+    return <div id="allocations-page">
             <AllocationsFilterBar />
             <ScrollingPage key="page_scroll" offsetY={headerHeight}>
                 <Stack direction="horizontal" gap={3}>
@@ -271,17 +319,22 @@ export const AllocationsComponent = ({headerHeight}) => {
                         </div>)    
                     }
                 </Stack>
-                <DataTable value={filteredAllocations}  className="pm-allocations">
-                
-                <Column body={BoardTemplate} className="allocation-board"></Column>
-                <Column header="Task" body={TaskTemplate} className="allocation-task"></Column>
-                <Column header="Review" body={ReviewTemplate} className="allocation-review"></Column>
-                <Column header="Department" body={DepartmentTemplate} className="allocation-department"></Column>
-                <Column header="Status" body={StatusTemplate} className="allocation-status"></Column>
-                <Column header="Timeline" body={TimelineTemplate} className="allocation-timeline"></Column>
-                <Column header="Tags" body={TagsTemplate} className="allocation-tags"></Column>
-                <Column body={ThumbnailTemplate}></Column>
-            </DataTable>
+            {
+                today?.length > 0 &&
+                <AllocationsTable data={today} header="Today" />
+            }
+            {
+                week?.length > 0 &&
+                <AllocationsTable data={week} header="This Week" />
+            }
+            {
+                scheduled?.length > 0 &&
+                <AllocationsTable data={scheduled} header="Scheduled" />
+            }
+            {
+                notimeline?.length > 0 &&
+                <AllocationsTable data={notimeline} header="No Timeline" />
+            }
         </ScrollingPage>
-    </> 
+    </div> 
 }

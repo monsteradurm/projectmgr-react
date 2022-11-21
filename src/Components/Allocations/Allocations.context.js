@@ -9,7 +9,7 @@ import { Badge } from "primereact";
 import { SetCurrentRoute } from '../../Application.context';
 import { createSignal } from "@react-rxjs/utils";
 import { doc } from "firebase/firestore";
-
+import moment from 'moment';
 const allocationsSearchMap = (val, searchParams, setSearchParams) => {
     if (setSearchParams && searchParams) {
         searchParams.set('Search', val);
@@ -54,8 +54,33 @@ export const [useMyAllocations, MyAllocations$] = bind(
                 && d.CurrentStatus?.indexOf('Blocked') < 0)
             )
         ),
+        map(docs => _.map(docs, d => {
+            const hasTimeline = d.CurrentTimeline?.indexOf(' - ') >= 0;
+            let result = {...d, allocationGroup: hasTimeline ? "Scheduled" : 'No Timeline' }
+ 
+            if (!hasTimeline) return result;
+
+            const tl = d.CurrentTimeline.split(' - ');
+
+            let start = moment(tl[0]).startOf('day');
+            let end = moment(tl[1]).endOf('day');
+            let today = moment(moment.now);
+            if (today.isBefore(end) && today.isAfter(start)) {
+                result.allocationGroup = 'Today';
+                return result;
+            }
+
+            let startWeek = moment(today).startOf('week');
+            let endWeek = moment(today).endOf('week');
+
+            if (startWeek.isAfter(start) || endWeek.isBefore(end)) {
+                result.allocationGroup = 'This Week';
+                return result;
+            }
+
+            return result;
+        })),
         map(docs => _.reduce(docs, (acc, cur) => {
-                console.log("HERE", cur);
                 let nesting = ['Other', cur.board_description]
 
                 if (nesting[1].indexOf('/') >= 0)
@@ -86,6 +111,9 @@ export const [useAllocationsByProject, AllocationsByProject$] = bind(
             const items = group[nesting[1]];
             return items ? items : [];
         }),
+        map(items => _.groupBy(items, i => i.allocationGroup)),
+        tap(t => console.log("GROUPS", t)),
+        map(groups => _.flatten(Object.values(groups)))
     ), SUSPENSE
 )
 

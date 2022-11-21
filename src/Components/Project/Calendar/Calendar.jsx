@@ -33,9 +33,9 @@ export const ProjectCalendar = ({}) => {
             [element, task] = element.split('/');
         }
         return (
-          <Stack direction="vertical" style={{padding: '10px 20px'}}>
-                <div style={{fontWeight: 600, fontSize: 18}}>{element}</div>
-                <Stack direction="horizontal" gap={1}>
+          <Stack direction="vertical" style={{padding: 10, height: '100%'}}>
+                <div style={{fontWeight: 700, fontSize: 15}}>{element}</div>
+                <Stack direction="horizontal" gap={1} style={{fontSize:14}}>
                 <div style={{fontWeight: 400}}>{task}</div>
                 {
                     item.CurrentReview && 
@@ -43,7 +43,8 @@ export const ProjectCalendar = ({}) => {
                 }
                 </Stack>
                 <div className="my-auto"></div>
-                <Stack direction="horizontal">
+                <Stack direction="horizontal" style={{fontSize:14}}>
+                    <div>{item.status}</div>
                     <div className="mx-auto"></div>
                     <div>{item.CurrentArtist}</div>
                 </Stack>
@@ -64,7 +65,7 @@ export const ProjectCalendar = ({}) => {
                     </div>
                 </Stack> : 
                 <div  style={{marginTop: 30}}>
-                <FullCalendar events={events} plugins={[ dayGridPlugin ]} height="auto"
+                <FullCalendar events={events} plugins={[ dayGridPlugin ]} height="auto" weekends={false}
                 initialView="dayGridMonth" eventContent={renderEventContent} />
                 </div>
             }
