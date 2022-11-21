@@ -1,6 +1,6 @@
 import { Dropdown, Navbar, Container, Stack } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faList, faUsers, faFilm, faCogs, faHome, faTruckMedical, faLink, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faList, faUsers, faFilm, faCogs, faHome, faTruckMedical, faLink, faUser, faScroll, faBook } from '@fortawesome/free-solid-svg-icons';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { FirebaseService } from '../../Services/Firebase.service';
 import { NestedDropdown } from '../General/NestedDropDown.component';
@@ -22,6 +22,7 @@ import { useApplicationForms, useApplicationGroups } from '../Applications/Appli
 import { useAllocationsMenu, useMyAllocations } from '../Allocations/Allocations.context';
 import { useGalleryMenu } from '../Gallery/Gallery.context';
 import { useTimesheetArtist } from '../Timesheet/Timesheet.context';
+import { useReportingMenu } from '../Reporting/Reporting.context';
 
 const ClearSyncsketchProjectCache = () => {
     const key = "Syncsketch/Project/"
@@ -53,7 +54,7 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
     const ApplicationGroups = useApplicationGroups();
     const SupportOptions = useSupportOptions();
     const GalleryMenu = useGalleryMenu();
-    
+    const ReportingMenu = useReportingMenu();
     useEffect(() => {
         if (searchParams.get('Simulating') && !SimulatedUser)
           SimulateUser(searchParams.get('Simulating'))
@@ -135,7 +136,7 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                                 <Dropdown.Item onClick={onStudioPipeline}>Studio Pipeline</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown> 
-                    
+                                
                         <Dropdown autoClose="outside">
                             <Dropdown.Toggle style={{fontSize:'20px'}}><FontAwesomeIcon icon={faUsers} /></Dropdown.Toggle>
                             <Dropdown.Menu variant="dark">
@@ -172,6 +173,12 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                                     </>
                                 }
                                 
+                            </Dropdown.Menu>
+                        </Dropdown>
+                        <Dropdown autoClose="outside">
+                            <Dropdown.Toggle style={{fontSize:'20px'}}><FontAwesomeIcon icon={faBook} /></Dropdown.Toggle>
+                            <Dropdown.Menu variant="dark">
+                                { ReportingMenu }
                             </Dropdown.Menu>
                         </Dropdown>
 
@@ -247,6 +254,7 @@ export const NavigationComponent = ({User, Initializing, SimulatedUser}) => {
                                 </Dropdown.Menu>
                             </Dropdown.Toggle>
                         </Dropdown>
+                        
                         <Dropdown autoClose="outside">
                                 <Dropdown.Toggle style={{fontSize:'20px'}}><FontAwesomeIcon icon={faCogs} /></Dropdown.Toggle>
                                 <Dropdown.Menu variant="dark">

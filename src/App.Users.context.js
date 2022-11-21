@@ -355,7 +355,7 @@ const [useMyBoardsByWorkspace, MyWorkspaceIds$] = partitionByKey(
     ),
     w => w.id
 )*/
-const [useAllWorkspaces, AllWorkspaces$] = bind(
+export const [useAllWorkspaces, AllWorkspaces$] = bind(
     FirebaseService.AllWorkspaces$, []
 ) 
 

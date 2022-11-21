@@ -30,6 +30,7 @@ import { TimesheetSubmissions } from './Components/Timesheet/Timesheet.Submissio
 import { Helmet } from 'react-helmet';
 import { useReportTeam } from './Components/Timesheet/Timesheet.context';
 import { TestingComponent } from './Components/Testing/Testing';
+import { ReportingCompoennt } from './Components/Reporting/Reporting.component';
 
 const preventMouseProps = (evt) => {
   evt.stopPropagation();
@@ -160,6 +161,7 @@ function App() {
                 <Route path="/Timesheets" element={<TimesheetComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
                 <Route path="/Support" element={<SupportComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
                 <Route path="/SignOut" element={<SignOutComponent />} />
+                <Route path="/Reporting" element={<ReportingCompoennt headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
                 <Route path="/Testing" element={<TestingComponent 
                   headerHeight={appHeaderRef.current?.clientHeight ?? 0} />} />
                 <Route path="/Projects" element={<Project 
