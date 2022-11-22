@@ -19,6 +19,8 @@ import { DialogHeader } from "../General/DialogHeader";
 import { Dropdown } from "primereact/dropdown";
 import { GenerateUUID } from "../../Helpers/UUID";
 import { SetProjectId } from "../Project/Context/Project.Params.context";
+import { SendToastError } from "../../App.Toasts.context";
+
 
 
 
@@ -170,6 +172,13 @@ export const TimelogDlg = ({}) => {
                         <div className="mx-auto"></div>
                         <Button style={{fontSize: 18, fontWeight: 600, width: 200, justifyContent: 'center'}}
                             onClick={() => {
+                                if (!hours || !ProjectId?.length || !BoardId?.lenght || !GroupId?.length || !ItemId?.length
+                                    || !Department?.length || !ItemName?.length) {
+                                        SendToastError("Missing minimum data to submit entry");
+                                        return;
+                                    }
+
+
                                 let result = {id: GenerateUUID()};
                                 if (entry) 
                                     result = {...entry};

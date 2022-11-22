@@ -362,6 +362,14 @@ export class MondayService {
         )
       }
 
+      static Webhooks$(boardId) {
+        return MondayService.Execute$(MondayGraphQL.Query_Webhooks(boardId)).pipe(
+          take(1),
+          tap(console.log),
+          map(t => t?.webhooks ? t.webhooks : null)
+        )
+      }
+
       static ApplicationsTeam$ = MondayService.Execute$(MondayGraphQL.ApplicationsTeam).pipe(
         take(1),
         map(t => t?.teams ? t.teams : []),

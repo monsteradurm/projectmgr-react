@@ -24,14 +24,14 @@ import { ApplicationsComponent } from './Components/Applications/Applications.co
 import { GalleryComponent } from './Components/Gallery/Gallery.component';
 import { SignOutComponent } from './Components/Signout/Signout';
 import { AllocationsComponent } from './Components/Allocations/Allocations';
-import { GalleryUpdateComponent } from './System/GalleryUpdate';
+import { GalleryUpdateComponent } from './Components/System/GalleryUpdate';
 import { TimesheetComponent } from './Components/Timesheet/Timesheet.component';
 import { TimesheetSubmissions } from './Components/Timesheet/Timesheet.Submissions';
 import { Helmet } from 'react-helmet';
 import { useReportTeam } from './Components/Timesheet/Timesheet.context';
 import { TestingComponent } from './Components/Testing/Testing';
 import { ReportingCompoennt } from './Components/Reporting/Reporting.component';
-
+import { WebhooksComponent } from './Components/System/Webhooks/Webhooks.component';
 const preventMouseProps = (evt) => {
   evt.stopPropagation();
   evt.preventDefault();
@@ -162,6 +162,7 @@ function App() {
                 <Route path="/Support" element={<SupportComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
                 <Route path="/SignOut" element={<SignOutComponent />} />
                 <Route path="/Reporting" element={<ReportingCompoennt headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
+                <Route path="/Webhooks" element={<WebhooksComponent headerHeight={appHeaderRef.current?.clientHeight ?? 0}/>} />
                 <Route path="/Testing" element={<TestingComponent 
                   headerHeight={appHeaderRef.current?.clientHeight ?? 0} />} />
                 <Route path="/Projects" element={<Project 

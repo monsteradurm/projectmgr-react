@@ -30,6 +30,11 @@ export const MondayGraphQL = {
       }
     }`,
 
+    Query_Webhooks: (boardId) => `query{ webhooks(board_id: ${boardId}) {
+      id event config  
+      } 
+    }`,
+
     Query_ColumnSettings: (id) => 
     `query {
         boards (ids:${id}) {

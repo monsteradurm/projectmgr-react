@@ -302,7 +302,14 @@ export class FirebaseService {
             })
         )
     }
-    
+    static StoreWebhooks$(data) {
+        const docRef = fsDoc(FirebaseService.db, 'Webhooks/SIn8DBXCaunMhezNhXqC');
+        return from(setDoc(docRef, data)).pipe(
+            take(1),
+            tap(console.log)
+        )
+    }
+
     static GetItemLogs$(itemId) {
         const q = query(collectionGroup(FirebaseService.db, 'LogEntries'), where('ItemId', '==', itemId.toString()));
         return from(getDocs(q)).pipe(

@@ -21,6 +21,7 @@ const PrimaryColors = {
     'Gallery' : '#FF9616',
     'GalleryUpdate' : '#FF9616',
     'Testing' : '#c20051',
+    'Webhooks' : '#a9003f',
     'default' : 'gray'
 }
 

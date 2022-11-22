@@ -5,6 +5,7 @@ import parse from 'html-react-parser'
 import * as _ from 'underscore';
 
 const BoardTemplate = (log) => {
+    console.log("LOG: ", log);
     return <Stack direction="horizontal" style={{justifyContent: 'start', paddingTop: 10, fontSize: 18}} gap={2}>
         <div>{log?.ProjectId.replace('_', ' ')}, </div>
         <div>{log?.BoardName}</div>

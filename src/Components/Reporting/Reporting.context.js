@@ -1,14 +1,46 @@
 
 import { bind, SUSPENSE } from "@react-rxjs/core";
+import { createSignal } from "@react-rxjs/utils";
 import { Dropdown } from "react-bootstrap";
 import DropdownItem from "react-bootstrap/esm/DropdownItem";
-import { map, tap, of, from, switchMap, withLatestFrom, take, combineLatest, EMPTY } from "rxjs";
+import { map, tap, of, from, switchMap, withLatestFrom, take, combineLatest, EMPTY, distinctUntilChanged, debounceTime } from "rxjs";
 import * as _ from 'underscore';
 import { AllWorkspaces$ } from "../../App.Users.context";
 import { SetCurrentRoute } from "../../Application.context";
 import { GenerateUUID } from "../../Helpers/UUID";
 import { FirebaseService } from "../../Services/Firebase.service";
 import { NestedDropdown } from "../General/NestedDropDown.component";
+
+export const [ProjectChangedEvent$, SetReportingProject] = createSignal((x) => x);
+export const [ProjectGroupChangedEvent$, SetReportingProjectGroup] = createSignal((x) => x);
+export const [BoardNestingChangedEvent$, SetReportingBoardNesting] = createSignal((x) => {
+    if (!x)
+        return null;
+    if (x.indexOf(','))
+        return x.split(',');
+    return x;
+})
+
+export const [useReportingProject, ReportingProject$] = bind(
+    ProjectChangedEvent$.pipe(
+        tap(t => console.log("Project Changed Event!", t)),
+        distinctUntilChanged()
+    ), SUSPENSE
+)
+
+export const [useReportingProjectGroup, ReportingProjectGroup$] = bind(
+    ProjectGroupChangedEvent$.pipe(
+        tap(t => console.log("Project Group Changed Event!", t)),
+        distinctUntilChanged()
+    ), SUSPENSE
+)
+
+export const [useReportingBoardNesting, ReportingBoardNesting$] = bind(
+    BoardNestingChangedEvent$.pipe(
+        tap(t => console.log("Project Board Nesting Changed Event!", t)),
+        distinctUntilChanged()
+    ), SUSPENSE
+)
 
 const ParseNestedHTML = (data, url, boards=[]) => {
     const result = [];
@@ -108,8 +140,10 @@ export const [useReportingMenu, ReportingMenu$] = bind(
         }),
     ), InitialReportingyMenu
 )
-/*
-onClick={
-                                () => SetCurrentRoute('/Reporting?ProjectGroup=' + n + '&Project=' + proj)
-                            }
-*/
+const [, ProjectSummary$] = bind(
+    combineLatest([ReportingProjectGroup$, ReportingProject$]).pipe(
+        debounceTime(250),
+        switchMap(params => params.indexOf(SUSPENSE) >= 0 ? EMPTY : of(params)),
+        
+    )
+)
