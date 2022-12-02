@@ -102,6 +102,7 @@ export const TimesheetComponent = ({headerHeight}) => {
     const User = useTimesheetArtist();
     const [sheetCount, setSheetCount] = useState(null);
     const [hourCount, setHourCount] = useState(null);
+    const [entryCount, setEntryCount] = useState(null);
     const [taskCount, setTaskCount] = useState(null);
     const [reviewCount, setReviewCount] = useState(null);
     const [projectCount, setProjectCount] = useState(null);
@@ -235,7 +236,8 @@ export const TimesheetComponent = ({headerHeight}) => {
         const entries = _.flatten(_.pluck(result, 'logs').filter(l => !!l && l.length));
 
         setHourCount(_.reduce(entries, (acc, e) => acc += e.hours || 0, 0));
-        setTaskCount(_.uniq(_.pluck(entries, 'ItemId')).length);
+        setEntryCount(_.uniq(_.pluck(entries, 'ItemId')).length);
+        setTaskCount(_.uniq(_.pluck(entries.filter(e => !e.type || e.type === 'Task'), 'ItemId')).length);
         setProjectCount(_.uniq(_.pluck(entries, 'ProjectId')).length);
         setReviewCount(_.uniq(_.pluck(entries, 'ReviewId').filter(r => !!r)).length);
         setHourCount(_.reduce(entries, (acc, e) => acc += e.hours || 0, 0));
@@ -373,7 +375,7 @@ export const TimesheetComponent = ({headerHeight}) => {
                     <Column header="Projects" body={ProjectsTemplate} className="log-projects"></Column>
                     <Column header="Departments" body={DepartmentsTemplate} className="log-projects"></Column>
                     <Column header="Feedback" body={FeedbackDepartmentsTemplate} className="log-projects"></Column>
-                    <Column header="Tasks" body={TasksTemplate} className="log-tasks" style={{width: 150, maxWidth: 150}}></Column>
+                    <Column header="Logs" body={TasksTemplate} className="log-tasks" style={{width: 150, maxWidth: 150}}></Column>
                     <Column header="Hours" body={HoursTemplate} className="log-hours" style={{width: 150, maxWidth: 150}}></Column>
                     <Column header="Next Day" body={TomorrowTemplate} className="log-hours" style={{width: 150, maxWidth: 150}}></Column>
                     <Column header="Submitted" body={SubmittedTemplate} className="log-submitted" 
@@ -427,6 +429,8 @@ export const TimesheetComponent = ({headerHeight}) => {
                     }
                     <div style={{fontWeight: 600, marginLeft: View === 'Submissions' ? 10 : 0}}>{projectCount}</div>
                     <div>Projects, </div>
+                    <div style={{marginLeft: 10, fontWeight: 600}}>{entryCount}</div>
+                    <div>Logs, </div>
                     <div style={{marginLeft: 10, fontWeight: 600}}>{taskCount}</div>
                     <div>Tasks, </div>
                     <div style={{marginLeft: 10, fontWeight: 600}}>{reviewCount}</div>

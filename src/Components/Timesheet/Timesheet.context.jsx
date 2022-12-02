@@ -9,6 +9,10 @@ import * as _ from 'underscore';
 import { IntegrationsService } from "../../Services/Integrations.service";
 import { SyncsketchService } from "../../Services/Syncsketch.service";
 import { MondayService } from "../../Services/Monday.service";
+
+export const TimelogEntryTypes = ["Task", "Administrative", "Meeting", "Review", "Other"];
+
+export const [TimelogEntryTypeChanged$, SetTimelogEntryType] = createSignal(t => t);
 export const [TimelogProjectIdChanged$, SetTimelogProjectId] = createSignal(id => id);
 export const [TimelogBoardIdChanged$, SetTimelogBoardId] = createSignal(id => id);
 export const [TimelogGroupIdChanged$, SetTimelogGroupId] = createSignal(id => id);
@@ -24,6 +28,9 @@ export const [useTimesheetView, TimesheetView$] = bind(
     TimesheetViewChanged$, SUSPENSE
 )
 
+export const [useTimelogEntryType, TimelogEntryType$] = bind(
+    TimelogEntryTypeChanged$.pipe(tap(t => console.log("Entry Type Changed: ", t))), "Task"
+)
 export const [TimeSheetFollowingChanged$, ShowTimesheetFollowingDlg] = createSignal(vis => vis);
 export const [useTimesheetFollowingDlg, ] = bind (
     TimeSheetFollowingChanged$, false
@@ -170,10 +177,16 @@ export const [useTimelogArtists, ] = bind(
         map(item => item?.Artist?.value || [])
     ), null
 )
-export const [NewTimelogDlgEvent$, ShowTimelogDialog] = createSignal(visible => {
+export const [NewTimelogDlgEvent$, ShowTimelogDialog] = createSignal(
+    (visible, type) => {
     if (!visible) {
         SetTimelogProjectId(null);
+        SetTimelogEntryType("Task");
     }
+
+    SetTimelogEntryType(!type || TimelogEntryTypes.indexOf(type) < 0 ? "Task" : type);
+
+    console.log("ENTRY TYPE: ", type);
     return visible;
 });
 
@@ -315,6 +328,7 @@ export const useTimeLogReviews = (item) => {
 }
 
 export const SubmitTimeEntry = (entry) => {
+    console.log("Submitting Entry: ", entry);
     Timesheet$.pipe(
         switchMap(res => res === SUSPENSE ? EMPTY : of(res)),
         map(ts => {
@@ -425,8 +439,18 @@ export const [useSheetContextMenu, SheetContextMenu$] = bind(
                 return [{label: 'Approve', command: () => ApproveTimesheet(sheet, user) }];
 
             let menu = [{label: 'Add', items: [
-                        {label: 'Entry', command: () => {
-                                ShowTimelogDialog(true)}},
+                        {label: 'Task', command: () => {
+                                ShowTimelogDialog(true, "Task")}},
+                        {divider: true, style: {height: '1px', background: 'gray'}},
+                        {label: 'Administrative', command: () => {
+                                    ShowTimelogDialog(true, "Administrative")}},
+                        {label: 'Review', command: () => {
+                                    ShowTimelogDialog(true, "Review")}},
+                        {label: 'Meeting', command: () => {
+                                        ShowTimelogDialog(true, "Meeting")}},
+                        {label: 'Other', command: () => {
+                                            ShowTimelogDialog(true, "Other")}},
+                        {divider: true, style: {height: '1px', background: 'gray'}},
                         {label: 'Next Day', command: () => ShowTimesheetFollowingDlg(true)}
             ]}]
             if (sheet?.tomorrow || sheet?.logs?.length)
@@ -448,17 +472,20 @@ export const [SheetsUpdatedEvent$, UpdateTimeSheets] = createSignal(sheets => sh
 export const [useLogContextMenu, SheetLogMenu$] = bind(
     SelectedLog$.pipe(
         map(({sheet, log}) => {
+            
             if (!sheet || !log ) return [{label: 'Error'}]
+
             let menu = [
                         {label: 'Edit', items: [
                             {label: 'Entry', command: () => {
+                                console.log("Editing entry: ", log.type);
                                 SetTimesheetDate(moment(sheet.date).toDate());
                                 SetTimelogProjectId(log.ProjectId);
                                 SetTimelogBoardId(log.BoardId);
                                 SetTimelogGroupId(log.GroupId);
                                 SetTimelogItemId(log.ItemId);
                                 SetTimelogReviewId(log.ReviewId);
-                                ShowTimelogDialog(true);
+                                ShowTimelogDialog(true, log.type);
                             }},
                             {label: 'Next Day', command: () => {
                                 SetTimesheetDate(moment(sheet.date).toDate());
@@ -507,6 +534,7 @@ export const RemoveLogEntry = (sheet, log) => {
 const FetchTimeSheets$ = RangeArray$.pipe(
     withLatestFrom(TimesheetArtist$),
     switchMap(([range, artist]) => FirebaseService.GetTimesheets$(artist, range)),
+    tap(t => console.log("Timesheets", t))
 )
 
 const FetchTimeSheetSubmissions$ = SubmissionRangeArray$.pipe(

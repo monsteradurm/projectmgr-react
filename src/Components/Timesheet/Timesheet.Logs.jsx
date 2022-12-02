@@ -5,22 +5,28 @@ import parse from 'html-react-parser'
 import * as _ from 'underscore';
 
 const BoardTemplate = (log) => {
-    console.log("LOG: ", log);
+   
     return <Stack direction="horizontal" style={{justifyContent: 'start', paddingTop: 10, fontSize: 18}} gap={2}>
         <div>{log?.ProjectId.replace('_', ' ')}, </div>
-        <div>{log?.BoardName}</div>
+        <div>{log?.BoardName ? log?.BoardName : log.type + "s"}</div>
     </Stack>
 }
 
 const ItemTemplate = (log) => {
-    return <Stack direction="horizontal" style={{justifyContent: 'end', width: '100%', fontSize: 16}} gap={2}>
+    if (log.type && log.type !== 'Task') return <></>
+    return <Stack direction="horizontal" style={{justifyContent: 'end', width: '100%', fontSize: 13}} gap={2}>
         <div>{log?.GroupName}, </div>
         <div>{log?.ItemName}</div>
     </Stack>
 }
 
+const TypeTemplate = (log) => {
+    return log.type ? log.type : 'Task';
+}
+
 const ReviewTemplate = (log) => {
-    return <Stack direction="horizontal" style={{justifyContent: 'start', width: '100%', fontSize: 16}} gap={2}>
+    if (log.type && log.type !== 'Task') return <></>
+    return <Stack direction="horizontal" style={{justifyContent: 'start', width: '100%', fontSize: 13}} gap={2}>
         <div>{log?.ReviewName}</div>
         {
             log?.FeedbackDepartment?.length && 
@@ -32,7 +38,8 @@ const ReviewTemplate = (log) => {
 export const TimesheetLogs = ({sheet, logContextRef, SelectedLog, LogContextMenu}) => {
     const logs = _.sortBy(sheet?.logs || [], log => 
             log.GroupName + ', ' + log.ItemName + (log.ReviewName ? log.ReviewName : ''))
-        .map(log => ({...log, grouping: log.ProjectId?.replace('_', ' ') + ', ' + log?.BoardName }));
+        .map(log => ({...log, grouping: log.ProjectId?.replace('_', ' ') + ', ' + (
+            !log.type || log.type === 'Task' ? log?.BoardName : log.type ) }));
     const primary = SheetRibbonColor(sheet);
     const View = useTimesheetView();
     return (
@@ -47,14 +54,15 @@ export const TimesheetLogs = ({sheet, logContextRef, SelectedLog, LogContextMenu
                     if (View !== 'Submissions')
                         logContextRef.current.show(e.originalEvent)
                 }}>
-                <Column body={ItemTemplate} style={{paddingLeft: 20}} className="log-item"/>
+                <Column body={TypeTemplate} style={{paddingLeft: 20, fontWeight: 600, textAlign: 'right', justifyContent: 'right', fontSize: 13}} />
+                <Column body={ItemTemplate}  className="log-item"/>
                 <Column body={ReviewTemplate} className="log-item" />
-                <Column header="Hours" field="hours" style={{width: 150, display: 'block', maxWidth: 150, textAlign:'center', fontWeight:600, fontSize: 16}}/>
+                <Column header="Hours" field="hours" style={{width: 150, display: 'block', maxWidth: 150, textAlign:'center', fontWeight:600, fontSize: 13}}/>
                 <Column header="Notes" field="notes" className="log-entry-notes"
-                 style={{width: '50%', textAlign:'left', justifyContent: 'start', minWidth: '50%', fontSize: 16}} />
+                 style={{width: '50%', textAlign:'left', justifyContent: 'start', minWidth: '50%', fontSize: 13}} />
             </DataTable>
             <div style={{borderBottom: 'solid 2px ' + primary, width: '100%', fontSize: 18, marginTop: 20, padding: 10, fontWeight: 600}}>Next Day</div>
-            <div style={{fontSize: 18, marginTop: 10, padding: 10}}>
+            <div style={{fontSize: 13, marginTop: 10, padding: 10}}>
             {
                 sheet?.tomorrow?.length ? 
                 parse(sheet.tomorrow) : <span style={{fontStyle: 'italic'}}>No notes provided for the following day..</span>

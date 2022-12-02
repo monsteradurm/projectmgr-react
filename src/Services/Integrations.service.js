@@ -5,6 +5,7 @@ import { EOD_Main } from "./EOD.main";
 import { EOD_Task } from "./EOD.Task";
 import { EOD_Tomorrow } from "./EOD.tomorrow";
 import moment from 'moment';
+import { EOD_Other } from "./EOD_Other";
 
 export class IntegrationsService {
 
@@ -24,7 +25,7 @@ export class IntegrationsService {
         let today_html = ''
         
         if (logs?.length) {
-            const groups = _.groupBy(logs, l => l.ProjectId + ", " + l.BoardName);
+            const groups = _.groupBy(logs, l => l.ProjectId + ", " + (!l.type || l.type == 'Task' ? l.BoardName : l.type) );
             const grouped_keys = Object.keys(groups);
             grouped_keys.forEach(g => {
                 
@@ -36,8 +37,10 @@ export class IntegrationsService {
                         log.Artists?.map(a => allUsers[a.toLowerCase()])
                             .map(a => a.monday.email) || []
                     );
+
                     console.log("ARTISTS: ", log.Artists, log.Artists?.map(a => allUsers[a.toLowerCase()])
                     .map(a => a.monday.email))
+
                     emails = emails.concat(
                         log.Directors?.map(a => allUsers[a.toLowerCase()])
                             .map(a => a.monday.email) || []
@@ -45,18 +48,18 @@ export class IntegrationsService {
 
                     const index = grouped.indexOf(log);
                     const borderTop = grouped_keys.indexOf(g) !== 0 && index === 0;
-                    const { ProjectId, BoardName, BoardId, GroupId, GroupName, ItemName, ReviewName, notes, FeedbackDepartment, Status, Thumbnail, Link } = log;
+                    const { ProjectId, BoardName, BoardId, GroupId, GroupName, ItemName, ReviewName, notes, FeedbackDepartment, Status, Thumbnail, Link, hours } = log;
                     
                     let inline_thumb = log.id + '.jpg';
-                    if (Thumbnail) {
+                    if (Thumbnail && Thumbnail.length && Thumbnail !== 'null') {
                         attachments.push({filename: inline_thumb,
                             path: Thumbnail,
                         cid: inline_thumb})
-                    }
+                    } else inline_thumb = null;
 
-                    let Element = ItemName;
+                    let Element = !log.type || log.type == 'Task' ? ItemName : log.type;
                     let Task = '';
-                    if (Element.indexOf('/') >= 0){
+                    if (Element?.indexOf('/') >= 0){
                         let arr = Element.split('/')
                         Element = arr[0];
                         Task = arr[1];
@@ -66,11 +69,17 @@ export class IntegrationsService {
                     if (FeedbackDepartment)
                         subtitle2 += ' (' + FeedbackDepartment + ')';
 
+                    const parsedNotes =  (notes?.length ? notes : 'No Notes Provided..') + ' (' + hours + ' hours)';
                     const BoardURL = `https://projectmgr.live/Projects?ProjectId=${ProjectId}&BoardId=${BoardId}&GroupId=${GroupId}`;
-                    today_html += EOD_Task(BoardURL, ProjectId, BoardName, 
-                        (GroupName !== 'All' && BoardName.indexOf(GroupName) < 0 ? GroupName + ', ' : '') + Element, 
-                        Task, subtitle2, 
-                        '<span style="font-style: italic;font-weight:bold">' + Status + '</span> - ' + notes , Link, inline_thumb, index === 0, borderTop);
+                    if (!log.type || log.type === 'Task')
+                        today_html += EOD_Task(BoardURL, ProjectId, BoardName, 
+                            (GroupName !== 'All' && BoardName.indexOf(GroupName) < 0 ? GroupName + ', ' : '') + Element, 
+                            Task, subtitle2, 
+                            '<span style="font-style: italic;font-weight:bold">' + Status + '</span> - ' + parsedNotes
+                             , Link, inline_thumb, index === 0, borderTop);
+
+                    else 
+                        today_html += EOD_Other(ProjectId, log.type, parsedNotes, index === 0, borderTop);
                 });
             })
         }

@@ -9,7 +9,7 @@ import { SetTimelogBoardId, SetTimelogGroupId, SetTimelogItemId, SetTimelogProje
     useTimelogItemDepartment, 
     useTimelogItemId, useTimelogItemOptions, useTimelogProjectId, useTimelogProjectOptions, useTimelogReviewId, 
     useTimelogReviewName, 
-    useTimelogReviewOptions, useTimeLogReviews, useTimesheet, useTimesheetArtist, useTimesheetDate, useTimelogElementTask, useTimelogItemStatus, useTimelogReviewThumbnail, useTimelogReviewLink, useTimelogDirectors, useTimelogArtists } from "./Timesheet.context"
+    useTimelogReviewOptions, useTimeLogReviews, useTimesheet, useTimesheetArtist, useTimesheetDate, useTimelogElementTask, useTimelogItemStatus, useTimelogReviewThumbnail, useTimelogReviewLink, useTimelogDirectors, useTimelogArtists, useTimelogEntryType } from "./Timesheet.context"
 import moment from 'moment';
 import * as _ from 'underscore';
 
@@ -20,6 +20,7 @@ import { Dropdown } from "primereact/dropdown";
 import { GenerateUUID } from "../../Helpers/UUID";
 import { SetProjectId } from "../Project/Context/Project.Params.context";
 import { SendToastError } from "../../App.Toasts.context";
+import { debug } from "util";
 
 
 
@@ -36,6 +37,7 @@ const DlgDropdown = ({value, options, onChange, title, optionLabel, optionValue,
 
 export const TimelogDlg = ({}) => {
     const visible = useTimelogDlg();
+    const EntryType = useTimelogEntryType();
     const Date = useTimesheetDate();
     const User = useTimesheetArtist();
     const ProjectId = useTimelogProjectId();
@@ -102,11 +104,11 @@ export const TimelogDlg = ({}) => {
             setHours(result.hours);
         else setHours(1);
 
-    }, [Sheet, BoardId, ProjectId, GroupId, ItemId, ReviewId])
+    }, [Sheet, BoardId, ProjectId, GroupId, ItemId, ReviewId, EntryType])
 
     const header = useMemo(() => 
-        <DialogHeader color="black" Header="New Timesheet Entry" onClose={() => ShowTimelogDialog(false)}/>
-    , [])
+        <DialogHeader color="black" Header={`New Timesheet ${EntryType} Entry`} onClose={() => ShowTimelogDialog(false)}/>
+    , [EntryType])
 
 
     if (!visible)
@@ -124,22 +126,22 @@ export const TimelogDlg = ({}) => {
                             onChange={SetTimelogProjectId} title="Project"/> : null
                         }
                         {
-                            BoardOptions && <DlgDropdown options={BoardOptions} value={BoardId} optionLabel="name" optionValue="id"
+                            (EntryType === "Task" && BoardOptions) && <DlgDropdown options={BoardOptions} value={BoardId} optionLabel="name" optionValue="id"
                             onChange={SetTimelogBoardId} title="Board" />
                         }
                         {
-                            GroupOptions && <DlgDropdown options={GroupOptions} value={GroupId} optionLabel="name" optionValue="id"
+                            (EntryType === "Task" && GroupOptions) && <DlgDropdown options={GroupOptions} value={GroupId} optionLabel="name" optionValue="id"
                             onChange={SetTimelogGroupId} title="Group"/>
                         }
                     </Stack>
                     <Stack direction="horizontal" gap={3} style={{marginTop: 40}}>
                         {
-                            ItemOptions && <DlgDropdown options={ItemOptions} value={ItemId} optionLabel="name" optionValue="id"
+                            (EntryType === "Task" && ItemOptions) && <DlgDropdown options={ItemOptions} value={ItemId} optionLabel="name" optionValue="id"
                             onChange={SetTimelogItemId} title="Item"/>
                         }
 
                         {
-                            ReviewOptions && <DlgDropdown options={ReviewOptions} value={ReviewId} optionLabel="name" optionValue="id"
+                            (EntryType === "Task" && ReviewOptions) && <DlgDropdown options={ReviewOptions} value={ReviewId} optionLabel="name" optionValue="id"
                             onChange={SetTimelogReviewId} title="Review" />
                         }
                     </Stack>
@@ -172,37 +174,46 @@ export const TimelogDlg = ({}) => {
                         <div className="mx-auto"></div>
                         <Button style={{fontSize: 18, fontWeight: 600, width: 200, justifyContent: 'center'}}
                             onClick={() => {
-                                if (!hours || !ProjectId?.length || !BoardId?.lenght || !GroupId?.length || !ItemId?.length
-                                    || !Department?.length || !ItemName?.length) {
+
+                                console.log("Submitting Entry Type: ", EntryType);
+
+                                if (!hours || !ProjectId?.length ) {
                                         SendToastError("Missing minimum data to submit entry");
                                         return;
                                     }
 
-
+                                else if (EntryType === "Task" && (!BoardId?.length || !GroupId?.length || !ItemId?.length
+                                    || !Department?.length || !ItemName?.length)) {
+                                    SendToastError("Missing minimum data to submit entry");
+                                    return;
+                                }
+                                
                                 let result = {id: GenerateUUID()};
                                 if (entry) 
                                     result = {...entry};
 
+                                result.type = EntryType;
                                 result.hours = hours;
                                 result.notes = notes;
                                 result.ProjectId = ProjectId;
-                                result.BoardId = BoardId;
-                                result.BoardName = BoardName;
-                                result.GroupId = GroupId;
-                                result.GroupName = GroupName;
-                                result.ItemId = ItemId;
-                                result.ItemName = ItemName;
-                                result.ReviewId = ReviewId;
-                                result.Department = Department;
-                                result.FeedbackDepartment = FeedbackDepartment;
-                                result.ReviewName = ReviewName;
-                                result.Thumbnail = Thumbnail;
-                                result.Directors = Directors;
-                                result.Artists = Artists;
-                                result.Link = Link;
-                                result.Status = Status;
+                                result.BoardId = EntryType === "Task" ? BoardId : null;
+                                result.BoardName = EntryType === "Task" ? BoardName : null;
+                                result.GroupId = EntryType === "Task" ? GroupId : null;
+                                result.GroupName = EntryType === "Task" ? GroupName : null;
+                                result.ItemId = EntryType === "Task" ? ItemId : result.id;
+                                result.ItemName = ItemName && EntryType === "Task" ? ItemName: null;
+                                result.ReviewId = EntryType === "Task" ? ReviewId : null;
+                                result.Department = EntryType === "Task" ? Department : null;
+                                result.FeedbackDepartment = EntryType === "Task" ? FeedbackDepartment : null;
+                                result.ReviewName = EntryType === "Task" ? ReviewName : null;
+                                result.Thumbnail = EntryType === "Task" ? Thumbnail : null;
+                                result.Directors = EntryType === "Task" ? Directors : null;
+                                result.Artists = EntryType === "Task" ? Artists : null;
+                                result.Link = EntryType === "Task" ? Link : null;
+                                result.Status = EntryType === "Task" ? Status : null;
                                 result.updated = moment(moment.now()).format('YYYY-MM-DD HH:mm:ss')
                                 SubmitTimeEntry(result)
+
                             }}>Save Entry</Button>
                     </Stack>
             </Stack>
