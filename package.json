@@ -17,7 +17,6 @@
     "@fullcalendar/resource-timeline": "^5.11.3",
     "@react-rxjs/core": "^0.9.8",
     "@react-rxjs/utils": "^0.9.5",
-    "@silevis/reactgrid": "^4.0.4",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
