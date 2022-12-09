@@ -10,7 +10,7 @@ import { IntegrationsService } from "../../Services/Integrations.service";
 import { SyncsketchService } from "../../Services/Syncsketch.service";
 import { MondayService } from "../../Services/Monday.service";
 
-export const TimelogEntryTypes = ["Task", "Administrative", "Meeting", "Review", "Other"];
+export const TimelogEntryTypes = ["Task", "Administrative", "Meeting", "Review", "QA", "Other"];
 
 export const [TimelogEntryTypeChanged$, SetTimelogEntryType] = createSignal(t => t);
 export const [TimelogProjectIdChanged$, SetTimelogProjectId] = createSignal(id => id);
@@ -446,6 +446,8 @@ export const [useSheetContextMenu, SheetContextMenu$] = bind(
                                     ShowTimelogDialog(true, "Administrative")}},
                         {label: 'Review', command: () => {
                                     ShowTimelogDialog(true, "Review")}},
+                        {label: 'QA', command: () => {
+                                        ShowTimelogDialog(true, "QA")}},
                         {label: 'Meeting', command: () => {
                                         ShowTimelogDialog(true, "Meeting")}},
                         {label: 'Other', command: () => {

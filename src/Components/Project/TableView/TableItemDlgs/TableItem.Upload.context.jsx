@@ -373,7 +373,10 @@ export const [useUploadEvent, OnUploadEvent$] = bind(
         withLatestFrom(FilesForUpload$, UploadItemName$, LoggedInUser$),
         switchMap(([reviewId, files, itemName, user]) => {
             const { displayName: artist} = user;
-            const [department, index, name] = itemName.split(' ');
+            let nameArr = itemName.split(' ');
+            const department = nameArr.shift();
+            const index = nameArr.shift();
+            const name = nameArr.join(" ");
 
             if (files.length < 1) {                
                 SendToastError('No files have been Added for Upload');
